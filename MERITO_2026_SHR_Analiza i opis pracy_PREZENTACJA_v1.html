@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analiza i opis pracy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+:root { --navy: #1F4460; --navy2: #163450; --honey: #E8B62C; --honey-soft: #FBF0CF; --ink: #1F2B36; --muted: #61788C; --line: #D9E1E8; --bg: #F5F5F7; --info: #F0F6FB;
+  --font: "Montserrat", "Segoe UI", system-ui, sans-serif }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { margin: 0; height: 100%; background: #0E1B26; font-family: var(--font); overflow: hidden }
+#stage { position: fixed; inset: 0 0 56px 0; display: grid; place-items: center }
+#canvas { width: 1280px; height: 720px; position: relative; transform-origin: center center; background: var(--bg); color: var(--ink); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.4) }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; height: 56px; display: flex; align-items: center; justify-content: center; gap: 12px; background: #0E1B26 }
+.bar .cnt { color: #9BB0C2; font: 600 14px var(--font); min-width: 70px; text-align: center; font-variant-numeric: tabular-nums }
+.btn { font: 700 14px var(--font); background: var(--honey); color: var(--ink); border: 0; border-radius: 999px; padding: 9px 20px; min-width: 130px; cursor: pointer }
+.btn:hover { background: #B68C20 }
+.btn:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px }
+/* plansza */
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 44px 56px 0 }
+.head { flex: 0 0 auto; margin-bottom: 22px }
+.kick { font-size: 15px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--honey); margin-bottom: 6px }
+.h { font-size: 38px; font-weight: 800; color: var(--navy); line-height: 1.15; margin: 0; text-wrap: balance }
+.body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; font-size: var(--fs, 24px); line-height: 1.38; padding-bottom: 14px }
+.foot { flex: 0 0 auto; background: var(--info); border-left: 6px solid var(--navy); border-radius: 0 12px 12px 0; padding: .6em .9em; margin-top: .6em; font-size: .82em }
+.footer { flex: 0 0 auto; height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 600; margin: 0 -56px; padding: 0 56px }
+.footer b { color: var(--navy) }
+/* punkty */
+.plist { flex: 1; display: grid; gap: .55em; grid-auto-rows: 1fr }
+.pt { background: #FFFFFF; border: 1px solid var(--line); border-radius: 14px; padding: .55em .8em; display: flex; gap: .7em; align-items: center }
+.pt .n { flex: 0 0 auto; width: 1.7em; height: 1.7em; border-radius: 50%; background: var(--navy); color: var(--honey); font-weight: 800; display: grid; place-items: center; font-size: .9em }
+/* dwie kolumny */
+.two { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: .8em; min-height: 0 }
+.col { background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: .8em 1em; display: flex; flex-direction: column; gap: .5em }
+.col h3 { margin: 0 0 .1em; font-size: 1.05em; color: var(--navy) }
+.col h3::before { content: ''; display: inline-block; width: .55em; height: .55em; background: var(--honey); border-radius: 3px; margin-right: .45em; vertical-align: .08em }
+.col ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: .4em; min-height: 0 }
+.col { min-height: 0 }
+/* siatka */
+.grid { flex: 1; display: grid; gap: .6em; grid-auto-rows: 1fr; min-height: 0 }
+.gc { background: #FFFFFF; border: 1px solid var(--line); border-top: 6px solid var(--navy); border-radius: 14px; padding: .6em .8em; display: flex; flex-direction: column; gap: .25em }
+.gc b { color: var(--navy); font-size: 1.02em }
+.gc span { font-size: .9em }
+/* tabela */
+.tw { flex: 1; min-height: 0; display: flex }
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: #FFFFFF; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; font-size: .82em; height: 100% }
+th { background: var(--navy); color: #FFFFFF; text-align: left; padding: .45em .7em; font-weight: 700 }
+td { padding: .4em .7em; border-top: 1px solid var(--line); vertical-align: middle }
+td:first-child { font-weight: 700; color: var(--navy) }
+/* osoby */
+.people { flex: 1; display: grid; gap: .6em; grid-auto-rows: 1fr; min-height: 0 }
+.pc { background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: .5em .7em; display: flex; gap: .7em; align-items: center; min-height: 0 }
+.pc svg { flex: 0 0 auto; height: 100%; max-height: 150px; width: auto; aspect-ratio: 280 / 300 }
+.pc b { display: block; color: var(--navy); font-size: 1.05em; margin-bottom: .15em }
+.pc span { font-size: .88em }
+/* kroki */
+.steps { flex: 1; display: grid; gap: .6em; grid-auto-rows: 1fr; min-height: 0 }
+.st { background: #FFFFFF; border: 1px solid var(--line); border-radius: 14px; padding: .55em .75em; display: flex; flex-direction: column; gap: .2em; position: relative }
+.st .sn { font-size: 1.5em; font-weight: 800; color: var(--honey); line-height: 1 }
+.st b { color: var(--navy) }
+.st span { font-size: .86em }
+.st i { font-style: normal; font-size: .72em; font-weight: 700; color: var(--muted); margin-top: auto; text-transform: uppercase; letter-spacing: .08em }
+/* ćwiczenie */
+.task { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: .8em; min-height: 0 }
+.task .plist { min-height: 0 }
+.task .side { background: var(--navy); color: #FFFFFF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; font-size: 20px }
+.task .side .lab { color: var(--honey); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 15px }
+.task .side .tab { font-size: 42px; font-weight: 800; line-height: 1.15; margin-top: 6px }
+.task .side .meta { color: #D9E1E8; font-size: 20px; line-height: 1.4 }
+a.lbtn { display: block; text-align: center; text-decoration: none; font: 700 16px var(--font); background: var(--honey); color: var(--ink); border-radius: 999px; padding: 12px 18px }
+a.lbtn:hover { background: #B68C20 }
+.linkrow { margin-top: .6em; display: flex; justify-content: flex-end }
+.linkrow a.lbtn { min-width: 330px }
+/* tytuł i przekładki */
+.title { position: absolute; inset: 0; display: grid; grid-template-columns: 460px 1fr; background: var(--navy); color: #FFFFFF }
+.title .lg { display: grid; place-items: center; background: var(--navy2) }
+.title .tx { padding: 70px 60px; display: flex; flex-direction: column; justify-content: center; gap: 18px }
+.title h1 { font-size: 64px; line-height: 1.05; margin: 0; font-weight: 800 }
+.title .sub { font-size: 24px; color: #D9E1E8; line-height: 1.4 }
+.title .who { font-size: 20px; font-weight: 700; color: var(--honey); margin-top: 20px }
+.title .org { font-size: 16px; color: #9BB0C2; letter-spacing: .14em; text-transform: uppercase; font-weight: 700 }
+.div { position: absolute; inset: 0; display: grid; grid-template-columns: 330px 1fr; background: var(--navy); color: #FFFFFF }
+.div .num { display: grid; place-items: center; font-size: 200px; font-weight: 800; color: var(--honey); background: var(--navy2) }
+.div .tx { padding: 60px; display: flex; flex-direction: column; justify-content: center; gap: 24px }
+.div h2 { font-size: 54px; line-height: 1.1; margin: 0; font-weight: 800; text-wrap: balance }
+.div p { font-size: 26px; line-height: 1.45; color: #D9E1E8; margin: 0 }
+.div .part { color: var(--honey); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; font-size: 16px }
+/* agenda */
+.agenda { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: .4em 1.2em }
+.ag { display: flex; align-items: center; gap: .7em; background: #FFFFFF; border: 1px solid var(--line); border-radius: 12px; padding: 0 .8em; font-weight: 600 }
+.ag .n { flex: 0 0 auto; width: 1.6em; height: 1.6em; border-radius: 8px; background: var(--honey); color: var(--ink); font-weight: 800; display: grid; place-items: center; font-size: .85em }
+/* DZIK */
+.dzik { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto 1fr; gap: .6em; min-height: 0 }
+.dz { border-radius: 16px; padding: .6em .8em; color: #FFFFFF; display: flex; flex-direction: column; gap: .2em }
+.dz .L { font-size: 2.6em; font-weight: 800; line-height: 1 }
+.dz b { font-size: 1.05em } .dz span { font-size: .85em; opacity: .9 }
+.ex { grid-column: 1 / -1; background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: .7em 1em; display: flex; flex-direction: column; justify-content: center; gap: .55em }
+.ex .lab { font-size: .7em; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.ex .s mark { background: none; padding: .05em .25em; border-radius: 6px; border-bottom: 4px solid; color: var(--ink) }
+.c1 { background: #1F4460 } .c2 { background: #2E5878 } .c3 { background: #61788C } .c4 { background: #B68C20 }
+.m1 { border-color: #1F4460 !important } .m2 { border-color: #2E5878 !important } .m3 { border-color: #61788C !important } .m4 { border-color: #E8B62C !important }
+.src { flex: 1; display: flex; flex-direction: column; justify-content: space-around; font-size: .78em }
+.src p { margin: 0; padding-left: 1em; text-indent: -1em }
+/* spis */
+#toc { position: fixed; inset: 0 0 56px 0; background: rgba(14,27,38,.96); color: #FFFFFF; padding: 40px; overflow: auto; z-index: 10 }
+#toc .in { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+#toc button { text-align: left; font: 600 16px var(--font); background: #162836; color: #E6EDF3; border: 1px solid #263E51; border-radius: 10px; padding: 12px 14px; cursor: pointer }
+#toc button b { color: var(--honey); margin-right: 8px }
+</style>
+</head>
+<body>
+<div id="stage"><div id="canvas"></div></div>
+<div class="bar">
+  <button class="btn" id="prev" type="button">Wstecz</button>
+  <button class="btn" id="tocb" type="button">Spis</button>
+  <span class="cnt" id="cnt"></span>
+  <button class="btn" id="fs" type="button">Pełny ekran</button>
+  <button class="btn" id="next" type="button">Dalej</button>
+</div>
+<div id="toc" hidden><div class="in" id="tocin"></div></div>
+<script>
+const POSTACI = {"w1": {"group": "zarzad", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A//www.w3.org/1999/02/22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A//www.w3.org/2001/XMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A//purl.org/dc/elements/1.1/%22%20xmlns%3Adcterms%3D%22http%3A//purl.org/dc/terms/%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C/dc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C/dc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20%28https%3A//avataaars.com/%29%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20%28https%3A//avataaars.com/%29%3C/dc%3Arights%3E%3C/rdf%3ADescription%3E%3C/rdf%3ARDF%3E%3C/metadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20/%3E%3C/mask%3E%3Cg%20mask%3D%22url%28%23viewboxMask%29%22%3E%3Cg%20transform%3D%22translate%288%29%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23edb98a%22/%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22/%3E%3Cg%20transform%3D%22translate%280%20170%29%22%3E%3Cpath%20d%3D%22M132%2057.05c14.91%200%2027-11.2%2027-25%200-1.01-.06-2.01-.2-3h1.2a72%2072%200%200%201%2072%2072V110H32v-8.95a72%2072%200%200%201%2072-72h1.2c-.14.99-.2%201.99-.2%203%200%2013.8%2012.09%2025%2027%2025Z%22%20fill%3D%22%23E8B62C%22/%3E%3Cpath%20d%3D%22M100.78%2029.12%20101%2028c-2.96.05-6%201-6%201l-.42.66A72.01%2072.01%200%200%200%2032%20101.06V110h74s-10.7-51.56-5.24-80.8l.02-.08ZM158%20110s11-53%205-82c2.96.05%206%201%206%201l.42.66a72.01%2072.01%200%200%201%2062.58%2071.4V110h-74Z%22%20fill%3D%22%231f4460%22/%3E%3Cpath%20d%3D%22M101%2028c-6%2029%205%2082%205%2082H90L76%2074l6-9-6-6%2019-30s3.04-.95%206-1ZM163%2028c6%2029-5%2082-5%2082h16l14-36-6-9%206-6-19-30s-3.04-.95-6-1Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.15%22/%3E%3Cpath%20d%3D%22M108%2021.54c-6.77%204.6-11%2011.12-11%2018.35%200%207.4%204.43%2014.05%2011.48%2018.67l5.94-4.68%204.58.33-1-3.15.08-.06c-6.1-3.15-10.08-8.3-10.08-14.12V21.54ZM156%2036.88c0%205.82-3.98%2010.97-10.08%2014.12l.08.06-1%203.15%204.58-.33%205.94%204.68C162.57%2053.94%20167%2047.29%20167%2039.89c0-7.23-4.23-13.75-11-18.35v15.34Z%22%20fill%3D%22%23D9A622%22/%3E%3Cpath%20d%3D%22m183.42%2085.77.87-2.24%206.27-4.7a4%204%200%200%201%204.85.05l6.6%205.12-18.59%201.77Z%22%20fill%3D%22%23E8B62C%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2878%20134%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22/%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22/%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28104%20122%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2090%29%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2082%29%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28-1%29%22%3E%3Cpath%20d%3D%22M40%20145c-.62-30.84%2028.32-95.2%2039-108%207.92-9.5%2029.7-17.45%2054-17%2024.3.45%2046.86%205.81%2055%2016%2012.32%2015.43%2037.87%2074.08%2038%20109%20.1%2024.8-9.54%2049.66-23%2051-7.6.76-17.26-.23-28.86-1.4-5.3-.55-11.02-1.13-17.14-1.6V180.6A56%2056%200%200%200%20189%20130v-28.44a130.34%20130.34%200%200%201-26.9-19.88c3.35%206.24%207.19%2011.9%2011.51%2016.2-30.57-8.59-51.71-26.16-64.38-39.94C103.39%2069.02%2092.96%2085.23%2077%2097.57V130a56%2056%200%200%200%2032%2050.61v13.14c-6.95.95-13.41%202.16-19.36%203.27-10.85%202.02-19.98%203.73-27.26%202.98-14.22-1.47-21.88-30.2-22.38-55Z%22%20fill%3D%22%23e8e1e1%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2849%2072%29%22%3E%3C/g%3E%3Cg%20transform%3D%22translate%2862%2042%29%22%3E%3Cg%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M111.71%2053.49c4.67.16%208%20.88%2010.55%204.52%203.01.15%206.25.37%208.98%201.63%203.39%201.56%203.9%205.1-.36%205.59-1.86.2-3.72-.12-5.55-.45l-.19-.03-.33-.06c1.1%209.46-6.21%2020.87-14.23%2024.35C99.6%2093.8%2087.34%2088.53%2081.53%2079c-2.62-4.3-4.14-10.51-4.46-15.86-.42-.2-.83-.44-1.23-.67-.38-.22-.76-.44-1.12-.61-2-.98-5.34-1.1-7.5%200-.35.17-.7.37-1.05.58-.42.25-.86.5-1.3.72C64.53%2068.5%2063.01%2074.7%2060.4%2079c-5.8%209.53-18.07%2014.8-29.05%2010.04-8.02-3.48-15.33-14.89-14.23-24.35l-.33.06-.2.03c-1.83.33-3.7.66-5.55.45-4.27-.5-3.74-4.03-.36-5.6%202.72-1.25%205.96-1.47%208.97-1.62%202.55-3.63%205.88-4.36%2010.55-4.52l23.29-.46c5.19-.14%209.72%200%2011.03%204.6a18.7%2018.7%200%200%201%206.35-1.25c1.86%200%204.35.45%206.5%201.28%201.3-4.64%205.83-4.77%2011.03-4.63l23.3.46Zm-24.03%206.78c-2.37.03-3.5.42-3.9%202.9-.4%202.5%200%205.31.46%207.78.73%203.77%201.92%207.46%204.71%2010.22a16.24%2016.24%200%200%200%208.32%204.34c.11.03.54.1.96.16.63.1%201.23.18.71.13l-.1-.01h-.06a47.08%2047.08%200%200%201%20.16%200c3.73.4%207.72.32%2010.82-2.04%203.53-2.7%205.95-6.95%207.01-11.2.63-2.48%201.93-8.42-.46-10.4-2.73-2.28-28.63-1.88-28.63-1.88Zm-33.43%200c2.37.03%203.5.42%203.9%202.9.4%202.5%200%205.32-.46%207.78-.73%203.77-1.92%207.46-4.71%2010.22a16.23%2016.23%200%200%201-8.32%204.35l-.96.15c-.64.1-1.26.19-.68.13-3.73.4-7.74.32-10.85-2.05-3.53-2.69-5.95-6.95-7.01-11.2-.63-2.48-1.93-8.42.46-10.4%202.73-2.28%2028.63-1.87%2028.63-1.87Zm-10.93%2025.5Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22/%3E%3Cpath%20d%3D%22M111.71%2051.49c4.67.16%208%20.88%2010.55%204.52%203.01.15%206.25.37%208.98%201.63%203.39%201.56%203.9%205.1-.36%205.59-1.86.2-3.72-.12-5.55-.45l-.19-.03-.33-.06c1.1%209.46-6.21%2020.87-14.23%2024.35C99.6%2091.8%2087.34%2086.53%2081.53%2077c-2.62-4.3-4.14-10.51-4.46-15.86-.42-.2-.83-.44-1.23-.67-.38-.22-.76-.44-1.12-.61-2-.98-5.34-1.1-7.5%200-.35.17-.7.37-1.05.58-.42.25-.86.5-1.3.72C64.53%2066.5%2063.01%2072.7%2060.4%2077c-5.8%209.53-18.07%2014.8-29.05%2010.04-8.02-3.48-15.33-14.89-14.23-24.35-.11%200-.22.03-.33.05l-.2.03c-1.83.33-3.7.66-5.55.45-4.27-.5-3.74-4.03-.36-5.6%202.72-1.25%205.96-1.47%208.97-1.62%202.55-3.63%205.88-4.36%2010.55-4.52l23.29-.46c5.19-.14%209.72%200%2011.03%204.6a18.7%2018.7%200%200%201%206.35-1.25c1.86%200%204.35.45%206.5%201.28%201.3-4.64%205.83-4.77%2011.03-4.63l23.3.46Zm-24.03%206.78c-2.37.03-3.5.42-3.9%202.9-.4%202.5%200%205.31.46%207.78.73%203.77%201.92%207.46%204.71%2010.22a16.24%2016.24%200%200%200%208.32%204.34c.11.03.54.1.96.16.63.1%201.23.18.71.13l-.1-.01h-.06a47.08%2047.08%200%200%201%20.16%200c3.73.4%207.72.32%2010.82-2.04%203.53-2.7%205.95-6.95%207.01-11.2.63-2.48%201.93-8.42-.46-10.4-2.73-2.28-28.63-1.88-28.63-1.88Zm-33.43%200c2.37.03%203.5.42%203.9%202.9.4%202.5%200%205.32-.46%207.78-.73%203.77-1.92%207.46-4.71%2010.22a16.23%2016.23%200%200%201-8.32%204.35l-.96.15c-.64.1-1.26.19-.68.13-3.73.4-7.74.32-10.85-2.05-3.53-2.69-5.95-6.95-7.01-11.2-.63-2.48-1.93-8.42.46-10.4%202.73-2.28%2028.63-1.87%2028.63-1.87Zm-10.93%2025.5Z%22%20fill%3D%22%23262e33%22/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E"}, "a1": {"group": "hr", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A//www.w3.org/1999/02/22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A//www.w3.org/2001/XMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A//purl.org/dc/elements/1.1/%22%20xmlns%3Adcterms%3D%22http%3A//purl.org/dc/terms/%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C/dc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C/dc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20%28https%3A//avataaars.com/%29%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20%28https%3A//avataaars.com/%29%3C/dc%3Arights%3E%3C/rdf%3ADescription%3E%3C/rdf%3ARDF%3E%3C/metadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20/%3E%3C/mask%3E%3Cg%20mask%3D%22url%28%23viewboxMask%29%22%3E%3Cg%20transform%3D%22translate%288%29%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23ffdbb4%22/%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22/%3E%3Cg%20transform%3D%22translate%280%20170%29%22%3E%3Cpath%20d%3D%22M100.37%2029.14a27.6%2027.6%200%200%201%207.63-7.57v15.3c0%205.83%203.98%2010.98%2010.08%2014.13l-.08.06.9%202.86c3.89%202%208.35%203.13%2013.1%203.13s9.21-1.13%2013.1-3.13l.9-2.86-.08-.06c6.1-3.15%2010.08-8.3%2010.08-14.12v-14.6a27.1%2027.1%200%200%201%206.6%206.82%2072%2072%200%200%201%2069.4%2071.95V110H32v-8.95a72%2072%200%200%201%2068.37-71.9Z%22%20fill%3D%22%23e8b62c%22/%3E%3Cpath%20d%3D%22M108%2021.57c-6.77%204.6-11%2011.17-11%2018.46%200%207.4%204.36%2014.05%2011.3%2018.66l6.12-4.81%204.58.33-1-3.15.08-.06c-6.1-3.15-10.08-8.3-10.08-14.12v-15.3ZM156%2036.88c0%205.82-3.98%2010.97-10.08%2014.12l.08.06-1%203.15%204.58-.33%205.65%204.45c6.63-4.6%2010.77-11.1%2010.77-18.3%200-6.92-3.82-13.2-10-17.75v14.6Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%22.75%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2878%20134%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22/%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22/%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28104%20122%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2090%29%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2082%29%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28-1%29%22%3E%3Cpath%20d%3D%22M157%20180.61V199h4a71.7%2071.7%200%200%201%2046%2016.6V92a74%2074%200%200%200-148%200v183.72A28%2028%200%200%200%2083%20248v-45.58a71.95%2071.95%200%200%201%2022-3.42h4v-18.39a56.24%2056.24%200%200%201-26-25.36V93.27a150%20150%200%200%200%2028.34-12.77c15.4-8.9%2028.1-19.56%2036.73-30.1%201.76%205.2%204.1%2010.4%207.04%2015.48%208.78%2015.2%2021.12%2026.35%2033.9%2032.04v.25c.4.06.8.15%201.18.26.77.32%201.55.62%202.33.9A12%2012%200%200%201%20199%20110v13a12%2012%200%200%201-10.22%2011.87A56.03%2056.03%200%200%201%20157%20180.6Z%22%20fill%3D%22%23724133%22/%3E%3Cpath%20d%3D%22M157%20199v-18.39a56.03%2056.03%200%200%200%2031.8-45.74A12%2012%200%200%200%20199%20123v-13a12%2012%200%200%200-6.5-10.66%2044.57%2044.57%200%200%200%2014.5%202.8v113.47A71.7%2071.7%200%200%200%20161%20199h-4ZM83%20202.42v-47.17a56.24%2056.24%200%200%200%2026%2025.36V199h-4c-7.67%200-15.07%201.2-22%203.42ZM189%2097.92v.25c.4.06.8.15%201.18.26l-1.18-.51Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.27%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2849%2072%29%22%3E%3C/g%3E%3Cg%20transform%3D%22translate%2862%2042%29%22%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E"}, "l2": {"group": "kierownictwo", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A//www.w3.org/1999/02/22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A//www.w3.org/2001/XMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A//purl.org/dc/elements/1.1/%22%20xmlns%3Adcterms%3D%22http%3A//purl.org/dc/terms/%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C/dc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C/dc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20%28https%3A//avataaars.com/%29%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20%28https%3A//avataaars.com/%29%3C/dc%3Arights%3E%3C/rdf%3ADescription%3E%3C/rdf%3ARDF%3E%3C/metadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20/%3E%3C/mask%3E%3Cg%20mask%3D%22url%28%23viewboxMask%29%22%3E%3Cg%20transform%3D%22translate%288%29%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23edb98a%22/%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22/%3E%3Cg%20transform%3D%22translate%280%20170%29%22%3E%3Cpath%20d%3D%22M132.5%2051.83c18.5%200%2033.5-9.62%2033.5-21.48%200-.36-.01-.7-.04-1.06A72%2072%200%200%201%20232%20101.04V110H32v-8.95a72%2072%200%200%201%2067.05-71.83c-.03.37-.05.75-.05%201.13%200%2011.86%2015%2021.48%2033.5%2021.48Z%22%20fill%3D%22%23bcd4ea%22/%3E%3Cpath%20d%3D%22M132.5%2058.76c21.89%200%2039.63-12.05%2039.63-26.91%200-.6-.02-1.2-.08-1.8-2-.33-4.03-.59-6.1-.76.04.35.05.7.05%201.06%200%2011.86-15%2021.48-33.5%2021.48S99%2042.2%2099%2030.35c0-.38.02-.76.05-1.13-2.06.14-4.08.36-6.08.67-.07.65-.1%201.3-.1%201.96%200%2014.86%2017.74%2026.91%2039.63%2026.91Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.08%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2878%20134%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22/%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22/%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28104%20122%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2090%29%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2082%29%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28-1%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M76%2098c.35%201.49%201.67%201.22%202%200-.46-1.55%203.3-28.75%2013-36%203.62-2.52%2023-4.77%2042.31-4.75%2019.1%200%2038.11%202.26%2041.69%204.75%209.7%207.25%2013.46%2034.45%2013%2036%20.33%201.22%201.65%201.49%202%200%20.72-10.3%200-63.73-57-63-57%20.73-57.72%2052.7-57%2063Z%22%20fill%3D%22%23b9b9b9%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2849%2072%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M101.43%2098.17c-2.52%202.3-5.2%203.32-8.58%202.6-.58-.12-2.95-4.54-8.85-4.54-5.9%200-8.27%204.42-8.85%204.54-3.39.72-6.07-.3-8.58-2.6-4.72-4.31-8.65-10.26-6.3-16.75%201.24-3.38%203.24-7.1%206.88-8.17%203.89-1.15%209.35%200%2013.26-.8A8.6%208.6%200%200%200%2084%2071a8.6%208.6%200%200%200%203.58%201.46c3.92.78%209.38-.36%2013.27.79%203.64%201.07%205.64%204.79%206.87%208.17%202.36%206.49-1.57%2012.44-6.3%2016.75ZM140.08%2026c-3.4%208.4-2.1%2018.86-2.72%2027.68-.52%207.16-2.02%2017.9-8.39%2022.53-3.25%202.37-9.18%206.35-13.43%205.24-2.93-.76-3.24-9.16-7.09-12.3a22.42%2022.42%200%200%200-15.3-4.9c-2.37.11-7.17.09-9.15%201.91-1.98-1.82-6.78-1.8-9.15-1.9a22.42%2022.42%200%200%200-15.3%204.89c-3.85%203.14-4.16%2011.54-7.1%2012.3-4.24%201.1-10.17-2.87-13.42-5.24-6.37-4.62-7.87-15.37-8.39-22.53-.63-8.82.69-19.28-2.72-27.68-1.66%200-.57%2016.13-.57%2016.13v20.36c.04%2015.28%209.59%2038.16%2030.76%2046.9C63.29%20111.53%2075%20115%2084%20115c8.98.01%2020.71-3.13%2025.9-5.27%2021.16-8.73%2030.71-31.95%2030.75-47.23V42.13s1.1-16.13-.57-16.13Z%22%20fill%3D%22%238f8f8f%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2862%2042%29%22%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E"}, "p6": {"group": "produkcja", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A//www.w3.org/1999/02/22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A//www.w3.org/2001/XMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A//purl.org/dc/elements/1.1/%22%20xmlns%3Adcterms%3D%22http%3A//purl.org/dc/terms/%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C/dc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C/dc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A//avataaars.com/%3C/dcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20%28https%3A//avataaars.com/%29%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20%28https%3A//avataaars.com/%29%3C/dc%3Arights%3E%3C/rdf%3ADescription%3E%3C/rdf%3ARDF%3E%3C/metadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20/%3E%3C/mask%3E%3Cg%20mask%3D%22url%28%23viewboxMask%29%22%3E%3Cg%20transform%3D%22translate%288%29%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23ffdbb4%22/%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22/%3E%3Cg%20transform%3D%22translate%280%20170%29%22%3E%3Cpath%20d%3D%22M132.5%2051.83c18.5%200%2033.5-9.62%2033.5-21.48%200-.36-.01-.7-.04-1.06A72%2072%200%200%201%20232%20101.04V110H32v-8.95a72%2072%200%200%201%2067.05-71.83c-.03.37-.05.75-.05%201.13%200%2011.86%2015%2021.48%2033.5%2021.48Z%22%20fill%3D%22%23aeb8c2%22/%3E%3Cpath%20d%3D%22M132.5%2058.76c21.89%200%2039.63-12.05%2039.63-26.91%200-.6-.02-1.2-.08-1.8-2-.33-4.03-.59-6.1-.76.04.35.05.7.05%201.06%200%2011.86-15%2021.48-33.5%2021.48S99%2042.2%2099%2030.35c0-.38.02-.76.05-1.13-2.06.14-4.08.36-6.08.67-.07.65-.1%201.3-.1%201.96%200%2014.86%2017.74%2026.91%2039.63%2026.91Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.08%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2878%20134%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22/%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22/%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28104%20122%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2090%29%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2876%2082%29%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28-1%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M88.18%2037.86c5.14-3.84%2011.22-7.12%2017.56-8.38%206.45-1.28%2010.36-1.6%2016.7-.07%201.64.39%202.2.78%203.63-.15%201.2-.79%209.66-9.5%2035.42-4.66%2026.03%204.88%2033.77%2044.08%2043.42%2045.57%203.49.53%207.79-.39%207.92-2.53%203.96%206.03%205%2014%203.33%2021.07-1.45%206.09-4.5%2011.8-10%2015.14-4.72%202.87-11.25%204.12-16.71%203.59a22.36%2022.36%200%200%201-7.03-1.77c-2.76-1.2-4.96-3.4-7.67-4.54a53.9%2053.9%200%200%200%209.18%206.42c1.64.9%203.3%201.53%205.11%202.02%201.24.34%203.76%201.48%204.96%201.18-7.81%201.4-15.16.18-22.32-3.16a51.67%2051.67%200%200%201-9.2-5.48c-2.83-2.13-6.09-4.3-8.3-7.1.93%201.2-.7-.6-.92-.81a74.07%2074.07%200%200%201-4.72-5.29c-1.99-2.48-3.84-5.08-5.5-7.8-1.68-2.76-8.36-13.87-10.38-16.5a195.3%20195.3%200%200%200%206.41%2016.93c-4.71-1.47-9.28-5.54-12.3-9.34a29.46%2029.46%200%200%201-6.1-14.66c-3.83%2010.41-12.79%2018.63-22.03%2024.3%202-3.74%205.05-6.9%207.05-10.69-9.2%209.33-24.57%2013.9-28.6%2027.58-1.03-4.76-4.35-8.58-5.34-13.43-1.1-5.4-1.9-11.11-1.73-16.62.4-12.24%208.64-23.72%2018.16-30.82Z%22%20fill%3D%22%234a312c%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2849%2072%29%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M84.5%2093.84c-11.5.38-16.64%205.88-20.5.29-2.91-4.2-1.7-11.26%201.01-15.23%203.86-5.65%209.1-2.92%2014.95-3.56%201.6-.18%203.2-.62%204.54-1.34%201.36.72%202.95%201.16%204.55%201.34%205.85.64%2011.09-2.09%2014.94%203.56%202.72%203.97%203.93%2011.03%201.03%2015.23-3.87%205.6-9-.67-20.52-.29ZM140.4%2026c-3.43%2014.07-5%2028.43-7.5%2042.67-.5%202.97-1.07%205.93-1.68%208.88-.12.62-.25%202.92-.86%203.21-1.85.89-5.62-3.81-6.63-4.87-2.53-2.67-5.05-5.36-8.13-7.45a43.7%2043.7%200%200%200-21.13-7.32c-3.18-.25-7.47.18-10.47%202-3-1.82-7.3-2.25-10.47-2-7.6.6-14.9%203.1-21.13%207.32-3.09%202.09-5.6%204.78-8.13%207.45-1%201.06-4.78%205.76-6.63%204.87-.61-.29-.74-2.6-.86-3.21-.6-2.95-1.17-5.91-1.7-8.88-2.47-14.24-4.05-28.6-7.47-42.67-1%200-1.87%2018.75-1.98%2020.5-.46%207.09-.98%2014.03-.3%2021.13%201.16%2012.24%202.37%2027.6%2011.7%2036.96%208.44%208.45%2020.68%2010.22%2031.24%2015.55%201.36.69%203.16%201.54%205.1%202.23%202.06%201.56%206.12%202.63%2010.8%202.63%204.91%200%209.15-1.17%2011.08-2.86%201.7-.65%203.27-1.39%204.48-2%2010.56-5.33%2022.8-7.1%2031.24-15.55%209.33-9.36%2010.54-24.72%2011.7-36.96.68-7.1.16-14.04-.3-21.14-.1-1.74-.98-20.5-1.98-20.5Z%22%20fill%3D%22%234a312c%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2862%2042%29%22%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E"}, "b1": {"group": "biuro", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%22%20xmlns%3Adcterms%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C%2Fdc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C%2Fdc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%3C%2Fdc%3Arights%3E%3C%2Frdf%3ADescription%3E%3C%2Frdf%3ARDF%3E%3C%2Fmetadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20%2F%3E%3C%2Fmask%3E%3Cg%20mask%3D%22url(%23viewboxMask)%22%3E%3Cg%20transform%3D%22translate(8)%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23ffdbb4%22%2F%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22%2F%3E%3Cg%20transform%3D%22translate(0%20170)%22%3E%3Cpath%20d%3D%22M92.68%2029.94A72.02%2072.02%200%200%200%2032%20101.05V110h200v-8.95a72.02%2072.02%200%200%200-60.68-71.11%2023.87%2023.87%200%200%201-7.56%2013.6l-29.08%2026.23a4%204%200%200%201-5.36%200l-29.08-26.23a23.87%2023.87%200%200%201-7.56-13.6Z%22%20fill%3D%22%2361788c%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(78%20134)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22%2F%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(104%20122)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2090)%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2082)%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(-1)%22%3E%3Cpath%20d%3D%22M67%20113c10.86-22.7%2034.67-31.6%2055.44-39.36%2013.32-4.97%2025.39-9.48%2032-16.86%202.22%202.02%204.75%204.05%207.41%206.2C172.06%2071.16%20184.21%2080.91%20189%2098v.17a12%2012%200%200%201%209.81%209.72V86.04c0-1.3-.05-2.57-.15-3.84%204.54-17-3.1-37.78-12.66-47.2-9.48-8.82-22.3-12.32-30.95-8.48C143.45%208.98%20109.9%2013.24%2090%2028c-13.22%209.8-24.79%2025.72-27.84%2045.75A46.18%2046.18%200%200%200%2061%2084.05v88.5c-.2%2031.5-7.4%2082.49-21%2090.45%2062.36%2016.8%2071.93-38.15%2069-82v-.39a56.03%2056.03%200%200%201-31.8-45.74A12%2012%200%200%201%2067%20123v-10ZM157%20180.61a56.03%2056.03%200%200%200%2031.8-45.74%2012%2012%200%200%200%2010.01-9.76v1.36A100%20100%200%200%200%20209.78%20172l26.95%2052.71a37.79%2037.79%200%200%201-3.94%2040.76A72%2072%200%200%200%20161%20199h-4v-18.39Z%22%20fill%3D%22%23d6b370%22%2F%3E%3Cpath%20d%3D%22M67%20113c10.86-22.7%2034.67-31.6%2055.44-39.36%2013.32-4.97%2025.39-9.48%2032-16.86%202.22%202.02%204.75%204.05%207.41%206.2%2010.19%208.17%2022.3%2017.89%2027.11%2034.9-4.57-14.04-15.75-21.22-25.6-27.55-3.21-2.06-6.28-4.03-8.93-6.12-6.6%206.4-18.67%2010.32-32%2014.64C101.68%2085.58%2077.87%2093.3%2067%20113Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(49%2072)%22%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(62%2042)%22%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"}, "i1": {"group": "it", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%22%20xmlns%3Adcterms%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C%2Fdc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C%2Fdc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%3C%2Fdc%3Arights%3E%3C%2Frdf%3ADescription%3E%3C%2Frdf%3ARDF%3E%3C%2Fmetadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20%2F%3E%3C%2Fmask%3E%3Cg%20mask%3D%22url(%23viewboxMask)%22%3E%3Cg%20transform%3D%22translate(8)%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23ffdbb4%22%2F%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22%2F%3E%3Cg%20transform%3D%22translate(0%20170)%22%3E%3Cpath%20d%3D%22M108%2014.7c-15.52%203.68-27.1%2010.83-30.77%2019.44A72.02%2072.02%200%200%200%2032%20101v9h200v-9a72.02%2072.02%200%200%200-45.23-66.86C183.1%2025.53%20171.52%2018.38%20156%2014.7V32a24%2024%200%201%201-48%200V14.7Z%22%20fill%3D%22%232e5878%22%2F%3E%3Cpath%20d%3D%22M102%2063.34a67.1%2067.1%200%200%201-7-2.82V110h7V63.34ZM162%2063.34a67.04%2067.04%200%200%200%207-2.82V98.5a3.5%203.5%200%201%201-7%200V63.34Z%22%20fill%3D%22%23F4F4F4%22%2F%3E%3Cpath%20d%3D%22M187.62%2034.49a71.79%2071.79%200%200%201%2010.83%205.63C197.11%2055.62%20167.87%2068%20132%2068c30.93%200%2056-13.43%2056-30%200-1.19-.13-2.36-.38-3.51ZM76.38%2034.49a16.48%2016.48%200%200%200-.38%203.5c0%2016.58%2025.07%2030%2056%2030-35.87%200-65.1-12.38-66.45-27.88a71.79%2071.79%200%200%201%2010.83-5.63Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(78%20134)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22%2F%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(104%20122)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2090)%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2082)%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(-1)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M193.76%2070.77a62.92%2062.92%200%200%200-1.51-9.86%2051.78%2051.78%200%200%200-2.5-7.49c-.6-1.48-2.02-3.52-2.19-5.13-.16-1.57%201.07-3.32%201.33-5.16.24-1.79.2-3.66-.17-5.44-.83-4.03-3.6-7.77-7.85-8.82-.95-.23-2.97.06-3.64-.5-.77-.63-1.3-2.8-2-3.67-2-2.47-5.1-4.07-8.37-3.51-2.41.4-1.03.9-2.84-.51-1-.8-1.75-2-2.73-2.85a24.7%2024.7%200%200%200-4.9-3.28%2050.82%2050.82%200%200%200-14.84-4.91c-9.28-1.52-19.2-.2-28.2%202.22a74.58%2074.58%200%200%200-13.14%204.74c-1.78.87-2.81%201.58-4.67%201.81-2.93.36-5.4.34-8.18%201.58-8.54%203.82-12.39%2012.69-9.06%2021.17.66%201.71%201.57%203.21%202.82%204.59%201.52%201.68%202.07%201.35.76%203.28a52.78%2052.78%200%200%200-4.96%209.17c-3.53%208.4-4.12%2017.87-3.89%2026.83.08%203.13.22%206.3.71%209.42.22%201.34.28%203.87%201.29%204.87.5.5%201.24.78%201.96.58%201.71-.47%201.13-1.73%201.17-2.9.2-5.88-.08-11.08%201.32-16.9a44.4%2044.4%200%200%201%205-12.03%2072.07%2072.07%200%200%201%209.8-13.35c.92-.99%201.12-1.4%202.35-1.48.93-.05%202.3.59%203.2.8%202%20.5%204%20.98%206.03%201.3%203.74.6%207.45.65%2011.22.53%207.43-.23%2014.88-.75%2022.09-2.62%204.78-1.24%209.02-3.47%2013.6-5.1.08-.04%201.23-.85%201.43-.82.28.04%201.97%201.82%202.26%202.05%202.23%201.74%204.67%202.48%207.07%203.83%202.97%201.66.1-.72%201.73%201.36.48.6.72%201.72%201.1%202.4%201.22%202.2%202.9%204.1%204.93%205.63%201.96%201.47%204.9%202.18%205.9%204.1.76%201.47%201.02%203.48%201.64%205.06%201.63%204.13%203.78%207.99%205.93%2011.88%201.73%203.14%203.62%205.89%203.81%209.47.07%201.25-1.12%208.74%201.78%206.46.43-.34%201.35-4.15%201.54-4.8.77-2.63%201.05-5.38%201.4-8.09.69-5.38.92-10.5.46-15.91Z%22%20fill%3D%22%23a55728%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(49%2072)%22%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(62%2042)%22%3E%3Cg%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M40%2096a24%2024%200%200%201-22.96-31H10.5a2.5%202.5%200%200%201%200-5h8c.23%200%20.45.03.66.09a24%2024%200%200%201%2042.26%201.06A11.36%2011.36%200%200%201%2070.86%2056c4.01%200%207.55%202.14%209.6%205.4a24%2024%200%200%201%2042.38-1.31c.2-.06.43-.1.66-.1h8a2.5%202.5%200%201%201%200%205h-6.54a24%2024%200%201%201-46.6%202.83c-.08-4.37-3.45-7.83-7.5-7.83-3.73%200-6.89%202.94-7.42%206.83A24%2024%200%200%201%2040%2096Zm0-4a20%2020%200%201%200%200-40%2020%2020%200%200%200%200%2040Zm82-20a20%2020%200%201%201-40%200%2020%2020%200%200%201%2040%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22%2F%3E%3Cpath%20d%3D%22M40%2094a24%2024%200%200%201-22.96-31H10.5a2.5%202.5%200%200%201%200-5h8c.23%200%20.45.03.66.09a24%2024%200%200%201%2042.26%201.06A11.36%2011.36%200%200%201%2070.86%2054c4.01%200%207.55%202.14%209.6%205.4a24%2024%200%200%201%2042.38-1.31c.2-.06.43-.1.66-.1h8a2.5%202.5%200%201%201%200%205h-6.54a24%2024%200%201%201-46.6%202.84c-.08-4.37-3.45-7.83-7.5-7.83-3.73%200-6.89%202.94-7.42%206.83A24%2024%200%200%201%2040%2094Zm0-4a20%2020%200%201%200%200-40%2020%2020%200%200%200%200%2040Zm82-20a20%2020%200%201%201-40%200%2020%2020%200%200%201%2040%200Z%22%20fill%3D%22%23262e33%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"}, "h1": {"group": "bhp", "face": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20280%20280%22%20fill%3D%22none%22%20shape-rendering%3D%22auto%22%3E%3Cmetadata%20xmlns%3Ardf%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%22%20xmlns%3Axsi%3D%22http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance%22%20xmlns%3Adc%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%22%20xmlns%3Adcterms%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%22%3E%3Crdf%3ARDF%3E%3Crdf%3ADescription%3E%3Cdc%3Atitle%3EAvataaars%3C%2Fdc%3Atitle%3E%3Cdc%3Acreator%3EPablo%20Stanley%3C%2Fdc%3Acreator%3E%3Cdc%3Asource%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdc%3Asource%3E%3Cdcterms%3Alicense%20xsi%3Atype%3D%22dcterms%3AURI%22%3Ehttps%3A%2F%2Favataaars.com%2F%3C%2Fdcterms%3Alicense%3E%3Cdc%3Arights%3ERemix%20of%20%E2%80%9EAvataaars%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%20by%20%E2%80%9EPablo%20Stanley%E2%80%9D%2C%20licensed%20under%20%E2%80%9EFree%20for%20personal%20and%20commercial%20use%E2%80%9D%20(https%3A%2F%2Favataaars.com%2F)%3C%2Fdc%3Arights%3E%3C%2Frdf%3ADescription%3E%3C%2Frdf%3ARDF%3E%3C%2Fmetadata%3E%3Cmask%20id%3D%22viewboxMask%22%3E%3Crect%20width%3D%22280%22%20height%3D%22280%22%20rx%3D%220%22%20ry%3D%220%22%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23fff%22%20%2F%3E%3C%2Fmask%3E%3Cg%20mask%3D%22url(%23viewboxMask)%22%3E%3Cg%20transform%3D%22translate(8)%22%3E%3Cpath%20d%3D%22M132%2036a56%2056%200%200%200-56%2056v6.17A12%2012%200%200%200%2066%20110v14a12%2012%200%200%200%2010.3%2011.88%2056.04%2056.04%200%200%200%2031.7%2044.73v18.4h-4a72%2072%200%200%200-72%2072v9h200v-9a72%2072%200%200%200-72-72h-4v-18.39a56.04%2056.04%200%200%200%2031.7-44.73A12%2012%200%200%200%20198%20124v-14a12%2012%200%200%200-10-11.83V92a56%2056%200%200%200-56-56Z%22%20fill%3D%22%23d08b5b%22%2F%3E%3Cpath%20d%3D%22M108%20180.61v8a55.79%2055.79%200%200%200%2024%205.39c8.59%200%2016.73-1.93%2024-5.39v-8a55.79%2055.79%200%200%201-24%205.39%2055.79%2055.79%200%200%201-24-5.39Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.1%22%2F%3E%3Cg%20transform%3D%22translate(0%20170)%22%3E%3Cpath%20d%3D%22M132.5%2051.83c18.5%200%2033.5-9.62%2033.5-21.48%200-.36-.01-.7-.04-1.06A72%2072%200%200%201%20232%20101.04V110H32v-8.95a72%2072%200%200%201%2067.05-71.83c-.03.37-.05.75-.05%201.13%200%2011.86%2015%2021.48%2033.5%2021.48Z%22%20fill%3D%22%23ffffff%22%2F%3E%3Cpath%20d%3D%22M132.5%2058.76c21.89%200%2039.63-12.05%2039.63-26.91%200-.6-.02-1.2-.08-1.8-2-.33-4.03-.59-6.1-.76.04.35.05.7.05%201.06%200%2011.86-15%2021.48-33.5%2021.48S99%2042.2%2099%2030.35c0-.38.02-.76.05-1.13-2.06.14-4.08.36-6.08.67-.07.65-.1%201.3-.1%201.96%200%2014.86%2017.74%2026.91%2039.63%2026.91Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.08%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(78%20134)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M35.12%2015.13a19%2019%200%200%200%2037.77-.09c.08-.77-.77-2.04-1.85-2.04H37.1C36%2013%2035%2014.18%2035.12%2015.13Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.7%22%2F%3E%3Cpath%20d%3D%22M70%2013H39a5%205%200%200%200%205%205h21a5%205%200%200%200%205-5Z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M66.7%2027.14A10.96%2010.96%200%200%200%2054%2025.2a10.95%2010.95%200%200%200-12.7%201.94A18.93%2018.93%200%200%200%2054%2032c4.88%200%209.33-1.84%2012.7-4.86Z%22%20fill%3D%22%23FF4F6D%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(104%20122)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M16%208c0%204.42%205.37%208%2012%208s12-3.58%2012-8%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2090)%22%3E%3Cpath%20d%3D%22M36%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200ZM88%2022a6%206%200%201%201-12%200%206%206%200%200%201%2012%200Z%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(76%2082)%22%3E%3Cpath%20d%3D%22M26.55%206.15c-5.8.27-15.2%204.49-14.96%2010.34.01.18.3.27.43.12%202.76-2.96%2022.32-5.95%2029.2-4.36.64.14%201.12-.48.72-.93-3.43-3.85-10.2-5.43-15.4-5.18ZM86.45%206.15c5.8.27%2015.2%204.49%2014.96%2010.34-.01.18-.3.27-.43.12-2.76-2.96-22.32-5.95-29.2-4.36-.64.14-1.12-.48-.72-.93%203.43-3.85%2010.2-5.43%2015.4-5.18Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23000%22%20fill-opacity%3D%22.6%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(-1)%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M167.3%2035c-20.18-11.7-40.17-9.78-55.26-5.97-15.1%203.8-24.02%2014.62-31.68%2030.62a67.68%2067.68%200%200%200-6.34%2025.83c-.13%203.41.33%206.94%201.25%2010.22.33%201.2%202.15%205.39%202.65%202%20.17-1.12-.44-2.67-.5-3.86-.08-1.57%200-3.16.11-4.73.2-2.92.73-5.8%201.65-8.59%201.33-3.98%203.02-8.3%205.6-11.67%206.4-8.33%2017.49-8.8%2026.29-13.39-.77%201.4-3.7%203.68-2.7%205.27.71%201.1%203.38.76%204.65.72%203.35-.09%206.72-.67%2010.02-1.14a71.5%2071.5%200%200%200%2015-4.1c4.02-1.5%208.61-2.88%2011.63-6.07a68.67%2068.67%200%200%200%2017.4%2013c5.62%202.88%2014.68%204.32%2018.11%2010.16%204.07%206.91%202.2%2015.4%203.44%2022.9.47%202.85%201.54%202.79%202.13.24%201-4.33%201.47-8.83%201.15-13.28-.72-10.05-4.4-36.45-24.6-48.15Z%22%20fill%3D%22%232c1b18%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(49%2072)%22%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(62%2042)%22%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"}};
+// ===================== TREŚĆ PLANSZ =====================
+const FORM = 'MERITO_2026_SHR_Analiza%20i%20opis%20pracy_FORMULARZE_v1.html?prowadzacy=1';
+const KLAS = 'MERITO_2026_SHR_Analiza%20i%20opis%20pracy_KLASYFIKATOR%20STANOWISK_v2.html';
+const START = 'zmianolog.github.io/analiza-pracy';
+
+const SLIDES = [
+ { t: 'title' },
+
+ { t: 'points', h: 'Cel dnia', k: 'Po zajęciach', items: [
+   'Odróżniacie analizę pracy od opisu stanowiska oraz opis stanowiska od opisu osoby, która je zajmuje.',
+   'Potraficie uporządkować strukturę stanowisk i ich nazwy, zanim powstanie pierwszy opis.',
+   'Budujecie jeden wzór opisu dla wszystkich stanowisk danego typu i dzielicie jego wypełnianie między właścicieli pól.',
+   'Opisujecie zadania metodą DZIK i korzystacie z opisów stanowisk jak z bazy danych.' ] },
+
+ { t: 'two', h: 'Firma KORVEX — na niej pracujemy przez cały dzień', k: 'Firma przykładowa',
+   l: { h: 'Kim jest KORVEX', items: [
+     'Producent opakowań z tektury falistej dla firm spożywczych i sklepów internetowych, 160 osób w jednej lokalizacji, produkcja w systemie trzyzmianowym.',
+     'Przez dwadzieścia lat stanowiska tworzono wtedy, gdy pojawiała się potrzeba, a nazwy nadawali kolejni kierownicy; dziś firma ma 53 nazwy stanowisk i żadnego opisu.' ] },
+   r: { h: 'Dlaczego zamawia opisy', items: [
+     'Największy klient z branży spożywczej wymaga w audycie udokumentowanych zakresów odpowiedzialności i wymagań.',
+     'Nowa kierowniczka HR przygotowuje regulamin wynagradzania i potrzebuje uporządkowanej listy stanowisk.',
+     'Rekrutacje trwają długo, bo kierownicy za każdym razem inaczej określają wymagania.' ] },
+   foot: 'Ćwiczenia wykonujecie w stałych grupach G1–G5 na stronie ' + START },
+
+ { t: 'agenda', h: 'Przebieg dnia', items: [
+   'Czym jest analiza i opis pracy', 'Interesariusze i wykorzystanie danych', 'Procedura budowy opisu', 'Wybór informacji na podstawie wiedzy o organizacji',
+   'Typologia: dwa wzory i sześć typów', 'Wzór opisu dla stanowiska, nie dla osoby', 'Porządkowanie struktury i nazw stanowisk', 'Eksperci przedmiotowi (SME)',
+   'EKASP w wersji uproszczonej', 'Wzór opisu i podział ról', 'Opis zadań metodą DZIK', 'Wypełnianie opisu stanowiska',
+   'Aktualizacja opisów', 'Opisy stanowisk jako baza danych' ] },
+
+ // ---------- 1 ----------
+ { t: 'div', n: 1, h: 'Czym jest analiza i opis pracy', lead: 'Zaczynamy od rozróżnienia procesu, jego wyniku i przedmiotu: analizujemy pracę na stanowisku, a nie osobę, która ją wykonuje.' },
+ { t: 'two', h: 'Analiza pracy i opis stanowiska to dwie różne rzeczy',
+   l: { h: 'Analiza pracy — proces', items: [
+     'Systematyczne zbieranie informacji o zadaniach, warunkach i wymaganiach stanowiska, prowadzone według ustalonej procedury.',
+     'Prowadzą ją osoby, które znają tę pracę (eksperci przedmiotowi), pod kierunkiem osoby znającej metodę.',
+     'Korzysta z obserwacji, wywiadów, dokumentów i kwestionariuszy, takich jak EKASP.' ] },
+   r: { h: 'Opis stanowiska — wynik', items: [
+     'Dokument, który zapisuje wynik analizy w ustalonym wzorze, jednakowym dla stanowisk danego typu.',
+     'Ten sam wynik analizy zasila też inne dokumenty: profil kandydata, plan szkoleń, taryfikator płac.',
+     'Opis bez analizy powstaje z wyobrażeń jednej osoby o pracy, a nie z ustaleń kilku osób, które tę pracę znają.' ] } },
+ { t: 'two', h: 'Opisujemy stanowisko, a nie osobę, która je zajmuje',
+   l: { h: 'Opis stanowiska', items: [
+     'Odpowiada na pytanie, jaka praca jest wykonywana, w jakich warunkach i jakie wymagania stawia.',
+     'Nie zmienia się, gdy na stanowisku zmienia się osoba; zmienia się, gdy zmienia się praca.' ] },
+   r: { h: 'Opis osoby', items: [
+     'Odpowiada na pytanie, jakie kompetencje ma konkretny człowiek: to wynik oceny, rozmowy rekrutacyjnej albo assessment center.',
+     'Zmienia się z każdą osobą i z jej rozwojem.' ] },
+   foot: 'Porównanie wymagań stanowiska z kompetencjami osoby pokazuje lukę kompetencyjną. Takie porównanie jest możliwe tylko wtedy, gdy oba dokumenty istnieją osobno.' },
+ { t: 'grid', h: 'Metody analizy pracy', k: 'Sześć grup metod', items: [
+   ['Ogólna analiza pracy', 'Kwestionariusze obejmujące wiele wymiarów pracy, np. PAQ i EKASP; wymagają zespołu ekspertów.'],
+   ['Analiza funkcjonalna', 'Opisuje pracę przez stosunek do danych, ludzi i rzeczy oraz poziom złożoności każdego z nich.'],
+   ['Inwentarze zadań', 'Listy zadań dla określonej grupy zawodów, oceniane pod względem częstotliwości i ważności.'],
+   ['Elementy pracy', 'Wymagania opisane jako wiedza, umiejętności, zdolności i inne cechy (model KSAO).'],
+   ['Zdarzenia krytyczne', 'Opis sytuacji, w których zachowanie pracownika przesądziło o sukcesie albo porażce zadania.'],
+   ['Analiza kompetencji', 'Profil zachowań wymaganych na stanowisku, często używany zamiast klasycznej analizy pracy.'] ],
+   foot: 'Na podstawie: Lees i Cordery (2003), Analiza i projektowanie pracy.' },
+ { t: 'two', h: 'Kiedy analiza pracy jest warta wysiłku',
+   l: { h: 'Uzasadniona', items: [
+     'Nowe stanowisko albo zasadnicza zmiana zakresu pracy.',
+     'Restrukturyzacja, wartościowanie stanowisk i budowa taryfikatora płac.',
+     'Niejasne kryteria selekcji i rozbieżne wymagania kierowników.',
+     'Wymagania zewnętrzne: audyt klienta, przepisy BHP, kontrola.' ] },
+   r: { h: 'Dyskusyjna', items: [
+     'Stanowiska, których zakres zmienia się z dnia na dzień, np. w pracy projektowej.',
+     'Mała firma bez procesów, które korzystałyby z opisów.',
+     'Brak osób i czasu na rzetelne przeprowadzenie analizy.',
+     'Opis, który nie zostanie użyty w żadnym procesie HR.' ] } },
+
+ // ---------- 2 ----------
+ { t: 'div', n: 2, h: 'Interesariusze i wykorzystanie danych', lead: 'Z opisu stanowiska korzysta kilka grup w organizacji, a każda potrzebuje innych pól. Od tego zależy, co powinno się znaleźć we wzorze.' },
+ { t: 'people', h: 'Kto korzysta z opisu stanowiska', items: [
+   ['w1', 'Zarząd', 'Struktura organizacji, wartościowanie stanowisk i koszty zatrudnienia.'],
+   ['a1', 'HR', 'Rekrutacja, ocena okresowa, szkolenia, wynagrodzenia i dokumentacja kadrowa.'],
+   ['l2', 'Przełożony', 'Wymagania wobec kandydatów, podział zadań, cele i ocena podwładnych.'],
+   ['p6', 'Pracownik (SME)', 'Jasny zakres zadań, odpowiedzialności i oczekiwań wobec jego pracy.'],
+   ['h1', 'BHP', 'Ryzyka zawodowe, środki ochrony, badania i szkolenia obowiązkowe.'],
+   ['i1', 'IT', 'Dostępy do systemów i danych, sprzęt przydzielany do stanowiska.'] ] },
+ { t: 'table', h: 'Które pola opisu zasilają które procesy', head: ['Proces', 'Pola opisu, z których korzysta'], rows: [
+   ['Rekrutacja i selekcja', 'zadania, wymagania (wykształcenie, doświadczenie, uprawnienia), profil kompetencyjny'],
+   ['Wynagradzanie', 'typ stanowiska, kategoria zaszeregowania, uprawnienia i odpowiedzialność'],
+   ['Ocena okresowa', 'zadania, KPI stanowiska, profil kompetencyjny'],
+   ['Szkolenia i rozwój', 'wymagania, szkolenia obowiązkowe, kompetencje, ścieżka awansu'],
+   ['BHP i medycyna pracy', 'miejsce i czynniki środowiskowe, ryzyka, badania, wymagania fizyczne'],
+   ['IT i ochrona danych', 'dostęp do systemów i danych osobowych, wyposażenie'],
+   ['Struktura organizacyjna', 'przełożony, podwładni, zastępstwa, kooperacja'] ],
+   foot: 'Jeśli wzór nie ma pola potrzebnego jednemu z odbiorców, ten odbiorca prowadzi własny rejestr i dane w organizacji zaczynają się rozchodzić.' },
+
+ // ---------- 3 ----------
+ { t: 'div', n: 3, h: 'Procedura budowy opisu', lead: 'Procedura ma osiem kroków. Kolejne części dnia rozwijają poszczególne kroki, dlatego do tej mapy będziemy wracać.' },
+ { t: 'steps', h: 'Osiem kroków od decyzji do aktualnych opisów', items: [
+   ['Cel i odbiorcy', 'Ustalamy, do czego organizacja będzie używać opisów.', 'część 4'],
+   ['Struktura i nazwy', 'Porządkujemy listę stanowisk i ich nazwy.', 'część 7'],
+   ['Typy i wzory', 'Przypisujemy stanowiska do typów i wzorów S lub M.', 'część 5'],
+   ['Zespół SME', 'Dobieramy ekspertów przedmiotowych i przygotowujemy ich.', 'część 8'],
+   ['Analiza', 'Zbieramy dane: obserwacja, wywiad, EKASP.', 'część 9'],
+   ['Wzór i role', 'Ustalamy pola wzoru i ich właścicieli.', 'część 10'],
+   ['Wypełnienie', 'Opisujemy zadania i wypełniamy pola.', 'części 11–12'],
+   ['Zatwierdzenie i aktualizacja', 'Zatwierdzamy, wprowadzamy do bazy, ustalamy zasady zmian.', 'części 13–14'] ] },
+
+ // ---------- 4 ----------
+ { t: 'div', n: 4, h: 'Wybór informacji na podstawie wiedzy o organizacji', lead: 'Zakres pól wzoru wynika z tego, do czego organizacja będzie używać opisów, a nie z najdłuższej listy pól spotykanej w literaturze.' },
+ { t: 'points', h: 'Zasada doboru pól', items: [
+   'Każde pole wzoru powinno mieć odbiorcę, czyli proces, w którym ktoś z niego korzysta; pole bez odbiorcy nie jest aktualizowane i po pewnym czasie zawiera nieaktualne dane.',
+   'Każde pole powinno mieć właściciela, czyli osobę lub dział, który zna jego treść i odpowiada za jego wypełnienie i aktualizację.',
+   'Pola wymagane przez przepisy i audyty (BHP, upoważnienia do danych osobowych, uprawnienia zawodowe) wchodzą do wzoru niezależnie od innych potrzeb.',
+   'Pola opcjonalne, takie jak profil psychologiczny czy ścieżka awansu, wprowadza się wtedy, gdy organizacja ma proces, który z nich skorzysta.' ] },
+ { t: 'table', h: 'KORVEX: od powodów zamówienia do pól wzoru', head: ['Powód zamówienia', 'Pola, które musi mieć wzór'], rows: [
+   ['Audyt klienta z branży spożywczej', 'zakres zadań i odpowiedzialności, wymagania kwalifikacyjne, szkolenia obowiązkowe, warunki pracy i BHP'],
+   ['Regulamin wynagradzania', 'typ stanowiska, kategoria zaszeregowania, uprawnienia decyzyjne i finansowe'],
+   ['Przedłużające się rekrutacje', 'wymagania, profil kompetencyjny, zadania opisane metodą DZIK'] ],
+   foot: 'Pytanie do grup: czy KORVEX potrzebuje dziś profilu psychologicznego i ścieżki awansu? Jaki proces w firmie by z nich korzystał?' },
+
+ // ---------- 5 ----------
+ { t: 'div', n: 5, h: 'Typologia: dwa wzory i sześć typów', lead: 'Opis ma dwa wzory: specjalistyczny i menedżerski. Typów stanowisk jest więcej, bo typ decyduje o treści opisu, a wzór o jego układzie.' },
+ { t: 'two', h: 'O wzorze decyduje jedno pytanie: czy stanowisko kieruje pracą podwładnych?',
+   l: { h: 'Wzór S — specjalistyczny', items: [
+     'Stanowisko nie ma podwładnych w ramach podległości służbowej.',
+     'Koordynowanie pracy innych bez podległości służbowej, np. w projekcie, zapisuje się jako zadanie z kategorii współpracy, a nie jako podstawę wzoru M.' ] },
+   r: { h: 'Wzór M — menedżerski', items: [
+     'Stanowisko przydziela zadania podwładnym, rozlicza ich pracę i ocenia ją jako przełożony służbowy.',
+     'Wzór M zawiera wszystkie pola wzoru S oraz pola dotyczące podwładnych, budżetu i odpowiedzialności za zespół.' ] } },
+ { t: 'table', h: 'Sześć typów stanowisk', head: ['Typ', 'Wzór', 'Kryterium', 'Wzorzec nazwy'], rows: [
+   ['Wykonawca', 'S', 'praca według instrukcji i norm; zakres wyznacza przełożony lub plan', 'nazwa zawodu + zakres'],
+   ['Specjalista', 'S', 'samodzielna praca według standardów i procedur', 'Specjalista ds. + zakres'],
+   ['Ekspert', 'S', 'złożone, niestandardowe problemy i doradzanie innym', 'Ekspert ds. + zakres'],
+   ['Lider', 'M', 'bezpośrednie kierowanie zespołem, zwykle z udziałem we własnej pracy zespołu', 'Kierownik zespołu + zakres'],
+   ['Manager', 'M', 'kierowanie jednostką przez kierowników albo całą jednostką z budżetem', 'Kierownik działu + zakres'],
+   ['Strateg', 'M', 'pion lub cała organizacja; decyzje o skutkach rozłożonych na lata', 'Dyrektor + zakres; Członek zarządu'] ],
+   foot: 'Stopnie w obrębie typu (wejściowy, samodzielny, wiodący) wyraża kategoria zaszeregowania, a nie nazwa. Ekspert nie jest starszym specjalistą: o typie decyduje charakter pracy, nie staż.' },
+ { t: 'points', h: 'Co wynika z typu stanowiska', k: 'Klasyfikator', items: [
+   'Wzór decyduje o układzie dokumentu: wszystkie opisy wzoru S mają te same pola, a opisy wzoru M mają dodatkowo pola kierownicze.',
+   'Typ decyduje o treści: wskazuje zadania typowe wpisywane hurtowo, przedział kategorii zaszeregowania i słowo poziomu w nazwie stanowiska.',
+   'Klasyfikator najpierw jednym pytaniem rozstrzyga wzór, a potem sześcioma pytaniami wskazuje typ w obrębie wzoru; wynik graniczny jest sygnałem do rozmowy w grupie, a nie do automatycznej decyzji.' ],
+   link: [KLAS, 'Otwórz klasyfikator stanowisk'] },
+
+ // ---------- 6 (punkt 7) ----------
+ { t: 'div', n: 6, h: 'Wzór opisu dla stanowiska, nie dla osoby', lead: 'Częsty błąd: wzór budowany na przykładzie jednego stanowiska, z nazwiskiem pracownika w nagłówku. Wszystkie opisy jednego wzoru mają tę samą strukturę.' },
+ { t: 'two', h: 'Ten sam błąd w dwóch odmianach',
+   l: { h: 'Błędnie', items: [
+     'Nagłówek „Opis stanowiska: Anna Nowak, kadrowa” — opis przypisany osobie, który traci aktualność, gdy ta osoba odchodzi lub zmienia stanowisko.',
+     'Wzór budowany na przykładzie jednego stanowiska: pola dopasowane do jego pracy, więc dla innych stanowisk trzeba tworzyć kolejne wzory.' ] },
+   r: { h: 'Poprawnie', items: [
+     'Nagłówek „S-020 Specjalista ds. kadr i płac” — numer i nazwa stanowiska, niezależne od osoby.',
+     'Jeden wzór S dla wszystkich stanowisk bez podwładnych i jeden wzór M dla stanowisk kierowniczych; różni się treść pól, a nie ich układ.' ] },
+   foot: 'Imiona i nazwiska występują w opisie tylko w module 10: przy osobach z zespołu SME, które opracowały opis, i przy osobach, które go zatwierdziły.' },
+ { t: 'table', h: 'Jeden wzór S, dwa różne stanowiska', head: ['Pole wzoru S', 'S-003 Operator maszyn przetwórczych', 'S-020 Specjalista ds. kadr i płac'], rows: [
+   ['Typ i kategoria', 'Wykonawca, W2', 'Specjalista, S2'],
+   ['Czas i organizacja pracy', 'praca trzyzmianowa, stacjonarna', 'praca jednozmianowa, hybrydowa'],
+   ['Miejsce i czynniki', 'hala produkcyjna, hałas, zapylenie', 'biuro, praca przy monitorze'],
+   ['Dostęp do danych i systemów', 'terminal zbiorczy na hali', 'system kadrowo-płacowy, upoważnienie do danych pracowników'],
+   ['Uprawnienia zawodowe', 'brak wymaganych uprawnień', 'brak wymaganych uprawnień'],
+   ['Obowiązki BHP (art. 211 KP)', 'wpis z wzoru', 'wpis z wzoru — ta sama treść'] ],
+   foot: 'Struktura jest ta sama, treść różna, a pola wzorcowe mają identyczną treść w obu opisach.' },
+
+ // ---------- 7 (punkt 8) ----------
+ { t: 'div', n: 7, h: 'Porządkowanie struktury i nazw stanowisk', lead: 'Zanim powstanie pierwszy opis, trzeba ustalić, ile jest stanowisk i jak się nazywają. Inaczej opisy powielą istniejący chaos.' },
+ { t: 'grid', h: 'Pięć problemów, które spotkacie w KORVEX', items: [
+   ['Ta sama praca, kilka nazw', 'Operator maszyny i operator sztancy; spedytor, logistyk i koordynator transportu.'],
+   ['Jedna nazwa, różna praca', '„Pracownik produkcji” obejmuje pakowanie oraz pomoc operatorom przy przezbrojeniach.'],
+   ['Nazwa bez poziomu i zakresu', 'Handlowiec, Informatyk, Office Manager — nazwa nie mówi, jaki to typ i jaki zakres.'],
+   ['Tytuł sugeruje typ, którego nie ma', 'Dyrektor ds. rozwoju bez podwładnych; Key Account Manager, który nikim nie kieruje.'],
+   ['Rola zapisana jako stanowisko', 'Pełnomocnik ds. jakości to rola powierzona osobie zajmującej inne stanowisko.'] ] },
+ { t: 'points', h: 'Reguły porządkowania', items: [
+   'Nazwa stanowiska składa się z poziomu i zakresu działania: poziom wynika z typu (Specjalista, Ekspert, Kierownik zespołu, Kierownik działu, Dyrektor), a zakres pochodzi ze słownika zakresów.',
+   'Stanowisko to praca, a nie osoba ani zmiana: trzech prowadzących zmiany na produkcji to jedno stanowisko „Kierownik zespołu produkcji” obsadzone przez trzy osoby.',
+   'Stopnie w obrębie typu wyraża kategoria zaszeregowania; tytuły w rodzaju „starsza księgowa” nadawane w uznaniu stażu nie tworzą odrębnego stanowiska.',
+   'Każde stanowisko otrzymuje stały numer z literą wzoru, np. S-020 lub M-004; numer nie zmienia się przy reorganizacji, więc odwołania między opisami pozostają prawidłowe.' ] },
+ { t: 'task', h: 'Ćwiczenie: uporządkujcie nazwy stanowisk', tab: 'Nazwy', steps: [
+   'Otwórzcie stronę ' + START + ', przycisk „Praca w grupach”, wpiszcie imię i wybierzcie swoją grupę.',
+   'W zakładce Nazwy każda grupa ma obecne nazwy stanowisk z przydzielonych działów wraz z opisem pracy.',
+   'Przy każdej nazwie wpiszcie nazwę docelową według reguły poziom + zakres i wybierzcie typ. Gdy kilka nazw opisuje tę samą pracę, wpiszcie tę samą nazwę docelową.',
+   'Przy trudnych przypadkach użyjcie klasyfikatora i zapiszcie, co przesądziło o decyzji.' ],
+   meta: 'Praca w grupach · około 40 minut' },
+ { t: 'points', h: 'Omówienie: rozstrzygnięcia, które wymagają decyzji', items: [
+   'Mistrz zmiany i brygadzista to jedno stanowisko typu Lider; zmiana, na której pracuje osoba, jest atrybutem obsady, a nie cechą stanowiska.',
+   '„Pracownik produkcji” to dwa stanowiska, bo pakowanie i pomoc przy przezbrojeniach różnią się zadaniami, narzędziami i wymaganiami.',
+   'Dyrektor ds. rozwoju to Ekspert ds. inwestycji; zmiana nazwy dotyczy statusu osoby, więc wymaga decyzji zarządu i rozmowy z pracownikiem, a nie tylko pracy HR.',
+   'Informatyk i administrator IT wykonują pracę z jednego zakresu, ale podlegają różnym przełożonym; porządkowanie nazw ujawniło tu problem podległości.' ] },
+
+ // ---------- 8 (punkt 9) ----------
+ { t: 'div', n: 8, h: 'Eksperci przedmiotowi (SME)', lead: 'SME to osoby, które znają pracę na stanowisku od środka. Bez nich opis powstaje z wyobrażeń działu HR o cudzej pracy.' },
+ { t: 'people', h: 'Kto może być SME — i z jakim ryzykiem', items: [
+   ['p6', 'Pracownik na stanowisku', 'Zna szczegóły czynności i trudności; może zawyżać wymagania własnego stanowiska.'],
+   ['l2', 'Przełożony', 'Widzi wymagania i efekty pracy; może nie znać szczegółów czynności i opisywać oczekiwania zamiast stanu.'],
+   ['a1', 'HR', 'Zna metodę i pilnuje spójności opisów; nie zna specyfiki pracy, więc nie może zastąpić pozostałych.'],
+   ['h1', 'BHP', 'Zna ryzyka, przepisy i środki ochrony; ocenia warunki pracy i wymagania fizyczne.'] ] },
+ { t: 'points', h: 'Dobór i przygotowanie zespołu SME', items: [
+   'Opis stanowiska powinien opierać się na ocenach co najmniej trzech niezależnych osób, ponieważ jedna osoba wnosi własny styl pracy i własne nawyki, a kilka osób pozwala oddzielić to, co indywidualne, od tego, co wynika z samego stanowiska.',
+   'Zespół łączy różne perspektywy: pracowników ze stanowiska, przełożonego, przedstawiciela HR, a dla warunków pracy także służbę BHP; dobrze, gdy różni się stażem.',
+   'Przygotowanie ma trzy etapy: zapoznanie z dokumentacją (regulaminy, instrukcje, dotychczasowe zakresy obowiązków), obserwację pracy na stanowisku oraz rozmowę z przełożonym o zakresie zadań i granicach odpowiedzialności.' ] },
+ { t: 'table', h: 'Kto ocenia którą część EKASP', head: ['Część EKASP', 'Rekomendowany skład SME', 'Powód'], rows: [
+   ['I — Środowisko pracy', 'pracownicy (co najmniej 2), BHP, przełożony', 'realia miejsca pracy zna wykonawca, BHP weryfikuje ryzyka'],
+   ['II — Funkcjonowanie', 'przełożony, HR, pracownik', 'przełożony widzi wymagania przez efekty pracy'],
+   ['III — Procesy poznawcze', 'przełożeni (co najmniej 2), HR, pracownik', 'przy samoocenie wymagań poznawczych zawyżanie jest najsilniejsze'],
+   ['IV — Czynności fizyczne', 'pracownicy (co najmniej 2), BHP lub medycyna pracy', 'obciążenie zna wykonawca, normy zna specjalista'],
+   ['V — Cechy pracownika', 'przełożeni (co najmniej 2), HR', 'ocena cech przez samego pracownika jest najbardziej podatna na zniekształcenia'] ] },
+
+ // ---------- 9 (punkt 10) ----------
+ { t: 'div', n: 9, h: 'EKASP w wersji uproszczonej', lead: 'Europejski Kwestionariusz Analizy Stanowisk Pracy liczy 448 pozycji. Pokazujemy jego logikę i procedurę konsensusu na dziesięciu pozycjach.' },
+ { t: 'table', h: 'Pięć części EKASP', head: ['Część', 'Pozycje', 'Czego dotyczy', 'Co trafia do naszego opisu'], rows: [
+   ['I — Środowisko pracy', '122', 'miejsce, mikroklimat, hałas, urządzenia, zagrożenia', 'miejsce i czynniki, ryzyka, środki ochrony, badania'],
+   ['II — Funkcjonowanie', '89', 'sytuacje trudne, strategie, kwalifikacje, czas, relacje', 'kwalifikacje i czas pracy'],
+   ['III — Procesy poznawcze', '125', 'uwaga, pamięć, wiedza, dane, rozumowanie, decyzje', 'wiedza; wymagania poznawcze w profilu psychologicznym'],
+   ['IV — Czynności fizyczne', '65', 'czynności manualne, pozycja ciała, wysiłek', 'jedna lista „wymagania fizyczne”'],
+   ['V — Cechy pracownika', '47', 'cechy charakteru, Wielka Piątka, kompetencje', 'profil psychologiczny i część profilu kompetencyjnego'] ],
+   foot: 'Pomijamy szczegóły należące do oceny ryzyka zawodowego i medycyny pracy oraz pozycje bez polskich norm (inteligencja moralna, style decyzji). Źródło: Biela i Rożnowski (2018).' },
+ { t: 'steps', h: 'Procedura konsensusu', items: [
+   ['Ocena indywidualna', 'Każdy ocenia pozycję sam, na skali wagi 1–7, bez wglądu w oceny innych.', ''],
+   ['Odczyt', 'Wszyscy ujawniają oceny jednocześnie.', ''],
+   ['Różnica do 2 punktów', 'Wynikiem jest średnia ocen.', ''],
+   ['Różnica od 3 punktów', 'Osoby ze skrajnymi ocenami uzasadniają je, a potem wszyscy oceniają ponownie.', ''],
+   ['Wynik', 'Średnia drugiej rundy jest oceną ostateczną.', ''],
+   ['Przejście do opisu', 'Pozycja z wynikiem 5 lub wyższym trafia do opisu jako wymaganie.', ''] ] },
+ { t: 'task', h: 'Ćwiczenie: ocena pozycji EKASP i konsensus', tab: 'EKASP', steps: [
+   'W zakładce EKASP oceniacie dziesięć pozycji dla stanowiska przydzielonego Waszej grupie; numer stanowiska widać nad listą.',
+   'Każdy ocenia sam. Oceny pozostałych osób zobaczycie dopiero po wystawieniu wszystkich swoich ocen.',
+   'Przy pozycjach oznaczonych jako rozbieżność osoby ze skrajnymi ocenami uzasadniają je, a potem wszyscy oceniają ponownie w rundzie 2.',
+   'Zanotujcie, które pozycje trafiają do opisu i przy których rozmowa zmieniła oceny.' ],
+   meta: 'Indywidualnie, potem w grupie · około 25 minut' },
+
+ // ---------- 10 (punkty 11–12) ----------
+ { t: 'div', n: 10, h: 'Wzór opisu i podział ról', lead: 'Wzór opisu to zestaw pól, z których każde ma właściciela, sposób wypełnienia i typ zmienności. Opis wypełnia kilka osób, a HR koordynuje całość.' },
+ { t: 'grid', h: 'Dziesięć modułów wzoru', items: [
+   ['1 Identyfikacja', 'numer, nazwa, typ, jednostka, lokalizacja, kategoria zaszeregowania'],
+   ['2 Miejsce w strukturze', 'przełożony, podwładni (M), zastępstwa, kooperacja'],
+   ['3 Cel', 'jedno do trzech zdań: po co stanowisko istnieje'],
+   ['4 Zadania', 'zadania typowe z wzoru i zadania wyjątkowe'],
+   ['5 Uprawnienia i odpowiedzialność', 'decyzje, odpowiedzialność za zespół (M), budżet (M), dostęp do danych'],
+   ['6 Wymagania', 'wykształcenie, doświadczenie, wiedza, uprawnienia, profil kompetencyjny'],
+   ['7 Warunki pracy', 'czas pracy, czynniki, ryzyka, badania, obowiązki BHP, wyposażenie'],
+   ['8 Mierniki', 'KPI stanowiska (miara bez wartości docelowej), metoda oceny'],
+   ['9 Rozwój', 'szkolenia obowiązkowe, ścieżka awansu (opcjonalnie)'],
+   ['10 Zespół i zatwierdzenie', 'zespół SME, zatwierdzenia, wersja i data przeglądu'] ] },
+ { t: 'two', h: 'Trzy sposoby wypełniania pól',
+   l: { h: 'Lista i ręcznie', items: [
+     'Lista: wartość wybiera się ze słownika, np. ryzyka zawodowe, systemy, szkolenia. Dzięki temu opisy można zestawiać i liczyć.',
+     'Ręcznie: wpisuje się tekst tam, gdzie słownik nie wystarczy, np. cel stanowiska, wiedza dziedzinowa, zadania wyjątkowe.' ] },
+   r: { h: 'Z wzoru', items: [
+     'Treść wpisuje się raz we wzorze i obowiązuje we wszystkich opisach danego wzoru lub typu.',
+     'Przykłady: obowiązki pracownika w zakresie BHP (art. 211 KP), obowiązki osoby kierującej pracownikami (art. 212 KP), zadania typowe, metoda oceny.' ] },
+   foot: 'Im więcej pól ze słownikiem, tym łatwiej korzystać z opisów jak z bazy danych; pola ręczne zostawiamy tam, gdzie treść jest naprawdę indywidualna.' },
+ { t: 'people', h: 'Kto wypełnia które pola', items: [
+   ['a1', 'HR — koordynator', 'Identyfikacja, struktura, pola wzorcowe i wspólne; pilnuje kompletności i zatwierdzeń.'],
+   ['l2', 'Przełożony', 'Cel, decyzje, wymagania, profil kompetencyjny, KPI; zatwierdza zadania wyjątkowe.'],
+   ['p6', 'SME', 'Zadania wyjątkowe, wiedza dziedzinowa, umiejętności i obsługa systemów.'],
+   ['h1', 'BHP', 'Warunki pracy, ryzyka, środki ochrony, badania, uprawnienia zawodowe.'],
+   ['i1', 'IT i IOD', 'Dostęp do systemów i danych osobowych, wyposażenie informatyczne.'],
+   ['w1', 'Finanse i wynagrodzenia', 'Budżet i limity finansowe, kategoria zaszeregowania.'] ] },
+ { t: 'points', h: 'Pola wypełniane hurtowo i rola HR', items: [
+   'Pola wzorcowe wypełnia się raz dla wszystkich opisów danego wzoru lub typu: obowiązki BHP z art. 211 KP trafiają do każdego opisu, a obowiązki osoby kierującej pracownikami z art. 212 KP do każdego opisu wzoru M.',
+   'Zadania typowe są przypisane do typu: każdy Lider otrzymuje te same zadania kadrowe i organizacyjne, niezależnie od działu, w którym pracuje.',
+   'Pola wspólne koordynuje HR, dzięki czemu ta sama treść nie jest formułowana w każdym dziale inaczej; zmiana przepisu wymaga poprawienia jednego wpisu we wzorze, a nie wszystkich opisów.' ] },
+ { t: 'task', h: 'Ćwiczenie: właściciele pól i sposób wypełnienia', tab: 'Wzór i właściciele', steps: [
+   'Każda grupa opracowuje przydzielone moduły wzoru; ich numery są podane na początku zakładki.',
+   'Dla każdego pola wskażcie, kto je wypełnia (może być kilka osób), jak często się zmienia i w jaki sposób się je wypełnia.',
+   'Po zakończeniu kliknijcie „Porównaj ze strukturą” i zanotujcie pola, przy których Wasze rozstrzygnięcie różni się od struktury.',
+   'Przy omówieniu każda grupa uzasadnia jedną różnicę: czy to błąd, czy inna, równie dobra decyzja.' ],
+   meta: 'Praca w grupach · około 40 minut' },
+
+ // ---------- 11 (punkt 13) ----------
+ { t: 'div', n: 11, h: 'Opis zadań metodą DZIK', lead: 'Zadania dzielimy na kategorie. Zadania typowe przychodzą z wzoru, a SME opisują zadania wyjątkowe, które odróżniają stanowisko od innych.' },
+ { t: 'table', h: 'Kategorie zadań', head: ['Kategoria', 'Wzór', 'Zakres'], rows: [
+   ['Merytoryczne', 'S i M', 'rdzeń zakresu działania; w nich stanowiska różnią się najbardziej'],
+   ['Administracyjne i dokumentacyjne', 'S i M', 'rejestrowanie pracy, dokumentacja'],
+   ['Współpracy i komunikacji', 'S i M', 'przekazywanie informacji, uzgadnianie pracy z innymi'],
+   ['Jakości i bezpieczeństwa', 'S i M', 'standardy, BHP, ochrona danych, zgłaszanie niezgodności'],
+   ['Przekazywania wiedzy', 'S i M', 'wdrażanie nowych osób, szkolenie, doradzanie'],
+   ['Planowania i organizacji pracy', 'M', 'cele, przydział zadań, obsada, kontrola wykonania'],
+   ['Kadrowe', 'M', 'dobór, ocena, rozwój i motywowanie podwładnych'],
+   ['Finansowe i raportowe', 'M', 'budżet, wydatki, raportowanie wyników'],
+   ['BHP osoby kierującej', 'M', 'organizacja pracy zgodnie z przepisami BHP (art. 212 KP)'] ] },
+ { t: 'two', h: 'Zadania typowe i zadania wyjątkowe',
+   l: { h: 'Typowe — z wzoru', items: [
+     'Przypisane do wzoru i typu, opisane metodą DZIK raz i wpisywane hurtowo.',
+     'Stanowiska menedżerskie jednego poziomu mają w dużej części te same zadania typowe, niezależnie od działu.' ] },
+   r: { h: 'Wyjątkowe — od SME', items: [
+     'Opisują pracę właściwą tylko temu stanowisku, przede wszystkim w kategorii merytorycznej.',
+     'Stanowiska specjalistyczne różnią się między sobą głównie zadaniami wyjątkowymi, dlatego to w nich SME wykonują najwięcej pracy.' ] },
+   foot: 'Zadania typowe i wyjątkowe opisuje się tym samym schematem, dzięki czemu można je razem zestawiać i porównywać.' },
+ { t: 'dzik' },
+ { t: 'grid', h: 'Cztery pytania kontrolne do każdego zadania', items: [
+   ['D — działanie', 'Czy jest konkretny czasownik czynnościowy, a nie rzeczownik ani „odpowiada za”? Jedno zadanie to jedna czynność.'],
+   ['Z — dla kogo', 'Czy wskazano konkretnego odbiorcę, np. „dla kierowników zmian”, a nie ogólnie „dla klientów”?'],
+   ['I — instrument', 'Czy podano narzędzie, system lub procedurę, a nie ogólnik „zgodnie z przepisami”?'],
+   ['K — korzyść', 'Czy rezultat różni się od działania, a nie powtarza go w rodzaju „w celu wykonania pracy”?'] ] },
+ { t: 'task', h: 'Ćwiczenie: zadania wyjątkowe Waszego stanowiska', tab: 'Zadania', steps: [
+   'W zakładce Zadania przeczytajcie zadania typowe wpisane z wzoru dla Waszego stanowiska.',
+   'Dodajcie od trzech do pięciu zadań wyjątkowych, każde w układzie DZIK, z kategorią, częstotliwością i udziałem czasu.',
+   'Sprawdźcie każde zadanie czterema pytaniami kontrolnymi.',
+   'Zwróćcie uwagę, ile zadań w opisie pochodzi z wzoru, a ile musieliście opisać sami.' ],
+   meta: 'Praca w grupach · około 30 minut' },
+
+ // ---------- 12 (punkt 14) ----------
+ { t: 'div', n: 12, h: 'Wypełnianie opisu stanowiska', lead: 'Łączymy wyniki wszystkich ćwiczeń w jeden opis. Każda osoba w grupie wypełnia pola, których właścicielem jest jej rola.' },
+ { t: 'task', h: 'Ćwiczenie: wypełnijcie opis stanowiska', tab: 'Opis', steps: [
+   'Rozdzielcie role w grupie: HR, przełożony, BHP, IT i SME. Każda osoba wypełnia pola, przy których widnieje jej rola.',
+   'Osoba w roli HR pilnuje kompletności opisu i spójności z ustaleniami z poprzednich ćwiczeń: nazwą, typem i zadaniami.',
+   'Pola wzorcowe są już wpisane i ich nie zmieniacie. W profilu psychologicznym wykorzystajcie wynik konsensusu EKASP widoczny nad listą.',
+   'W module 10 wpiszcie zespół SME i zatwierdzenia; to jedyne miejsce opisu, w którym pojawiają się imiona i nazwiska.' ],
+   meta: 'Praca w grupach, z podziałem ról · około 30 minut' },
+
+ // ---------- 13 (punkt 15) ----------
+ { t: 'div', n: 13, h: 'Aktualizacja opisów', lead: 'Każde pole ma przypisany typ zmienności. Od niego zależy, kiedy pole się zmienia i kto uruchamia zmianę.' },
+ { t: 'table', h: 'Cztery typy zmienności', head: ['Typ', 'Kiedy pole się zmienia', 'Kto uruchamia zmianę', 'Przykłady pól'], rows: [
+   ['Stałe', 'przy reorganizacji', 'zarząd i HR', 'numer, nazwa, typ, cel'],
+   ['Okresowe', 'przy przeglądzie, zwykle raz w roku', 'HR z przełożonym', 'zadania wyjątkowe, KPI, kompetencje, wymagania'],
+   ['Zdarzeniowe', 'gdy zmienia się przepis, system lub wyposażenie', 'właściciel pola: BHP, IT, finanse', 'ryzyka, badania, dostępy, uprawnienia'],
+   ['Wzorcowe', 'raz we wzorze, dla wszystkich opisów wzoru lub typu', 'HR', 'obowiązki BHP, zadania typowe, metoda oceny'] ] },
+ { t: 'steps', h: 'Jak przebiega zmiana opisu', items: [
+   ['Zdarzenie', 'Zmienia się przepis, system, wyposażenie albo zakres pracy.', ''],
+   ['Zgłoszenie', 'Właściciel pola zgłasza zmianę do HR.', ''],
+   ['Wprowadzenie', 'HR zmienia pole w opisie albo we wzorze.', ''],
+   ['Zatwierdzenie', 'Przełożony zatwierdza zmianę w opisie stanowiska.', ''],
+   ['Wersja', 'Moduł 10 otrzymuje nową wersję, datę i zakres zmiany.', ''] ],
+   foot: 'Przegląd okresowy obejmuje wszystkie pola okresowe naraz. Zmiana wzorcowa obejmuje jednym wpisem wszystkie opisy danego wzoru lub typu.' },
+
+ // ---------- 14 (punkt 16) ----------
+ { t: 'div', n: 14, h: 'Opisy stanowisk jako baza danych', lead: 'Opisy zapisane w jednym wzorze i wypełniane wartościami ze słowników pozwalają odpowiadać na pytania o całą organizację bez czytania każdego dokumentu.' },
+ { t: 'points', h: 'Warunki, które muszą być spełnione', items: [
+   'Pola wypełnia się wartościami ze słowników, a nie wolnym tekstem; tylko wtedy da się policzyć, ile stanowisk ma dane ryzyko czy dostęp do danego systemu.',
+   'Jeden rekord to jedno stanowisko o stałym numerze; osoby zajmujące stanowisko łączy się z opisem w systemie kadrowym przez numer, a nie przez wpisywanie nazwisk do opisu.',
+   'Liczba osób na stanowisku pochodzi z obsady, dlatego zestawienia od razu pokazują skalę działań: ile osób przeszkolić, ile kont założyć, ile badań zaplanować.' ] },
+ { t: 'grid', h: 'Przykładowe pytania, na które odpowiada baza opisów', items: [
+   ['Ochrona danych', 'Które stanowiska mają upoważnienie do danych osobowych pracowników i ile osób je zajmuje?'],
+   ['IT', 'Ile kont w systemie kadrowo-płacowym i ERP jest potrzebnych i dla których stanowisk?'],
+   ['BHP', 'Które stanowiska wymagają ochronników słuchu i badań przy monitorze ekranowym?'],
+   ['Szkolenia', 'Ile osób trzeba objąć szkoleniem okresowym BHP dla stanowisk robotniczych?'],
+   ['Uprawnienia', 'Dla których stanowisk trzeba pilnować ważności uprawnień UDT i SEP?'],
+   ['Rozwój', 'Która kompetencja występuje w największej liczbie opisów i ilu osób dotyczy?'] ],
+   link: [FORM, 'Otwórz zestawienia (zakładka Zestawienia)'] },
+
+ { t: 'points', h: 'Podsumowanie dnia', items: [
+   'Analiza pracy jest procesem prowadzonym przez zespół SME, a opis stanowiska jej wynikiem; opis dotyczy stanowiska i nie zmienia się, gdy zmienia się osoba.',
+   'Przed opisaniem stanowisk trzeba uporządkować ich strukturę i nazwy według reguły poziom + zakres oraz nadać każdemu stanowisku stały numer.',
+   'Wzory są dwa, S i M, a o wyborze decyduje podległość służbowa; sześć typów decyduje o treści opisu, w tym o zadaniach typowych.',
+   'Każde pole wzoru ma właściciela, sposób wypełnienia i typ zmienności; HR koordynuje pola wspólne i wzorcowe.',
+   'Zadania opisuje się metodą DZIK; zadania typowe przychodzą z wzoru, a SME opisują zadania wyjątkowe.',
+   'Opisy wypełniane wartościami ze słowników tworzą bazę danych, z której korzystają HR, BHP, IT i kadra kierownicza.' ] },
+ { t: 'sources' },
+];
+
+// ===================== PREZENTACJA =====================
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LOGO = `<svg viewBox="0 0 320 320" width="300" height="300" role="img" aria-label="Logo zajęć Analiza i opis pracy">
+  <rect x="10" y="10" width="300" height="300" rx="56" fill="#1F4460" stroke="#E8B62C" stroke-width="6"/>
+  <rect x="78" y="60" width="140" height="186" rx="14" fill="#FFFFFF"/>
+  <rect x="98" y="86" width="64" height="12" rx="6" fill="#1F4460"/>
+  <rect x="98" y="114" width="100" height="9" rx="4.5" fill="#AEB8C2"/>
+  <rect x="98" y="136" width="100" height="9" rx="4.5" fill="#AEB8C2"/>
+  <rect x="98" y="158" width="76" height="9" rx="4.5" fill="#AEB8C2"/>
+  <rect x="98" y="186" width="100" height="9" rx="4.5" fill="#AEB8C2"/>
+  <rect x="98" y="208" width="58" height="9" rx="4.5" fill="#AEB8C2"/>
+  <circle cx="210" cy="198" r="44" fill="none" stroke="#E8B62C" stroke-width="14"/>
+  <circle cx="210" cy="198" r="37" fill="#E8B62C" fill-opacity=".18"/>
+  <path d="M242 230 L270 258" stroke="#E8B62C" stroke-width="18" stroke-linecap="round"/>
+  <text x="160" y="292" text-anchor="middle" fill="#E8B62C" font-family="Montserrat, Segoe UI, sans-serif" font-weight="800" font-size="17" letter-spacing="3">ANALIZA I OPIS PRACY</text>
+</svg>`;
+
+function dress(group) {
+  let c = '', h = '';
+  if (group === 'kierownictwo') c = `<path d="M170 197 L142 215 L159 233 Z" fill="#FFFFFF" stroke="#C3CDD7" stroke-width="2"/><path d="M110 197 L138 215 L121 233 Z" fill="#FFFFFF" stroke="#C3CDD7" stroke-width="2"/><path d="M131 211 L149 211 L146 225 L134 225 Z" fill="#1F4460"/><path d="M134 225 L146 225 L154 268 L140 284 L126 268 Z" fill="#1F4460"/>`;
+  if (group === 'produkcja') c = `<path d="M96 228 Q96 222 102 222 L178 222 Q184 222 184 228 L184 290 L96 290 Z" fill="#1F4460"/><path d="M212 212 L198 205 L176 226 L186 232 Z" fill="#1F4460"/><path d="M68 212 L82 205 L104 226 L94 232 Z" fill="#1F4460"/><circle cx="172" cy="232" r="5.5" fill="#E8B62C"/><circle cx="108" cy="232" r="5.5" fill="#E8B62C"/><rect x="122" y="242" width="36" height="20" rx="3" fill="none" stroke="#2E5878" stroke-width="2"/>`;
+  if (group === 'bhp') {
+    c = `<path d="M56 250 Q62 214 104 203 L128 244 L128 290 L56 290 Z" fill="#E8B62C"/><path d="M224 250 Q218 214 176 203 L152 244 L152 290 L224 290 Z" fill="#E8B62C"/><rect x="56" y="258" width="72" height="9" fill="#D9E1E8"/><rect x="152" y="258" width="72" height="9" fill="#D9E1E8"/>`;
+    h = `<path d="M82 84 C82 42 106 26 140 26 C174 26 198 42 198 84 Z" fill="#FFFFFF" stroke="#AEB8C2" stroke-width="3"/><rect x="70" y="78" width="140" height="11" rx="5.5" fill="#FFFFFF" stroke="#AEB8C2" stroke-width="3"/><path d="M126 30 L126 78 M154 30 L154 78" stroke="#D9E1E8" stroke-width="5"/>`;
+  }
+  return [c, h];
+}
+let uid = 0;
+function figure(id) {
+  const p = POSTACI[id]; const k = 'f' + (uid++); const [c, h] = dress(p.group);
+  return `<svg viewBox="0 0 280 300" aria-hidden="true"><defs><clipPath id="${k}"><rect width="280" height="280"/></clipPath></defs><image href="${p.face}" width="280" height="280"/><g clip-path="url(#${k})">${c}</g>${h}</svg>`;
+}
+
+const head = (s) => `<div class="head">${s.k ? `<div class="kick">${esc(s.k)}</div>` : ''}<h2 class="h">${esc(s.h)}</h2></div>`;
+const foot = (s) => s.foot ? `<div class="foot">${esc(s.foot)}</div>` : '';
+const link = (s) => s.link ? `<div class="linkrow"><a class="lbtn" href="${s.link[0]}" target="_blank" rel="noopener">${esc(s.link[1])}</a></div>` : '';
+const cols = n => n <= 3 ? 1 : n <= 4 ? 2 : n <= 6 ? (n === 5 ? 3 : 3) : 4;
+
+const R = {
+  title: () => `<div class="title"><div class="lg">${LOGO}</div><div class="tx">
+    <div class="org">Studia podyplomowe · MERITO</div>
+    <h1>Analiza i opis pracy</h1>
+    <div class="sub">Od analizy stanowiska do opisu, który działa jak baza danych</div>
+    <div class="who">dr Marcin Żółtak · ZMIANOLOGICA</div></div></div>`,
+  div: s => `<div class="div"><div class="num">${s.n}</div><div class="tx"><div class="part">Część ${s.n}</div><h2>${esc(s.h)}</h2><p>${esc(s.lead)}</p></div></div>`,
+  points: s => `${head(s)}<div class="body fit"><div class="plist" style="grid-template-columns:repeat(${s.items.length > 4 ? 2 : 1},1fr)">${s.items.map((t, i) => `<div class="pt"><span class="n">${i + 1}</span><span>${esc(t)}</span></div>`).join('')}</div>${foot(s)}${link(s)}</div>`,
+  two: s => `${head(s)}<div class="body fit"><div class="two">${[s.l, s.r].map(c => `<div class="col"><h3>${esc(c.h)}</h3><ul>${c.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}</div>${foot(s)}</div>`,
+  grid: s => `${head(s)}<div class="body fit"><div class="grid" style="grid-template-columns:repeat(${s.items.length === 4 ? 2 : s.items.length === 10 ? 5 : s.items.length > 6 ? 2 : 3},1fr)">${s.items.map(x => `<div class="gc"><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join('')}</div>${foot(s)}${link(s)}</div>`,
+  table: s => `${head(s)}<div class="body fit"><div class="tw"><table><thead><tr>${s.head.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${s.rows.map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${foot(s)}</div>`,
+  people: s => `${head(s)}<div class="body fit"><div class="people" style="grid-template-columns:repeat(${s.items.length > 4 ? 3 : 2},1fr)">${s.items.map(x => `<div class="pc">${figure(x[0])}<div><b>${esc(x[1])}</b><span>${esc(x[2])}</span></div></div>`).join('')}</div>${foot(s)}</div>`,
+  steps: s => `${head(s)}<div class="body fit"><div class="steps" style="grid-template-columns:repeat(${s.items.length === 8 ? 4 : s.items.length === 5 ? 5 : 3},1fr)">${s.items.map((x, i) => `<div class="st"><span class="sn">${i + 1}</span><b>${esc(x[0])}</b><span>${esc(x[1])}</span>${x[2] ? `<i>${esc(x[2])}</i>` : ''}</div>`).join('')}</div>${foot(s)}</div>`,
+  task: s => `${head({ k: 'Ćwiczenie', h: s.h })}<div class="body fit"><div class="task"><div class="plist" style="grid-template-columns:1fr">${s.steps.map((t, i) => `<div class="pt"><span class="n">${i + 1}</span><span>${esc(t)}</span></div>`).join('')}</div>
+    <div class="side"><div><div class="lab">Zakładka w formularzach</div><div class="tab">${esc(s.tab)}</div><div class="meta" style="margin-top:14px">${esc(s.meta)}</div></div>
+    <div><div class="meta" style="margin-bottom:12px">Adres dla uczestników:<br><b style="color:#E8B62C">${START}</b></div><a class="lbtn" href="${FORM}" target="_blank" rel="noopener">Podgląd pracy grup</a></div></div></div></div>`,
+  agenda: s => `${head(s)}<div class="body fit"><div class="agenda">${s.items.map((t, i) => `<div class="ag"><span class="n">${i + 1}</span>${esc(t)}</div>`).join('')}</div></div>`,
+  dzik: () => `${head({ k: 'Opis zadania', h: 'DZIK — jedno zadanie w jednym zdaniu' })}<div class="body fit"><div class="dzik">
+    <div class="dz c1"><span class="L">D</span><b>Działanie</b><span>Co dokładnie robi osoba na stanowisku: jeden konkretny czasownik.</span></div>
+    <div class="dz c2"><span class="L">Z</span><b>Dla kogo / z kim</b><span>Kto jest odbiorcą lub partnerem tej czynności.</span></div>
+    <div class="dz c3"><span class="L">I</span><b>Instrument</b><span>Przy użyciu jakiego narzędzia, systemu lub procedury.</span></div>
+    <div class="dz c4"><span class="L">K</span><b>Korzyść</b><span>Jaki rezultat daje czynność; nie powtarza działania.</span></div>
+    <div class="ex"><span class="lab">Przykład z KORVEX — S-020 Specjalista ds. kadr i płac</span>
+      <div class="s"><mark class="m1">nalicza wynagrodzenia</mark> <mark class="m2">dla pracowników wszystkich zmian</mark> <mark class="m3">w systemie kadrowo-płacowym, na podstawie ewidencji czasu pracy</mark> <mark class="m4">w celu terminowej i poprawnej wypłaty</mark>.</div>
+      <span class="lab">Przykład z KORVEX — S-003 Operator maszyn przetwórczych</span>
+      <div class="s"><mark class="m1">przezbraja sztancę przy zmianie zlecenia</mark> <mark class="m2">dla zespołu zmiany</mark> <mark class="m3">według karty technologicznej zlecenia</mark> <mark class="m4">w celu rozpoczęcia produkcji bez braków</mark>.</div></div></div></div>`,
+  sources: () => `${head({ k: 'Literatura', h: 'Źródła' })}<div class="body fit"><div class="src">
+    <p>Biela, A., Rożnowski, B. (2018). Europejski Kwestionariusz Analizy Stanowisk Pracy (EKASP). Studia Oeconomica Posnaniensia, 6(3), 5–26.</p>
+    <p>Biela, A. (2018). Analiza stanowisk pracy i jej synteza. EKASP. Lublin: Wydawnictwo UMCS.</p>
+    <p>Lees, C., Cordery, J. L. (2003). Analiza i projektowanie pracy. W: N. Chmiel (red.), Psychologia pracy i organizacji. Gdańsk: GWP.</p>
+    <p>McCormick, E. J., Mecham, R. C., Jeanneret, P. R. (1989). Technical manual for the Position Analysis Questionnaire (PAQ). Logan: PAQ Services.</p>
+    <p>Morgeson, F. P., Campion, M. A. (2012). A framework of potential sources of inaccuracy in job analysis. W: M. A. Wilson i in. (red.), The handbook of work analysis. New York: Routledge.</p>
+    <p>Ustawa z dnia 26 czerwca 1974 r. — Kodeks pracy, art. 211, 212, 237¹¹.</p></div></div>`,
+};
+
+const canvas = document.getElementById('canvas');
+let cur = 0;
+function fit(el) {
+  const target = el.parentElement.classList.contains('slide') ? el : el;
+  let lo = 15, hi = 34;
+  const ok = () => el.scrollHeight <= el.clientHeight + 1 && [...el.querySelectorAll('.pt,.gc,.col,.st,.pc,.ag,.dz,.ex,td,.tw,.task,.two,.grid,.plist,.people,.steps,.agenda,.dzik,.src,ul')].every(x => x.scrollHeight <= x.clientHeight + 2 && x.scrollWidth <= x.clientWidth + 2);
+  for (let i = 0; i < 9; i++) { const m = (lo + hi) / 2; el.style.setProperty('--fs', m + 'px'); if (ok()) lo = m; else hi = m; }
+  el.style.setProperty('--fs', lo + 'px');
+}
+function show(i) {
+  cur = Math.max(0, Math.min(SLIDES.length - 1, i));
+  const s = SLIDES[cur];
+  const full = s.t === 'title' || s.t === 'div';
+  canvas.innerHTML = full ? R[s.t](s) : `<div class="slide">${R[s.t](s)}<div class="footer"><span><b>Analiza i opis pracy</b> · dr Marcin Żółtak · ZMIANOLOGICA · MERITO</span><span>${cur + 1} / ${SLIDES.length}</span></div></div>`;
+  canvas.querySelectorAll('.fit').forEach(el => { if (el.classList.contains('body')) fit(el); });
+  document.getElementById('cnt').textContent = (cur + 1) + ' / ' + SLIDES.length;
+  if (location.hash !== '#' + (cur + 1)) history.replaceState(null, '', '#' + (cur + 1));
+}
+function scale() {
+  const st = document.getElementById('stage');
+  const k = Math.min(st.clientWidth / 1280, st.clientHeight / 720);
+  canvas.style.transform = `scale(${k})`;
+}
+document.getElementById('prev').onclick = () => show(cur - 1);
+document.getElementById('next').onclick = () => show(cur + 1);
+document.getElementById('fs').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); };
+const toc = document.getElementById('toc');
+document.getElementById('tocb').onclick = () => { toc.hidden = !toc.hidden; };
+document.getElementById('tocin').innerHTML = SLIDES.map((s, i) => s.t === 'div' ? `<button type="button" data-i="${i}"><b>${s.n}</b>${esc(s.h)}</button>` : '').join('');
+toc.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { show(+b.dataset.i); toc.hidden = true; } });
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === 'Home') show(0); if (e.key === 'End') show(SLIDES.length - 1);
+  if (e.key === 'Escape') toc.hidden = true;
+});
+window.addEventListener('resize', scale);
+scale();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+if (document.fonts) document.fonts.ready.then(() => show(cur));
+
+</script>
+</body>
+</html>
