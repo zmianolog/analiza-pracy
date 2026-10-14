@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klasyfikator stanowisk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --fg: #1F2B36; --head: #1F4460; --muted: #61788C; --line: #D9E1E8;
+  --navy: #1F4460; --navy-hover: #163450; --honey: #E8B62C; --honey-soft: #FBF0CF; --honey-ink: #5C4810;
+  --info: #F0F6FB; --sel: #FFF8E6; --btn-bg: #1F4460; --btn-fg: #FFFFFF; --btn-hover: #163450; --btn-off: #AEB8C2;
+  --font: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif; --r: 12px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --info: #1D3446; --sel: #2A3A2A; --honey-soft: #3A3218; --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; --btn-off: #3A4C5C;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --info: #1D3446; --sel: #2A3A2A; --honey-soft: #3A3218; --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; --btn-off: #3A4C5C;
+  color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.55 }
+.brand { background: var(--navy); color: var(--honey); padding: 14px 24px; font-weight: 800; letter-spacing: .22em; font-size: 13px; text-transform: uppercase }
+.wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 56px }
+h1 { color: var(--head); font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; margin: 0 0 8px; text-wrap: balance }
+h2 { color: var(--head); font-size: 20px; margin: 0 0 10px }
+.lead { color: var(--muted); margin: 0 0 22px; max-width: 68ch }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 26px }
+label.f { display: block; font-weight: 700; color: var(--head); margin-bottom: 8px }
+input[type=text] { width: 100%; font: 500 16px var(--font); color: var(--fg); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; padding: 12px 14px }
+input[type=text]:focus { outline: none; border-color: var(--honey) }
+.note { background: var(--info); border-left: 4px solid var(--navy); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 18px 0; font-size: 14px }
+.btn { font: 700 15px var(--font); background: var(--btn-bg); color: var(--btn-fg); border: 0; border-radius: 999px; padding: 11px 24px; min-height: 44px; min-width: 170px; cursor: pointer }
+.btn:hover { background: var(--btn-hover) }
+.btn:disabled { background: var(--btn-off); cursor: default }
+.btn:focus-visible, .opt:focus-visible { outline: 3px solid var(--honey); outline-offset: 2px }
+.row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-top: 22px }
+.progress { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 6px }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 18px }
+.bar > div { height: 100%; background: var(--honey); transition: width .3s }
+.qnum { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px }
+.qtext { font-size: 19px; font-weight: 700; color: var(--head); margin: 0 0 18px; text-wrap: pretty }
+.opts { display: flex; flex-direction: column; gap: 10px }
+.opt { display: flex; gap: 14px; align-items: flex-start; text-align: left; width: 100%; font: 500 15px var(--font); color: var(--fg);
+  background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 13px 15px; cursor: pointer }
+.opt:hover { border-color: var(--navy) }
+.opt[aria-checked="true"] { border-color: var(--honey); background: var(--sel) }
+.opt .l { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--head); font-weight: 800; font-size: 13px; display: grid; place-items: center }
+.opt[aria-checked="true"] .l { background: var(--honey); color: #1F2B36 }
+.res-head { background: var(--navy); color: #FFFFFF; border-radius: var(--r) var(--r) 0 0; padding: 22px 26px }
+.res-head small { color: var(--honey); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 12px }
+.res-head .t { font-size: clamp(24px, 3vw, 32px); font-weight: 800; line-height: 1.2; margin-top: 4px }
+.res-head .s { opacity: .85; margin-top: 4px }
+.res-body { background: var(--surface); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--r) var(--r); padding: 22px 26px }
+.facts { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 10px 18px; margin: 0 0 18px }
+.facts dt { font-weight: 700; color: var(--muted); font-size: 14px }
+.facts dd { margin: 0 }
+.scores { margin: 6px 0 18px }
+.sc { display: grid; grid-template-columns: 110px minmax(0, 1fr) 48px; gap: 10px; align-items: center; margin-bottom: 7px; font-size: 14px }
+.sc .b { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden }
+.sc .b > div { height: 100%; background: var(--navy); border-radius: 5px }
+.sc.win .b > div { background: var(--honey) }
+.sc .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted) }
+.warn { background: var(--honey-soft); border-left: 4px solid var(--honey); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 0 0 18px; font-size: 14px }
+table { width: 100%; border-collapse: collapse; font-size: 14px }
+th { text-align: left; background: var(--navy); color: #FFFFFF; padding: 8px 10px; font-weight: 700 }
+td { padding: 8px 10px; border-bottom: 1px solid var(--line) }
+.tablewrap { overflow-x: auto; margin-top: 10px }
+#done { margin-top: 26px }
+@media (max-width: 560px) { .facts { grid-template-columns: minmax(0, 1fr) } .facts dt { margin-top: 6px } .btn { min-width: 0; flex: 1 } .panel, .res-body { padding: 18px } }
+</style>
+</head>
+<body>
+<div class="brand">ZMIANOLOGICA · Analiza i opis pracy</div>
+<main class="wrap">
+  <h1>Klasyfikator stanowisk</h1>
+  <p class="lead">Klasyfikacja ma dwa etapy. Najpierw jedno pytanie o podległość służbową rozstrzyga wzór opisu: specjalistyczny (S) albo menedżerski (M). Potem sześć pytań wskazuje typ w obrębie tego wzoru: Wykonawcę, Specjalistę lub Eksperta we wzorze S albo Lidera, Managera lub Stratega we wzorze M. Typ wskazuje wzorzec nazwy, przedział kategorii zaszeregowania i zadania typowe, które trafiają do opisu hurtowo.</p>
+
+  <section id="start" class="panel">
+    <label class="f" for="pos">Obecna nazwa stanowiska</label>
+    <input type="text" id="pos" maxlength="80" placeholder="np. Mistrz zmiany" autocomplete="off">
+    <div class="note">Odpowiadaj o pracy wykonywanej na stanowisku, a nie o osobie, która je obecnie zajmuje. Zmiana osoby na stanowisku nie zmienia ani typu, ani opisu.</div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="go">Rozpocznij</button></div>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="progress"><span id="pLabel"></span><span id="pPos"></span></div>
+    <div class="bar"><div id="pBar"></div></div>
+    <div class="panel">
+      <div class="qnum" id="qNum"></div>
+      <p class="qtext" id="qText"></p>
+      <div class="opts" id="opts" role="radiogroup"></div>
+    </div>
+    <div class="row"><button class="btn" id="back">Wstecz</button><button class="btn" id="next" disabled>Dalej</button></div>
+  </section>
+
+  <section id="result" hidden>
+    <div class="res-head"><small>Wynik klasyfikacji</small><div class="t" id="rType"></div><div class="s" id="rSub"></div></div>
+    <div class="res-body">
+      <div class="warn" id="rWarn" hidden></div>
+      <dl class="facts">
+        <dt>Wzór opisu</dt><dd id="rWzor"></dd>
+        <dt>Kryterium typu</dt><dd id="rKryt"></dd>
+        <dt>Wzorzec nazwy</dt><dd id="rNazwa"></dd>
+        <dt>Kategorie zaszeregowania</dt><dd id="rKat"></dd>
+        <dt>Zadania typowe</dt><dd id="rZad"></dd>
+        <dt>Kategorie zadań</dt><dd id="rKatZad"></dd>
+      </dl>
+      <h2>Dopasowanie do typów</h2>
+      <div class="scores" id="rScores"></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn" id="again">Klasyfikuj kolejne stanowisko</button></div>
+    </div>
+  </section>
+
+  <section id="done" class="panel" hidden>
+    <h2>Sklasyfikowane stanowiska</h2>
+    <div class="tablewrap"><table><thead><tr><th>Nazwa obecna</th><th>Typ</th><th>Wzór</th><th>Wzorzec nazwy</th></tr></thead><tbody id="doneBody"></tbody></table></div>
+  </section>
+</main>
+
+<script>
+const INFO = {
+  Wykonawca:   { wzor: 'S', sub: 'Stanowisko wykonawcze — praca według instrukcji i norm',
+    kryt: 'Praca według instrukcji i norm; zakres i kolejność pracy wyznacza przełożony lub plan.',
+    nazwa: 'nazwa zawodu + zakres, np. Operator maszyn przetwórczych', kat: 'W1–W3', zad: 'ZT-01 do ZT-05 (wszystkie S) oraz ZT-06 i ZT-07' },
+  Specjalista: { wzor: 'S', sub: 'Stanowisko specjalistyczne — samodzielna praca według standardów',
+    kryt: 'Samodzielna praca według standardów i procedur; samodzielnie planuje własną pracę w swoim zakresie.',
+    nazwa: 'Specjalista ds. + zakres, np. Specjalista ds. kadr i płac', kat: 'S1–S3', zad: 'ZT-01 do ZT-05 (wszystkie S) oraz ZT-08 do ZT-10' },
+  Ekspert:     { wzor: 'S', sub: 'Stanowisko eksperckie — złożone, niestandardowe problemy i doradztwo',
+    kryt: 'Rozwiązuje złożone, niestandardowe problemy i doradza innym; o przypisaniu decyduje charakter pracy, nie staż.',
+    nazwa: 'Ekspert ds. + zakres, np. Ekspert ds. technologii produkcji', kat: 'E1–E2', zad: 'ZT-01 do ZT-05 (wszystkie S) oraz ZT-11 do ZT-13' },
+  Lider:       { wzor: 'M', sub: 'Stanowisko kierownicze — bezpośrednie kierowanie zespołem',
+    kryt: 'Kieruje bezpośrednio pracą wykonawców lub specjalistów i zwykle sam także wykonuje pracę zespołu.',
+    nazwa: 'Kierownik zespołu + zakres, np. Kierownik zespołu produkcji', kat: 'L1–L2', zad: 'ZT-14 do ZT-19 (wszystkie M) oraz ZT-20 do ZT-22' },
+  Manager:     { wzor: 'M', sub: 'Stanowisko kierownicze — kierowanie jednostką i jej budżetem',
+    kryt: 'Kieruje jednostką przez innych kierowników albo odpowiada za całą jednostkę razem z jej budżetem.',
+    nazwa: 'Kierownik działu + zakres, np. Kierownik działu logistyki', kat: 'MG1–MG2', zad: 'ZT-14 do ZT-19 (wszystkie M) oraz ZT-23 do ZT-27' },
+  Strateg:     { wzor: 'M', sub: 'Stanowisko kierownicze — pion lub cała organizacja',
+    kryt: 'Odpowiada za pion lub całą organizację; podejmuje decyzje o skutkach rozłożonych na lata.',
+    nazwa: 'Dyrektor + zakres; Członek zarządu / Prezes zarządu', kat: 'ST1–ST2', zad: 'ZT-14 do ZT-19 (wszystkie M) oraz ZT-28 do ZT-32' }
+};
+const KAT_S = 'merytoryczne; administracyjne i dokumentacyjne; współpracy i komunikacji; jakości i bezpieczeństwa; przekazywania wiedzy';
+const KAT_M = KAT_S + '; a dodatkowo: planowania i organizacji pracy; kadrowe; finansowe; raportowe; BHP osoby kierującej pracownikami';
+
+// Etap 1: wzór opisu
+const Q0 = { t: 'Czy na tym stanowisku kieruje się pracą podwładnych, czyli przydziela im zadania, rozlicza ich pracę i ocenia ją jako przełożony służbowy?', o: [
+  ['Tak — stanowisku podlegają służbowo inne osoby.', 'M'],
+  ['Nie — stanowisko nie ma podwładnych.', 'S'],
+  ['Koordynuje pracę innych osób, ale nie jest ich przełożonym służbowym, np. w projekcie albo przy przekazaniu zmiany.', 'S'] ] };
+
+// Etap 2: typ w obrębie wzoru; punkty w kolejności typów wzoru
+const TYPES = { S: ['Wykonawca', 'Specjalista', 'Ekspert'], M: ['Lider', 'Manager', 'Strateg'] };
+const QS = {
+  S: [
+    { t: 'Kto ustala, co i jak jest robione na tym stanowisku?', o: [
+      ['Zakres, kolejność i sposób pracy wyznaczają instrukcje, normy i bieżące polecenia przełożonego.', [3,1,0]],
+      ['Zakres wyznacza przełożony, a osoba na stanowisku sama planuje swoją pracę według standardów i procedur.', [1,3,0]],
+      ['Osoba na stanowisku sama dobiera metody do problemów, dla których nie ma gotowej procedury.', [0,1,3]] ] },
+    { t: 'Jak często stanowisko ma do czynienia z problemami, dla których nie ma procedury?', o: [
+      ['Rzadko; takie sytuacje zgłasza się przełożonemu.', [3,1,0]],
+      ['Czasami; większość spraw obejmują procedury, a nietypowe rozwiązuje się wspólnie z przełożonym.', [1,3,0]],
+      ['Regularnie; rozwiązywanie takich problemów jest istotą pracy.', [0,0,3]] ] },
+    { t: 'Jakiej wiedzy wymaga praca na tym stanowisku?', o: [
+      ['Wiedzy i umiejętności zawodowych zdobywanych przez szkolenie stanowiskowe i praktykę.', [3,0,0]],
+      ['Wiedzy specjalistycznej z jednej dziedziny, zwykle potwierdzonej wykształceniem kierunkowym.', [0,3,1]],
+      ['Pogłębionej wiedzy dziedzinowej, wyższej niż w otoczeniu stanowiska; inni zwracają się do tej osoby o opinię.', [0,1,3]] ] },
+    { t: 'Jak długo organizacja odczuwa skutki typowej decyzji podejmowanej na tym stanowisku?', o: [
+      ['Godziny albo jedną zmianę.', [3,1,0]],
+      ['Dni lub tygodnie.', [1,3,1]],
+      ['Miesiące lub dłużej.', [0,1,3]] ] },
+    { t: 'Z czego rozlicza się pracę na tym stanowisku?', o: [
+      ['Z ilości i jakości wykonanej pracy oraz przestrzegania norm.', [3,1,0]],
+      ['Z terminowej i poprawnej realizacji spraw w swoim zakresie.', [1,3,0]],
+      ['Z jakości merytorycznej rozwiązań, opinii i opracowanych standardów.', [0,0,3]] ] },
+    { t: 'Z kim stanowisko najczęściej współpracuje?', o: [
+      ['Głównie z osobami z tego samego zespołu, według ustalonego przebiegu pracy.', [3,1,0]],
+      ['Z osobami z innych działów i z klientami w sprawach swojego zakresu.', [0,3,1]],
+      ['Z kadrą kierowniczą i specjalistami innych jednostek, którzy oczekują opinii lub rozwiązania.', [0,0,3]] ] } ],
+  M: [
+    { t: 'Kto podlega temu stanowisku?', o: [
+      ['Bezpośrednio wykonawcy lub specjaliści; osoba na stanowisku sama też wykonuje pracę zespołu.', [3,0,0]],
+      ['Kierownicy zespołów albo cała jednostka, która ma własny budżet.', [0,3,0]],
+      ['Kierownicy działów lub jednostek tworzących pion.', [0,0,3]] ] },
+    { t: 'Jaką część czasu pracy zajmuje samodzielne wykonywanie pracy merytorycznej, a nie kierowanie innymi?', o: [
+      ['Większość czasu, obok kierowania bieżącą pracą zespołu.', [3,0,0]],
+      ['Niewielką część; większość czasu to planowanie, organizowanie i rozliczanie pracy jednostki.', [0,3,1]],
+      ['Prawie wcale; praca polega na decyzjach strategicznych i relacjach z otoczeniem.', [0,1,3]] ] },
+    { t: 'Jak długo organizacja odczuwa skutki typowej decyzji podejmowanej na tym stanowisku?', o: [
+      ['Od godzin do kilku tygodni.', [3,0,0]],
+      ['Od kilku miesięcy do roku.', [1,3,0]],
+      ['Kilka lat.', [0,1,3]] ] },
+    { t: 'Jakie uprawnienia finansowe ma stanowisko?', o: [
+      ['Żadnych albo drobne wydatki w ustalonym limicie.', [3,0,0]],
+      ['Przygotowuje budżet jednostki i odpowiada za jego realizację.', [0,3,1]],
+      ['Zatwierdza budżety innych jednostek lub decyduje o inwestycjach.', [0,0,3]] ] },
+    { t: 'Z czego rozlicza się pracę na tym stanowisku?', o: [
+      ['Z wyników kierowanego zespołu.', [3,1,0]],
+      ['Z wyników jednostki i realizacji jej budżetu.', [0,3,1]],
+      ['Z realizacji strategii i wyników pionu lub organizacji.', [0,0,3]] ] },
+    { t: 'Z kim stanowisko najczęściej współpracuje?', o: [
+      ['Codziennie z podwładnymi i z przełożonym.', [3,1,0]],
+      ['Z innymi kierownikami i działami przy planowaniu pracy i budżetu.', [0,3,1]],
+      ['Z zarządem i kluczowymi partnerami zewnętrznymi.', [0,1,3]] ] } ]
+};
+const MAX = {};
+for (const w of ['S', 'M']) MAX[w] = [0, 1, 2].map(i => QS[w].reduce((s, q) => s + Math.max(...q.o.map(o => o[1][i])), 0));
+
+let cur = -1, ans = [], a0 = undefined, pos = '';
+const done = [];
+const $ = id => document.getElementById(id);
+const show = id => ['start', 'quiz', 'result'].forEach(s => $(s).hidden = s !== id);
+const wzor = () => a0 === undefined ? null : Q0.o[a0][1];
+
+function renderQ() {
+  const first = cur === -1, q = first ? Q0 : QS[wzor()][cur];
+  const n = first ? 0 : QS[wzor()].length;
+  $('pLabel').textContent = first ? 'Etap 1 — wzór opisu' : 'Etap 2 — typ stanowiska we wzorze ' + wzor() + ': pytanie ' + (cur + 1) + ' z ' + n;
+  $('pPos').textContent = pos;
+  $('pBar').style.width = (first ? 0 : (cur + 1) / (n + 1) * 100) + '%';
+  $('qNum').textContent = first ? 'Pytanie rozstrzygające' : 'Pytanie ' + (cur + 1);
+  $('qText').textContent = q.t;
+  const box = $('opts'); box.replaceChildren();
+  const sel = first ? a0 : ans[cur];
+  q.o.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', sel === i);
+    b.innerHTML = '<span class="l">' + 'ABCDEF'[i] + '</span><span></span>';
+    b.lastChild.textContent = o[0];
+    b.addEventListener('click', () => {
+      if (first) { if (a0 !== undefined && Q0.o[a0][1] !== o[1]) ans = []; a0 = i; } else ans[cur] = i;
+      renderQ(); });
+    box.appendChild(b);
+  });
+  $('back').disabled = first;
+  $('next').disabled = sel === undefined;
+  $('next').textContent = (!first && cur === n - 1) ? 'Zobacz wynik' : 'Dalej';
+}
+
+function result() {
+  const w = wzor(), T3 = TYPES[w], Qw = QS[w];
+  const raw = T3.map((_, i) => Qw.reduce((s, q, qi) => s + q.o[ans[qi]][1][i], 0));
+  const pct = raw.map((r, i) => Math.round(r / MAX[w][i] * 100));
+  const order = [0, 1, 2].sort((a, b) => pct[b] - pct[a]);
+  const T = T3[order[0]], T2 = T3[order[1]], inf = INFO[T];
+  $('rType').textContent = pos + ' → ' + T;
+  $('rSub').textContent = inf.sub;
+  $('rWzor').textContent = (w === 'S' ? 'S — wzór specjalistyczny' : 'M — wzór menedżerski') + '; rozstrzygnięty pytaniem o podległość służbową.' +
+    (a0 === 2 ? ' Koordynowanie pracy innych bez podległości służbowej zapisuje się w opisie jako zadanie z kategorii współpracy i komunikacji, a nie jako podstawę wzoru M.' : '');
+  $('rKryt').textContent = inf.kryt;
+  $('rNazwa').textContent = inf.nazwa;
+  $('rKat').textContent = inf.kat;
+  $('rZad').textContent = inf.zad;
+  $('rKatZad').textContent = w === 'S' ? KAT_S : KAT_M;
+  const warn = $('rWarn');
+  if (pct[order[0]] - pct[order[1]] <= 10) {
+    warn.hidden = false;
+    warn.textContent = 'Wynik graniczny: dopasowanie do typu ' + T + ' (' + pct[order[0]] + '%) i typu ' + T2 + ' (' + pct[order[1]] + '%) różni się niewiele. Rozstrzygnij w grupie, porównując pracę na stanowisku z kryterium każdego z tych typów.';
+  } else warn.hidden = true;
+  const sc = $('rScores'); sc.replaceChildren();
+  T3.forEach((t, i) => {
+    const r = document.createElement('div'); r.className = 'sc' + (t === T ? ' win' : '');
+    r.innerHTML = '<span></span><div class="b"><div style="width:' + pct[i] + '%"></div></div><span class="n">' + pct[i] + '%</span>';
+    r.firstChild.textContent = t; sc.appendChild(r);
+  });
+  done.push([pos, T, w, inf.nazwa.split(', np.')[0]]);
+  const tb = $('doneBody'); tb.replaceChildren();
+  done.forEach(d => { const tr = document.createElement('tr'); d.forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); }); tb.appendChild(tr); });
+  $('done').hidden = false;
+  show('result');
+}
+
+$('go').addEventListener('click', () => {
+  pos = $('pos').value.trim() || 'Analizowane stanowisko';
+  cur = -1; ans = []; a0 = undefined; show('quiz'); renderQ();
+});
+$('pos').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
+$('back').addEventListener('click', () => { if (cur > -1) { cur--; renderQ(); } });
+$('next').addEventListener('click', () => {
+  if (cur === -1) { if (a0 === undefined) return; cur = 0; renderQ(); return; }
+  if (ans[cur] === undefined) return;
+  if (cur < QS[wzor()].length - 1) { cur++; renderQ(); } else result();
+});
+$('again').addEventListener('click', () => { $('pos').value = ''; show('start'); $('pos').focus(); });
+</script>
+</body>
+</html>
