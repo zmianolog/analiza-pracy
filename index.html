@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analiza i opis pracy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+:root { --bg: #F5F5F7; --surface: #FFFFFF; --fg: #1F2B36; --head: #1F4460; --muted: #61788C; --line: #D9E1E8; --navy: #1F4460; --honey: #E8B62C;
+  --btn-bg: #1F4460; --btn-fg: #FFFFFF; --btn-hover: #163450; --font: "Montserrat", "Segoe UI", system-ui, sans-serif }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; color-scheme: dark }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); line-height: 1.55 }
+.brand { background: var(--navy); color: var(--honey); padding: 14px 20px; font-weight: 800; letter-spacing: .2em; font-size: 12px; text-transform: uppercase }
+.wrap { max-width: 640px; margin: 0 auto; padding: 40px 16px 64px }
+h1 { color: var(--head); font-size: clamp(26px, 5vw, 36px); margin: 0 0 8px }
+p { color: var(--muted); margin: 0 0 28px }
+.links { display: flex; flex-direction: column; gap: 14px }
+a.btn { display: block; text-align: center; text-decoration: none; font: 700 17px var(--font); background: var(--btn-bg); color: var(--btn-fg); border-radius: 999px; padding: 16px 24px }
+a.btn:hover { background: var(--btn-hover) }
+a.btn:focus-visible { outline: 3px solid var(--honey); outline-offset: 3px }
+</style>
+</head>
+<body>
+<div class="brand">ZMIANOLOGICA · MERITO</div>
+<main class="wrap">
+  <h1>Analiza i opis pracy</h1>
+  <p>Materiały do zajęć: praca w grupach na przykładzie firmy KORVEX oraz klasyfikator stanowisk.</p>
+  <div class="links">
+    <a class="btn" href="MERITO_2026_SHR_Analiza%20i%20opis%20pracy_FORMULARZE_v1.html">Praca w grupach</a>
+    <a class="btn" href="MERITO_2026_SHR_Analiza%20i%20opis%20pracy_KLASYFIKATOR%20STANOWISK_v2.html">Klasyfikator stanowisk</a>
+  </div>
+</main>
+</body>
+</html>
