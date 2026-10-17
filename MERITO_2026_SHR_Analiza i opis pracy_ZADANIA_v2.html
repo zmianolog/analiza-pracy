@@ -750,7 +750,7 @@ const DB = {
 const ZAD = [
   ['nazwy', 'Z01', 'Nazwy stanowisk', 'Nazwy stanowisk w Waszych działach według reguły poziom + zakres oraz typ trudnego stanowiska z klasyfikatora.'],
   ['sme', 'Z02', 'Wybór SME', 'Wybór dwóch lub trzech ekspertów przedmiotowych spośród sześciu kandydatów, z uzasadnieniem.'],
-  ['przeglad', 'Z03', 'Przegląd EKASP', 'Które z 46 rozdziałów EKASP dotyczą Waszego stanowiska i do których pól opisu prowadzą.'],
+  ['przeglad', 'Z03', 'Przegląd EKASP', 'Które z 46 rozdziałów EKASP wchodzą do wzoru opisu S albo M dla całej firmy i do których pól prowadzą.'],
   ['ekasp', 'Z04', 'Konsensus EKASP', 'Ocena dziesięciu pozycji EKASP w rolach SME według procedury konsensusu.'],
   ['wzor', 'Z05', 'Wzór i właściciele pól', 'Kto w organizacji wypełnia każde pole wzoru opisu.'],
   ['zadania', 'Z06', 'Zadania DZIK', 'Zadania typowe z wzoru oraz trzy do pięciu zadań własnych stanowiska w układzie DZIK.'],
@@ -1013,10 +1013,16 @@ function tabSme(main) {
 function tabPrzeglad(main) {
   const id = G() + '_przeglad', typ = 'przeglad', nr = NR();
   let data = {};
+  const w = WZOR_TYPU[klucz(nr)[2]];
+  const typy = TYPY.filter(t => WZOR_TYPU[t] === w);
+  const stW = KLUCZ.filter(k => WZOR_TYPU[k[2]] === w);
+  const nazwaW = w === 'S' ? 'wzoru S (stanowiska specjalistyczne)' : 'wzoru M (stanowiska kierownicze)';
   main.append(intro(
-    'EKASP ma 46 rozdziałów w pięciu częściach. Komisja opisu decyduje, które z nich dotyczą stanowisk w organizacji; Wy decydujecie dla swojego stanowiska.',
-    'Najedźcie na kafelek, aby przeczytać, czego dotyczy rozdział w KORVEX. Kliknijcie kafelek albo przeciągnijcie go na prawą stronę, jeśli rozdział dotyczy Waszego stanowiska. Po prawej rozdziały układają się same według modułów opisu, do których prowadzą. Kliknięcie kafelka po prawej przenosi go z powrotem.'),
-    stanowiskoInfo(nr));
+    'Komisja opisu decyduje, które rozdziały EKASP wchodzą do wzoru opisu. Wasza grupa działa jako komisja dla ' + nazwaW + ' w całej firmie KORVEX: wybór obowiązuje wszystkie stanowiska typów ' + typy.join(', ') + ', a nie jedno stanowisko.',
+    'Stanowisko Waszej grupy jest tylko przykładem do sprawdzenia. Rozdział, który nie dotyczy Waszego stanowiska, może wejść do wzoru, jeśli dotyczy innych stanowisk tego wzoru, np. pracy na hali albo w magazynie.',
+    'Najedźcie na kafelek, aby przeczytać, czego dotyczy rozdział w KORVEX. Kliknijcie kafelek albo przeciągnijcie go na prawą stronę, jeśli rozdział wchodzi do wzoru. Po prawej rozdziały układają się same według modułów opisu, do których prowadzą. Kliknięcie kafelka po prawej przenosi go z powrotem.'),
+    h('div', { class: 'stan' }, h('div', { class: 'stan-nr', style: 'white-space:nowrap' }, 'Wzór ' + w), h('div', {}, h('div', { class: 'stan-n' }, 'Stanowiska ' + (w === 'S' ? 'specjalistyczne' : 'kierownicze') + ' w KORVEX: ' + stW.length + ' stanowisk, ' + stW.reduce((x, k) => x + k[4], 0) + ' osób'),
+      h('div', { class: 'muted' }, 'Np. ' + stW.filter(k => k[0] !== nr).slice(0, 4).map(k => k[1]).join(', ') + '. Przykład Waszej grupy: ' + nr + ' ' + klucz(nr)[1] + '.'))));
   const info = h('div', { class: 'rinfo' }, h('b', {}, 'Wskaż kafelek'), h('span', {}, 'Tu pojawi się krótka informacja o rozdziale.'));
   const lewa = h('div', { class: 'rlewa' }), prawa = h('div', { class: 'rprawa' });
   const tiles = {};
@@ -1035,7 +1041,7 @@ function tabPrzeglad(main) {
   };
   drop(prawa, true); drop(lewa, false);
   const licz = h('p', { class: 'muted' });
-  main.append(h('div', { class: 'rplansza' }, h('div', {}, h('h2', {}, 'Rozdziały EKASP'), lewa), h('div', {}, h('h2', {}, 'Dotyczą Waszego stanowiska'), prawa)), info, licz, koniecZadania('przeglad'));
+  main.append(h('div', { class: 'rplansza' }, h('div', {}, h('h2', {}, 'Rozdziały EKASP'), lewa), h('div', {}, h('h2', {}, 'Wchodzą do wzoru ' + w + ' w KORVEX'), prawa)), info, licz, koniecZadania('przeglad'));
   const paint = () => {
     const wyb = r => !!getP(data, ['w', r[0].replace('.', '_')]);
     lewa.replaceChildren(...Object.keys(CZESCI_EKASP).map(c => {
@@ -1044,9 +1050,9 @@ function tabPrzeglad(main) {
     }));
     const mods = [...new Set(ROZDZIALY.filter(wyb).map(r => r[3]))].sort((a, b) => (a || 99) - (b || 99));
     prawa.replaceChildren(...(mods.length ? mods.map(m => h('div', { class: 'rgr' }, h('span', { class: 'lbl' }, m ? 'Moduł ' + m + ' — ' + MODULY[m] : 'Bez polskich norm — do rozważenia'),
-      h('div', { class: 'rks' }, ROZDZIALY.filter(r => wyb(r) && r[3] === m).map(r => tiles[r[0]])))) : [h('p', { class: 'muted' }, 'Przeciągnijcie tu rozdziały, które dotyczą Waszego stanowiska.')]));
+      h('div', { class: 'rks' }, ROZDZIALY.filter(r => wyb(r) && r[3] === m).map(r => tiles[r[0]])))) : [h('p', { class: 'muted' }, 'Przeciągnijcie tu rozdziały, które wchodzą do wzoru ' + w + '.')]));
     const n = ROZDZIALY.filter(wyb).length;
-    licz.textContent = 'Wybrane rozdziały: ' + n + ' z 46. Wybrane rozdziały pojawią się jako podpowiedzi przy polach opisu w zadaniu Z07.';
+    licz.textContent = 'Rozdziały we wzorze ' + w + ': ' + n + ' z 46. W zadaniu Z07 pojawią się jako podpowiedzi przy polach opisu Waszego stanowiska.';
   };
   ST.unsub.push(DB.watchDoc(id, d => { data = d; paint(); }));
 }
@@ -1278,7 +1284,7 @@ function tabOpis(main) {
     const wyb = ROZDZIALY.filter(r => getP(dP, ['w', r[0].replace('.', '_')]) && ROZDZ_POLE[r[0]]);
     Object.entries(wsk).forEach(([pole, el]) => {
       const rr = wyb.filter(r => ROZDZ_POLE[r[0]] === pole);
-      el.hidden = !rr.length; el.textContent = rr.length ? 'Z przeglądu EKASP (Z03): ' + rr.map(r => r[0] + ' ' + r[1]).join('; ') : '';
+      el.hidden = !rr.length; el.textContent = rr.length ? 'Rozdziały EKASP we wzorze (Z03): ' + rr.map(r => r[0] + ' ' + r[1]).join('; ') : '';
     });
   };
   ST.unsub.push(DB.watchDoc(id, d => {
