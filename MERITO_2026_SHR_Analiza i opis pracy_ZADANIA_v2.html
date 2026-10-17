@@ -1411,6 +1411,18 @@ function czyszczenie(main, g) {
       } }, 'Tak, usuń dane grupy ' + nrG(g)),
       h('a', { class: 'btn', href: adres('start') }, 'Anuluj'))));
 }
+function czyszczenieWszystkich(main) {
+  const z = GRUPY.filter(g => wczytajGrupe(g).zmieniono);
+  main.append(h('div', { class: 'card narrow' }, h('h2', {}, 'Usunąć dane wszystkich grup z tej przeglądarki?'),
+    h('p', { class: 'desc' }, z.length ? 'Dane mają grupy: ' + z.map(nrG).join(', ') + '. Pliki grup zapisane na dysku zostają bez zmian.' : 'Ta przeglądarka nie ma danych żadnej grupy.'),
+    h('div', { class: 'actions' },
+      h('button', { class: 'btn', type: 'button', onclick: async () => {
+        for (const g of GRUPY) { try { localStorage.removeItem(KL + g); } catch (e) {} delete mem[g]; delete PLIK.h[g]; delete PLIK.stan[g]; await IDB.set(g, null); }
+        try { localStorage.removeItem(KL + 'wybrana'); } catch (e) {}
+        location.replace(adres('start'));
+      } }, 'Tak, usuń dane wszystkich grup'),
+      h('a', { class: 'btn', href: adres('start') }, 'Anuluj'))));
+}
 function wyborGrupy(main) {
   const przyciski = GRUPY.map(g => {
     const m = wczytajGrupe(g), ost = g === OSTATNIA;
@@ -1460,7 +1472,8 @@ function render() {
   main.className = 'wrap' + (ST.tab === 'start' ? ' szeroki' : '');
   document.body.classList.toggle('szer', ST.tab === 'start' || !g);
   const wycz = 'G' + (URLP.get('wyczysc') || '');
-  if (GRUPY.includes(wycz)) czyszczenie(main, wycz);
+  if (URLP.get('wyczysc') === 'wszystkie') czyszczenieWszystkich(main);
+  else if (GRUPY.includes(wycz)) czyszczenie(main, wycz);
   else if (!g) wyborGrupy(main);
   else if (wczytajGrupe(g).lock) zablokowana(main);
   else if (ST.tab === 'start') tabStart(main);
