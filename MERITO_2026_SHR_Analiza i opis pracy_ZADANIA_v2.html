@@ -1422,7 +1422,7 @@ function wyborGrupy(main) {
   main.append(h('div', { class: 'card narrow wide' }, h('h2', {}, 'Wybierzcie swoją grupę'),
     h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, wybierzcie grupę, a potem kliknijcie „Kontynuuj pracę grupy z pliku”. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
     h('div', { class: 'grupy' }, przyciski),
-    h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : h('a', { class: 'btn', href: 'index.html' }, 'Wróć do strony startowej')),
+    h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : null),
     FS_OK ? '' : h('p', { class: 'no' }, 'Ta przeglądarka nie zapisuje pliku grupy automatycznie. Najlepiej pracować w Chrome albo Edge na komputerze.')));
 }
 function zablokowana(main) {
