@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analiza pracy — zadania grup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --fg: #1F2B36; --head: #1F4460; --muted: #61788C; --line: #D9E1E8;
+  --navy: #1F4460; --honey: #E8B62C; --gold-bg: #FBF0CF; --gold-fg: #5C4810; --red: #C8202E; --green: #2E6B4A;
+  --info: #F0F6FB; --chip: #EAF0F5; --chip-on: #1F4460; --chip-on-fg: #FFFFFF; --locked: #F0F6FB;
+  --btn-bg: #1F4460; --btn-fg: #FFFFFF; --btn-hover: #163450;
+  --font: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif; --r: 12px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --info: #1D3446; --chip: #1D3446; --chip-on: #E8B62C; --chip-on-fg: #1F2B36; --locked: #1D3446; --gold-bg: #3A3218; --gold-fg: #F3D27A; --green: #7FC8A0; --red: #FF8A8A;
+  --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1B26; --surface: #162836; --fg: #E6EDF3; --head: #E6EDF3; --muted: #9BB0C2; --line: #263E51;
+  --info: #1D3446; --chip: #1D3446; --chip-on: #E8B62C; --chip-on-fg: #1F2B36; --locked: #1D3446; --gold-bg: #3A3218; --gold-fg: #F3D27A; --green: #7FC8A0; --red: #FF8A8A;
+  --btn-bg: #E8B62C; --btn-fg: #1F2B36; --btn-hover: #B68C20; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5 }
+.brand { background: var(--navy); color: var(--honey); padding: 12px 20px; font-weight: 800; letter-spacing: .2em; font-size: 12px; text-transform: uppercase; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: space-between }
+.brand .who { color: #FFFFFF; letter-spacing: .04em; text-transform: none; font-weight: 600 }
+.top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line) }
+.topin { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 64px }
+h1 { color: var(--head); font-size: clamp(22px, 3vw, 30px); margin: 0 0 6px }
+h2 { color: var(--head); font-size: 18px; margin: 22px 0 10px }
+.seg, .chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 600 13px var(--font); color: var(--fg); background: var(--chip); border: 0; border-radius: 999px; padding: 7px 13px; cursor: pointer; text-align: left }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-fg) }
+.chip.sq { min-width: 40px; text-align: center; border-radius: 10px; font-size: 15px; padding: 8px 0 }
+.btn { font: 700 14px var(--font); background: var(--btn-bg); color: var(--btn-fg); border: 0; border-radius: 999px; padding: 10px 22px; min-height: 42px; min-width: 150px; cursor: pointer }
+.btn:hover { background: var(--btn-hover) }
+.chip:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--honey); outline-offset: 2px }
+.status { font-size: 13px; color: var(--muted); min-height: 1em }
+.status.ok { color: var(--green) } .status.err { color: var(--red); font-weight: 700 }
+.intro { background: var(--info); border-left: 4px solid var(--navy); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 0 0 14px }
+.intro p { margin: 0 0 8px } .intro p:last-child { margin: 0 }
+.list { display: flex; flex-direction: column; gap: 12px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.card.narrow { max-width: 480px; margin: 40px auto }
+.row-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center }
+.row-h b { color: var(--head) }
+.tag { align-self: flex-start; font-size: 12px; font-weight: 700; background: var(--chip); color: var(--muted); border-radius: 6px; padding: 2px 8px }
+.tag.soft { background: transparent; border: 1px solid var(--line) }
+.tag.gold { background: var(--gold-bg); color: var(--gold-fg) }
+.desc { margin: 0 }
+.muted { color: var(--muted); font-size: 14px; margin: 0 }
+label { display: flex; flex-direction: column; gap: 5px; min-width: 0 }
+label > span, .lbl { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em }
+input[type=text], input[type=number], select, textarea { font: 500 15px var(--font); color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 11px; width: 100%; min-width: 0 }
+textarea { resize: vertical }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 14px; align-items: end }
+@media (max-width: 640px) { .grid2 { grid-template-columns: minmax(0, 1fr) } .btn { min-width: 0 } }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 12px }
+.actions.end { justify-content: flex-end; margin: 0 }
+.key { border-top: 1px dashed var(--line); padding-top: 8px; font-size: 14px; display: flex; flex-direction: column; gap: 4px }
+.ok { color: var(--green); font-weight: 700 } .no { color: var(--red); font-weight: 700 }
+.scale { display: flex; flex-wrap: wrap; gap: 6px }
+.vals { font-variant-numeric: tabular-nums; font-size: 14px }
+.r2 { display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed var(--line); padding-top: 8px }
+.stan { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; margin-bottom: 8px }
+.stan-nr { background: var(--navy); color: var(--honey); font-weight: 800; border-radius: 8px; padding: 6px 10px; font-variant-numeric: tabular-nums }
+.stan-n { font-weight: 800; color: var(--head); font-size: 17px }
+.mod { margin-top: 8px }
+.locked { background: var(--locked); border-radius: 8px; padding: 10px 14px 10px 30px; margin: 0; font-size: 14px }
+p.locked { padding-left: 14px }
+.locked li + li { margin-top: 6px }
+.psych { display: flex; flex-direction: column; gap: 6px }
+.pline { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 10px; align-items: center; font-size: 14px }
+.pline > span { font-size: 14px; font-weight: 500; color: var(--fg); letter-spacing: 0 }
+.komp { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px }
+.prowbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 14px; background: var(--gold-bg); border-radius: 10px; padding: 10px 14px }
+.link { color: var(--head); font-weight: 700 }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface) }
+table { width: 100%; border-collapse: collapse; font-size: 14px }
+th { text-align: left; background: var(--navy); color: #FFFFFF; padding: 8px 10px; font-weight: 700; white-space: nowrap }
+td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 6px 0 10px }
+.tile { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--navy); border-radius: var(--r); padding: 14px 16px }
+.tile:hover { border-color: var(--honey) }
+.tile b { color: var(--head); font-size: 17px }
+.tile span { font-size: 14px; color: var(--muted) }
+.tile .tile-n { font-size: 26px; font-weight: 800; color: var(--honey); line-height: 1 }
+.grupy { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 6px 0 4px }
+.grupy .btn { min-width: 0 }
+.osoby { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px }
+.oceny { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px }
+.oc { gap: 3px }
+.oc-l { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.sel-ocena { text-align: center; font-weight: 700 }
+@media (max-width: 640px) { .oceny { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.przyp { border: 2px solid var(--honey); background: var(--gold-bg) }
+.przyp b { color: var(--gold-fg) }
+
+.top .topin { flex-wrap: wrap }
+.topin .lewo, .topin .prawo { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center }
+.topin .tyt { color: var(--head); font-size: 18px; font-weight: 800 }
+.potw { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: flex-end; background: var(--gold-bg); color: var(--gold-fg); border-radius: 10px; padding: 8px 12px; font-weight: 600 }
+.brand .gb { background: var(--honey); color: var(--navy); border-radius: 8px; padding: 3px 12px; font-weight: 800; font-size: 18px; letter-spacing: .02em; margin-right: 6px }
+.brand .who { font-size: 15px }
+.plikbar { background: var(--gold-bg); color: var(--gold-fg); border-bottom: 1px solid var(--line) }
+.plikbar.ok { background: var(--info); color: var(--muted) }
+.plikbar.ok .plikin { font-size: 13px; padding: 6px 16px }
+.plikin { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font-weight: 600; font-size: 14px }
+.wrap.szeroki { max-width: 1480px }
+.tiles { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin: 14px 0 16px }
+@media (max-width: 1200px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+@media (max-width: 760px) { .tiles { grid-template-columns: minmax(0, 1fr) } }
+.tile { padding: 12px 14px }
+.tile b { font-size: 16px; line-height: 1.25 }
+.tile span { font-size: 13px; line-height: 1.4 }
+.tile em { margin-top: auto; font-style: normal; font-size: 12px; font-weight: 700; color: var(--muted) }
+.tile.done { border-top-color: var(--green) }
+.tile.done em { color: var(--green) }
+.grupa { display: flex; gap: 16px; align-items: stretch; margin-top: 10px }
+.grupa .stan { margin: 0 0 6px }
+.gnr { background: var(--navy); color: var(--honey); border-radius: var(--r); min-width: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 54px; font-weight: 800; line-height: 1 }
+.gnr small { font-size: 13px; letter-spacing: .15em; text-transform: uppercase; color: #fff; margin-bottom: 4px }
+.krok .kn, .kn { background: var(--honey); color: var(--navy); font-weight: 800; border-radius: 999px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px }
+.krok { border-left: 4px solid var(--honey) }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; align-items: start }
+@media (max-width: 760px) { .grid3 { grid-template-columns: minmax(0, 1fr) } }
+.col { display: flex; flex-direction: column; gap: 10px }
+.wiersz { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px }
+.wiersz small { font-size: 12px; line-height: 1.35 }
+.hint { margin: 0; font-size: 13px; color: var(--gold-fg); background: var(--gold-bg); border-radius: 8px; padding: 6px 10px }
+.pline > span { display: flex; flex-direction: column; gap: 1px }
+.pline small { font-size: 12px; color: var(--muted) }
+.pline { padding: 4px 0; border-bottom: 1px dashed var(--line) }
+.dziktab td:first-child { white-space: nowrap; font-weight: 700; color: var(--head) }
+.dziktab td:last-child { font-size: 12px; color: var(--muted) }
+.dziktab th { white-space: normal }
+.lock ol { margin: 0; padding-left: 20px } .lock li + li { margin-top: 6px }
+/* Przegląd EKASP */
+.rplansza { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start }
+@media (max-width: 760px) { .rplansza { grid-template-columns: minmax(0, 1fr) } }
+.rlewa, .rprawa { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; min-height: 160px; display: flex; flex-direction: column; gap: 10px }
+.rprawa { border: 2px dashed var(--honey); background: var(--gold-bg) }
+.rlewa.nad, .rprawa.nad { outline: 3px solid var(--honey) }
+.rgr { display: flex; flex-direction: column; gap: 6px }
+.rks { display: flex; flex-wrap: wrap; gap: 6px }
+.rk { font: 600 13px var(--font); color: var(--fg); background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: grab; display: inline-flex; gap: 6px; align-items: center }
+.rk:hover, .rk:focus-visible { border-color: var(--honey); outline: none; background: var(--surface) }
+.rk .rn { font-weight: 800; color: var(--head); font-variant-numeric: tabular-nums }
+.rk.brak { border-style: dashed; color: var(--muted) }
+.rprawa .rk { background: var(--surface) }
+.rinfo { position: sticky; bottom: 0; background: var(--navy); color: #fff; border-radius: var(--r); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; margin: 12px 0 }
+.rinfo b { color: var(--honey) } .rinfo em { font-style: normal; font-size: 13px; color: #CFE0EE }
+/* wydruk */
+#druk { display: none }
+@media print {
+  body.drukuj #app, body.drukuj .brand, body.drukuj .plikbar { display: none !important }
+  body.drukuj #druk { display: block }
+  body.drukuj { background: #fff; color: #000; font-size: 10.5pt }
+  @page { size: A4; margin: 16mm 14mm 18mm }
+}
+.druk-in { font-family: var(--font); color: #1F2B36; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+.druk-in .dp.duza { break-inside: auto; grid-template-columns: 1fr; gap: 3px }
+body.szer .topin, body.szer .plikin { max-width: 1480px }
+.druk-in .dh { display: flex; gap: 14px; align-items: center; border-bottom: 3px solid #E8B62C; padding-bottom: 10px; margin-bottom: 8px }
+.druk-in .dl svg { width: 46px; height: 49px }
+.druk-in .dl path { fill: #1F4460 }
+.druk-in h1 { color: #1F4460; font-size: 18pt; margin: 2px 0 } .druk-in .dh small { color: #61788C; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 8pt } .druk-in .dh p { margin: 0; color: #61788C; font-size: 9pt }
+.druk-in h2 { color: #fff; background: #1F4460; font-size: 11pt; padding: 4px 10px; margin: 14px 0 6px; break-after: avoid }
+.druk-in .dp { display: grid; grid-template-columns: 46mm 1fr; gap: 8px; padding: 4px 0; border-bottom: 1px solid #D9E1E8; break-inside: avoid }
+.druk-in .dk { font-weight: 700; color: #1F4460; font-size: 9pt }
+.druk-in .dv { font-size: 9.5pt; white-space: pre-wrap }
+.druk-in .dou { color: #C8202E; font-style: italic }
+.druk-in table.dt { width: 100%; border-collapse: collapse; font-size: 8.5pt; white-space: normal }
+.druk-in table.dt th { background: #EAF0F5; color: #1F4460; text-align: left; padding: 3px 5px; white-space: normal }
+.druk-in table.dt td { border-top: 1px solid #D9E1E8; padding: 3px 5px; vertical-align: top }
+.druk-in table.dt td:first-child { white-space: nowrap }
+.druk-in .df { margin-top: 14px; padding-top: 6px; border-top: 1px solid #D9E1E8; font-size: 8pt; color: #61788C }
+</style>
+</head>
+<body>
+<div class="brand"><span>ZMIANOLOGICA · Analiza i opis pracy · KORVEX</span><span class="who" id="who"></span></div>
+<div id="app">
+  <div class="top"><div class="topin" id="topin"></div></div>
+  <div class="plikbar" id="plikbar" hidden></div>
+  <main class="wrap" id="main"></main>
+</div>
+<div id="druk"></div>
+<script>
+// ===================== DANE SZKOLENIA =====================
+const KLASYFIKATOR_URL = 'MERITO_2026_SHR_Analiza%20i%20opis%20pracy_KLASYFIKATOR%20STANOWISK_v2.html';
+const GRUPY = ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10'];
+
+const TYPY = ['Wykonawca', 'Specjalista', 'Ekspert', 'Lider', 'Manager', 'Strateg'];
+const WZOR_TYPU = { Wykonawca: 'S', Specjalista: 'S', Ekspert: 'S', Lider: 'M', Manager: 'M', Strateg: 'M' };
+
+// [nazwa obecna, jednostka, osoby, przełożony, opis pracy, numer docelowy, nazwa docelowa, typ docelowy]
+const OBECNE = [
+ ["Prezes zarządu","Zarząd",1,"zgromadzenie wspólników","Współwłaściciel firmy. Kieruje całą firmą, zatwierdza budżet i inwestycje, sam prowadzi rozmowy z trzema największymi klientami.","M-001","Prezes zarządu","Strateg"],
+ ["Dyrektor operacyjny","Zarząd",1,"Prezes zarządu","Kieruje produkcją, utrzymaniem ruchu, jakością, logistyką i zakupami przez kierowników tych jednostek. Przygotowuje plan inwestycji w park maszynowy na kolejne trzy lata.","M-002","Dyrektor operacyjny","Strateg"],
+ ["Dyrektor ds. rozwoju","Zarząd",1,"Prezes zarządu","Nie ma podwładnych. Przygotowuje analizy opłacalności inwestycji i prowadzi projekt zakupu nowej linii do druku cyfrowego. Tytuł dyrektora otrzymał przy zatrudnieniu, żeby oferta była atrakcyjna.","S-001","Ekspert ds. inwestycji","Ekspert"],
+ ["Kierownik produkcji","Produkcja",1,"Dyrektor operacyjny","Kieruje trzema zmianami przez osoby prowadzące zmiany. Odpowiada za plan produkcji, wydajność i koszty działu, przygotowuje budżet działu.","M-003","Kierownik działu produkcji","Manager"],
+ ["Mistrz zmiany","Produkcja",2,"Kierownik produkcji","Prowadzi zmianę: przydziela operatorów do maszyn, pilnuje wykonania planu i jakości, wpisuje raport zmiany do systemu MES. Zmiana liczy około 30 osób.","M-004","Kierownik zespołu produkcji","Lider"],
+ ["Brygadzista","Produkcja",1,"Kierownik produkcji","Prowadzi zmianę nocną. Zakres pracy taki sam jak mistrza zmiany; nazwa pochodzi z czasów, gdy nocna zmiana była mniejsza.","M-004","Kierownik zespołu produkcji","Lider"],
+ ["Maszynista tekturnicy","Produkcja",3,"Mistrz zmiany","Obsługuje linię do produkcji tektury falistej: ustawia parametry, nadzoruje sklejanie warstw, kontroluje wilgotność i grubość tektury.","S-002","Operator linii tektury","Wykonawca"],
+ ["Operator linii tektury","Produkcja",8,"Mistrz zmiany","Obsługuje linię do produkcji tektury falistej. Na zebraniu przełożeni potwierdzili, że wykonuje dokładnie to samo co maszynista tekturnicy.","S-002","Operator linii tektury","Wykonawca"],
+ ["Operator maszyny","Produkcja",21,"Mistrz zmiany","Obsługuje drukarki fleksograficzne i sklejarki. Operatorzy są przesuwani między maszynami w zależności od planu, w tym także do sztanc.","S-003","Operator maszyn przetwórczych","Wykonawca"],
+ ["Operator sztancy","Produkcja",8,"Mistrz zmiany","Obsługuje sztance wykrawające opakowania. Przechodzi to samo szkolenie co operator maszyny i w razie potrzeby pracuje na drukarkach i sklejarkach.","S-003","Operator maszyn przetwórczych","Wykonawca"],
+ ["Pracownik produkcji","Produkcja",40,"Mistrz zmiany","28 osób odbiera wyroby z maszyn, pakuje je i układa na paletach. 12 osób pomaga operatorom przy przezbrojeniach: podaje formy, matryce i farby, czyści maszyny.","S-005 / S-006","Pracownik pakowania i paletyzacji / Pomocnik operatora","Wykonawca"],
+ ["Ustawiacz maszyn","Produkcja",3,"Kierownik produkcji","Przezbraja i ustawia drukarki, sklejarki i sztance przy zmianie zlecenia, usuwa drobne usterki ustawień. Zna wszystkie maszyny przetwórcze.","S-004","Ustawiacz maszyn przetwórczych","Wykonawca"],
+ ["Technolog","Produkcja",1,"Kierownik produkcji","Rozwiązuje nietypowe problemy technologiczne (rozwarstwianie tektury, błędy druku), opracowuje instrukcje technologiczne i doradza działowi sprzedaży przy nowych wzorach opakowań.","S-007","Ekspert ds. technologii produkcji","Ekspert"],
+ ["Planista","Produkcja",1,"Kierownik produkcji","Układa plan produkcji na podstawie zamówień w ERP i dostępności maszyn, aktualizuje go po awariach.","S-008","Specjalista ds. planowania produkcji","Specjalista"],
+ ["Specjalista ds. planowania","Produkcja",1,"Kierownik produkcji","Wykonuje tę samą pracę co planista; obie osoby planują na zmianę, w zależności od dnia tygodnia.","S-008","Specjalista ds. planowania produkcji","Specjalista"],
+ ["Kierownik działu utrzymania ruchu","Utrzymanie ruchu",1,"Dyrektor operacyjny","Bezpośrednio kieruje siedmioma osobami, sam wykonuje część napraw, planuje przeglądy maszyn. Nie ma własnego budżetu; zakupy części zatwierdza dyrektor operacyjny.","M-005","Kierownik zespołu utrzymania ruchu","Lider"],
+ ["Mechanik","Utrzymanie ruchu",4,"Kierownik działu utrzymania ruchu","Usuwa awarie mechaniczne i wykonuje przeglądy maszyn.","S-009","Mechanik utrzymania ruchu","Wykonawca"],
+ ["Konserwator","Utrzymanie ruchu",1,"Kierownik działu utrzymania ruchu","Wykonuje tę samą pracę co mechanik; nazwa pozostała po poprzedniej strukturze.","S-009","Mechanik utrzymania ruchu","Wykonawca"],
+ ["Elektryk","Utrzymanie ruchu",2,"Kierownik działu utrzymania ruchu","Usuwa awarie i wykonuje przeglądy instalacji i układów elektrycznych maszyn; ma uprawnienia SEP.","S-010","Elektryk utrzymania ruchu","Wykonawca"],
+ ["Kierownik jakości","Jakość",1,"Dyrektor operacyjny","Kieruje trzema kontrolerami, prowadzi reklamacje klientów, przygotowuje firmę do audytów klientów. Jest jednocześnie pełnomocnikiem zarządu ds. jakości.","M-006","Kierownik zespołu jakości","Lider"],
+ ["Kontroler jakości","Jakość",2,"Kierownik jakości","Bada próbki tektury i gotowych opakowań, porównuje kolory druku ze wzorcem, dopuszcza partie do wysyłki.","S-011","Kontroler jakości","Wykonawca"],
+ ["Laborant","Jakość",1,"Kierownik jakości","Wykonuje te same badania co kontroler jakości; nazwa wynika z tego, że pracuje głównie w pomieszczeniu laboratorium.","S-011","Kontroler jakości","Wykonawca"],
+ ["Kierownik logistyki","Logistyka i magazyn",1,"Dyrektor operacyjny","Kieruje logistyką przez kierownika magazynu i koordynatora magazynu, bezpośrednio kieruje osobami planującymi transport. Odpowiada za budżet transportu.","M-007","Kierownik działu logistyki","Manager"],
+ ["Kierownik magazynu","Logistyka i magazyn",1,"Kierownik logistyki","Kieruje magazynierami w zakładzie głównym, przydziela zadania, pilnuje zgodności stanów.","M-008","Kierownik zespołu magazynu","Lider"],
+ ["Koordynator magazynu","Logistyka i magazyn",1,"Kierownik logistyki","Kieruje magazynierami w magazynie zewnętrznym. Zakres pracy taki sam jak kierownika magazynu; inna nazwa została przejęta razem z magazynem.","M-008","Kierownik zespołu magazynu","Lider"],
+ ["Magazynier","Logistyka i magazyn",16,"Kierownik magazynu / Koordynator magazynu","Przyjmuje surowce, kompletuje i wydaje wyroby gotowe, rejestruje ruchy w WMS. Wszyscy magazynierzy mają uprawnienia UDT i jeżdżą wózkami.","S-012","Magazynier","Wykonawca"],
+ ["Operator wózka widłowego","Logistyka i magazyn",6,"Kierownik magazynu","Przewozi palety wózkiem między halą a magazynem i kompletuje wysyłki. Przełożony potwierdza, że pracują zamiennie z magazynierami.","S-012","Magazynier","Wykonawca"],
+ ["Spedytor","Logistyka i magazyn",1,"Kierownik logistyki","Planuje transporty do klientów, zamawia przewoźników, przygotowuje dokumenty przewozowe.","S-013","Specjalista ds. transportu","Specjalista"],
+ ["Logistyk","Logistyka i magazyn",1,"Kierownik logistyki","Planuje transporty i zamawia przewoźników; ta sama praca co spedytora.","S-013","Specjalista ds. transportu","Specjalista"],
+ ["Koordynator transportu","Logistyka i magazyn",1,"Kierownik logistyki","Planuje transporty i kontaktuje się z kierowcami; ta sama praca co spedytora i logistyka.","S-013","Specjalista ds. transportu","Specjalista"],
+ ["Kierowca","Logistyka i magazyn",2,"Kierownik logistyki","Dowozi wyroby samochodem ciężarowym do klientów w promieniu 150 km.","S-014","Kierowca samochodu ciężarowego","Wykonawca"],
+ ["Kierownik sprzedaży","Sprzedaż i obsługa klienta",1,"Prezes zarządu","Kieruje bezpośrednio wszystkimi handlowcami i osobami obsługi klienta, odpowiada za plan i budżet sprzedaży.","M-009","Kierownik działu sprzedaży","Manager"],
+ ["Handlowiec","Sprzedaż i obsługa klienta",2,"Kierownik sprzedaży","Pozyskuje nowych klientów, przygotowuje oferty, negocjuje ceny i prowadzi stałych klientów.","S-015","Specjalista ds. sprzedaży","Specjalista"],
+ ["Key Account Manager","Sprzedaż i obsługa klienta",1,"Kierownik sprzedaży","Wykonuje tę samą pracę co handlowiec, ale dla największych klientów. Nie ma podwładnych; angielska nazwa pochodzi z ogłoszenia rekrutacyjnego.","S-015","Specjalista ds. sprzedaży","Specjalista"],
+ ["Przedstawiciel handlowy","Sprzedaż i obsługa klienta",1,"Kierownik sprzedaży","Pozyskuje klientów i przygotowuje oferty; więcej czasu spędza w terenie, poza tym praca jak u handlowca.","S-015","Specjalista ds. sprzedaży","Specjalista"],
+ ["Opiekun klienta","Sprzedaż i obsługa klienta",2,"Kierownik sprzedaży","Przyjmuje zamówienia, wprowadza je do ERP, ustala terminy z planowaniem, informuje klientów o statusie zamówień.","S-016","Specjalista ds. obsługi klienta","Specjalista"],
+ ["Specjalista ds. obsługi klienta","Sprzedaż i obsługa klienta",1,"Kierownik sprzedaży","Wykonuje tę samą pracę co opiekun klienta.","S-016","Specjalista ds. obsługi klienta","Specjalista"],
+ ["Asystentka sprzedaży","Sprzedaż i obsługa klienta",1,"Kierownik sprzedaży","Wykonuje tę samą pracę co opiekun klienta; dodatkowo przygotowuje zestawienia sprzedaży dla kierownika.","S-016","Specjalista ds. obsługi klienta","Specjalista"],
+ ["Specjalista ds. zakupów","Zakupy",1,"Dyrektor operacyjny","Zamawia tekturę, kleje i farby, negocjuje warunki z dostawcami, pilnuje stanów minimalnych.","S-017","Specjalista ds. zakupów","Specjalista"],
+ ["Kupiec","Zakupy",1,"Dyrektor operacyjny","Wykonuje tę samą pracę co specjalista ds. zakupów, dla innej grupy surowców.","S-017","Specjalista ds. zakupów","Specjalista"],
+ ["Główna księgowa","Finanse",1,"Prezes zarządu","Kieruje dwiema księgowymi, sama zamyka miesiąc i rok, kontaktuje się z urzędem skarbowym i biegłym rewidentem.","M-010","Kierownik zespołu księgowości","Lider"],
+ ["Starsza księgowa","Finanse",1,"Główna księgowa","Księguje dokumenty, rozlicza VAT, uzgadnia rozrachunki. Tytuł „starsza” otrzymała w uznaniu stażu.","S-018","Specjalista ds. księgowości","Specjalista"],
+ ["Księgowa","Finanse",1,"Główna księgowa","Księguje dokumenty i uzgadnia rozrachunki; ten sam zakres co starsza księgowa.","S-018","Specjalista ds. księgowości","Specjalista"],
+ ["Controller","Finanse",1,"Prezes zarządu","Przygotowuje miesięczne raporty wyników i kosztów dla zarządu, analizuje odchylenia od budżetu.","S-019","Specjalista ds. controllingu","Specjalista"],
+ ["Kierownik HR","Kadry i płace",1,"Prezes zarządu","Zatrudniona pół roku temu. Kieruje dwiema osobami, sama prowadzi rekrutacje i sprawy pracownicze, przygotowuje regulamin wynagradzania.","M-011","Kierownik zespołu kadr i płac","Lider"],
+ ["Kadrowa","Kadry i płace",1,"Kierownik HR","Prowadzi akta osobowe, ewidencję czasu pracy i naliczanie płac.","S-020","Specjalista ds. kadr i płac","Specjalista"],
+ ["Specjalista ds. kadr i płac","Kadry i płace",1,"Kierownik HR","Wykonuje tę samą pracę co kadrowa.","S-020","Specjalista ds. kadr i płac","Specjalista"],
+ ["Informatyk","IT",1,"Prezes zarządu","Utrzymuje sieć, komputery i drukarki, obsługuje zgłoszenia pracowników.","S-021","Specjalista ds. IT","Specjalista"],
+ ["Administrator IT","IT",1,"Główna księgowa","Administruje systemem ERP i nadaje uprawnienia użytkownikom, obsługuje zgłoszenia pracowników. Podlega głównej księgowej, bo ERP wdrażał dział finansów.","S-021","Specjalista ds. IT","Specjalista"],
+ ["Inspektor BHP","Służba BHP",1,"Prezes zarządu","Prowadzi szkolenia BHP, ocenę ryzyka zawodowego, postępowania powypadkowe i kontrole stanowisk.","S-022","Specjalista ds. BHP","Specjalista"],
+ ["Office Manager","Administracja",1,"Prezes zarządu","Prowadzi recepcję i sekretariat, zamawia materiały biurowe, obsługuje flotę samochodów i umowy serwisowe budynku.","S-023","Specjalista ds. administracji","Specjalista"],
+ ["Asystentka zarządu","Administracja",1,"Prezes zarządu","Prowadzi kalendarz i korespondencję zarządu, zastępuje office managera na recepcji i w sekretariacie.","S-023","Specjalista ds. administracji","Specjalista"],
+ ["Sprzątaczka","Administracja",2,"Office Manager","Sprząta biura, pomieszczenia socjalne i szatnie.","S-024","Pracownik utrzymania czystości","Wykonawca"],
+];
+const DZIALY_GRUP = {
+  G1: ['Produkcja'],
+  G2: ['Zarząd', 'Utrzymanie ruchu', 'Jakość'],
+  G3: ['Logistyka i magazyn'],
+  G4: ['Sprzedaż i obsługa klienta', 'Zakupy'],
+  G5: ['Finanse', 'Kadry i płace', 'IT', 'Służba BHP', 'Administracja']
+};
+
+// [numer, nazwa, typ, kategoria, osoby, jednostka]
+const KLUCZ = [
+ ["M-001","Prezes zarządu","Strateg","ST2",1,"Zarząd"],
+ ["M-002","Dyrektor operacyjny","Strateg","ST1",1,"Zarząd"],
+ ["M-003","Kierownik działu produkcji","Manager","MG2",1,"Produkcja"],
+ ["M-004","Kierownik zespołu produkcji","Lider","L2",3,"Produkcja"],
+ ["M-005","Kierownik zespołu utrzymania ruchu","Lider","L1",1,"Utrzymanie ruchu"],
+ ["M-006","Kierownik zespołu jakości","Lider","L1",1,"Jakość"],
+ ["M-007","Kierownik działu logistyki","Manager","MG2",1,"Logistyka i magazyn"],
+ ["M-008","Kierownik zespołu magazynu","Lider","L2",2,"Logistyka i magazyn"],
+ ["M-009","Kierownik działu sprzedaży","Manager","MG1",1,"Sprzedaż i obsługa klienta"],
+ ["M-010","Kierownik zespołu księgowości","Lider","L1",1,"Finanse"],
+ ["M-011","Kierownik zespołu kadr i płac","Lider","L1",1,"Kadry i płace"],
+ ["S-001","Ekspert ds. inwestycji","Ekspert","E2",1,"Zarząd"],
+ ["S-002","Operator linii tektury","Wykonawca","W2",11,"Produkcja"],
+ ["S-003","Operator maszyn przetwórczych","Wykonawca","W2",29,"Produkcja"],
+ ["S-004","Ustawiacz maszyn przetwórczych","Wykonawca","W3",3,"Produkcja"],
+ ["S-005","Pracownik pakowania i paletyzacji","Wykonawca","W1",28,"Produkcja"],
+ ["S-006","Pomocnik operatora","Wykonawca","W1",12,"Produkcja"],
+ ["S-007","Ekspert ds. technologii produkcji","Ekspert","E1",1,"Produkcja"],
+ ["S-008","Specjalista ds. planowania produkcji","Specjalista","S2",2,"Produkcja"],
+ ["S-009","Mechanik utrzymania ruchu","Wykonawca","W3",5,"Utrzymanie ruchu"],
+ ["S-010","Elektryk utrzymania ruchu","Wykonawca","W3",2,"Utrzymanie ruchu"],
+ ["S-011","Kontroler jakości","Wykonawca","W2",3,"Jakość"],
+ ["S-012","Magazynier","Wykonawca","W1–W2",22,"Logistyka i magazyn"],
+ ["S-013","Specjalista ds. transportu","Specjalista","S2",3,"Logistyka i magazyn"],
+ ["S-014","Kierowca samochodu ciężarowego","Wykonawca","W2",2,"Logistyka i magazyn"],
+ ["S-015","Specjalista ds. sprzedaży","Specjalista","S2–S3",4,"Sprzedaż i obsługa klienta"],
+ ["S-016","Specjalista ds. obsługi klienta","Specjalista","S1–S2",4,"Sprzedaż i obsługa klienta"],
+ ["S-017","Specjalista ds. zakupów","Specjalista","S2",2,"Zakupy"],
+ ["S-018","Specjalista ds. księgowości","Specjalista","S2–S3",2,"Finanse"],
+ ["S-019","Specjalista ds. controllingu","Specjalista","S3",1,"Finanse"],
+ ["S-020","Specjalista ds. kadr i płac","Specjalista","S2",2,"Kadry i płace"],
+ ["S-021","Specjalista ds. IT","Specjalista","S2",2,"IT"],
+ ["S-022","Specjalista ds. BHP","Specjalista","S3",1,"Służba BHP"],
+ ["S-023","Specjalista ds. administracji","Specjalista","S1–S2",2,"Administracja"],
+ ["S-024","Pracownik utrzymania czystości","Wykonawca","W1",2,"Administracja"],
+];
+const STANOWISKO_GRUPY = { G1: 'S-003', G2: 'S-020', G3: 'S-016', G4: 'M-004', G5: 'M-007' };
+const MODULY_GRUPY = { G1: [1, 2], G2: [3, 4, 9, 10], G3: [5, 8], G4: [6], G5: [7] };
+// grupy G6–G10 pracują na tych samych stanowiskach i działach co G1–G5 (pary: G1–G6, G2–G7, G3–G8, G4–G9, G5–G10)
+for (let i = 1; i <= 5; i++) { DZIALY_GRUP['G' + (i + 5)] = DZIALY_GRUP['G' + i]; STANOWISKO_GRUPY['G' + (i + 5)] = STANOWISKO_GRUPY['G' + i]; }
+
+const L = {
+  typ: TYPY,
+  jednostka: ["Zarząd","Produkcja","Utrzymanie ruchu","Jakość","Logistyka i magazyn","Sprzedaż i obsługa klienta","Zakupy","Finanse","Kadry i płace","IT","Służba BHP","Administracja"],
+  lokalizacja: ["Zakład główny","Magazyn zewnętrzny","Praca w terenie"],
+  kategoria: ["W1","W2","W3","S1","S2","S3","E1","E2","L1","L2","MG1","MG2","ST1","ST2"],
+  stanowiska: KLUCZ.map(k => k[0] + ' ' + k[1]),
+  budzet: ["Brak uprawnień finansowych","Do 5 000 zł jednorazowo","Do 20 000 zł jednorazowo","Do 100 000 zł jednorazowo","Powyżej 100 000 zł w ramach budżetu jednostki","W granicach uchwały zarządu"],
+  dostep: ["System ERP — odczyt","System ERP — edycja","System kadrowo-płacowy","System MES (rejestracja produkcji)","System WMS (magazyn)","System CRM","Poczta elektroniczna i dysk wspólny","Upoważnienie do przetwarzania danych osobowych pracowników","Upoważnienie do przetwarzania danych osobowych klientów i kontrahentów","Terminal zbiorczy na hali (bez indywidualnego konta)"],
+  wyksztalcenie: ["Podstawowe","Branżowe I stopnia (zasadnicze zawodowe)","Średnie","Średnie techniczne w określonym zawodzie","Wyższe I stopnia","Wyższe II stopnia","Studia podyplomowe w określonej dziedzinie"],
+  uprawnienia: ["Brak wymaganych uprawnień","UDT — wózki jezdniowe podnośnikowe","UDT — suwnice","SEP — grupa 1, eksploatacja (E)","SEP — grupa 1, dozór (D)","Prawo jazdy kat. B","Prawo jazdy kat. C","Kwalifikacje do wykonywania zadań służby BHP"],
+  czas: ["Pełny etat","Część etatu","Podstawowy system czasu pracy, praca jednozmianowa","Podstawowy system czasu pracy, praca trzyzmianowa","Równoważny system czasu pracy","Zadaniowy czas pracy","Praca stacjonarna","Praca hybrydowa"],
+  miejsce: ["Biuro — normalne warunki","Hala produkcyjna","Magazyn, w tym strefa nieogrzewana","Praca na zewnątrz","Hałas wymagający stosowania ochronników słuchu","Zapylenie (pył papierowy)","Substancje chemiczne (kleje, farby)","Podwyższona lub obniżona temperatura","Praca przy monitorze ekranowym co najmniej przez połowę dobowego wymiaru czasu pracy"],
+  ryzyka: ["Ryzyko: urazy przez części ruchome maszyn","Ryzyko: potrącenie przez wózek jezdniowy","Ryzyko: upadek na tym samym poziomie","Ryzyko: przeciążenie przy ręcznym przemieszczaniu ładunków","Ryzyko: skaleczenie (krawędzie tektury, noże)","Ryzyko: obciążenie wzroku i układu mięśniowo-szkieletowego przy pracy biurowej","Środek ochrony: obuwie ochronne","Środek ochrony: rękawice ochronne","Środek ochrony: ochronniki słuchu","Środek ochrony: okulary ochronne","Środek ochrony: kamizelka odblaskowa"],
+  badania: ["Badania lekarskie wstępne, okresowe i kontrolne","Badania okulistyczne do pracy przy monitorze ekranowym","Badania psychologiczne, gdy wymaga ich ocena ryzyka zawodowego","Badania lekarskie i psychologiczne kierowcy zawodowego"],
+  fizyczne: ["Brak szczególnych wymagań fizycznych","Przeważająca praca siedząca","Przeważająca praca stojąca","Praca w ruchu","Ręczne przemieszczanie ładunków w granicach norm","Sprawność manualna (precyzyjne czynności)","Prawidłowe widzenie barw (kontrola jakości druku)"],
+  wyposazenie: ["Komputer przenośny","Komputer stacjonarny","Telefon służbowy","Terminal z czytnikiem kodów","Wózek jezdniowy podnośnikowy","Linia do produkcji tektury","Sztanca i maszyny do przetwarzania tektury","Narzędzia ręczne (noże, przymiary)","Przyrządy pomiarowe (grubościomierz, wilgotnościomierz)","Samochód osobowy służbowy","Samochód ciężarowy"],
+  kpi: ["Terminowość realizacji zleceń","Wydajność (liczba wyrobów na zmianę)","Udział braków i odpadów","Liczba uzasadnionych reklamacji klientów","Zgodność stanów magazynowych","Terminowość dostaw do klientów","Dostępność maszyn (czas przestojów awaryjnych)","Czas obsługi zgłoszenia","Realizacja planu sprzedaży","Poprawność rozliczeń (liczba korekt)","Rotacja pracowników w zespole","Realizacja budżetu jednostki","Liczba wypadków przy pracy i zdarzeń potencjalnie wypadkowych"],
+  szkolenia: ["Szkolenie BHP wstępne (instruktaż ogólny i stanowiskowy)","Szkolenie BHP okresowe — stanowiska robotnicze","Szkolenie BHP okresowe — stanowiska administracyjno-biurowe","Szkolenie BHP okresowe — pracodawcy i osoby kierujące pracownikami","Szkolenie z ochrony danych osobowych","Szkolenie stanowiskowe z obsługi maszyny"],
+  cykl: ["6 miesięcy","12 miesięcy","24 miesiące"],
+  czestotliwosc: ["ciągła","codzienna","cotygodniowa","comiesięczna","kwartalna lub roczna","doraźna"],
+  katS: ["Merytoryczne","Administracyjne i dokumentacyjne","Współpracy i komunikacji","Jakości i bezpieczeństwa","Przekazywania wiedzy"],
+  katM: ["Planowania i organizacji pracy","Kadrowe","Finansowe","Raportowe","BHP osoby kierującej pracownikami"],
+};
+
+const WZOROWE = {
+  zespol: 'Organizuje stanowiska pracy zgodnie z przepisami i zasadami BHP, dba o sprawność środków ochrony indywidualnej i ich stosowanie zgodnie z przeznaczeniem, organizuje, przygotowuje i prowadzi prace z uwzględnieniem zabezpieczenia pracowników przed wypadkami i chorobami zawodowymi, dba o porządek w miejscu pracy, egzekwuje przestrzeganie przepisów i zasad BHP oraz zapewnia wykonanie zaleceń lekarza sprawującego profilaktyczną opiekę zdrowotną nad pracownikami (art. 212 Kodeksu pracy).',
+  bhp211: 'Zna przepisy i zasady BHP, bierze udział w szkoleniach i instruktażu z tego zakresu i poddaje się egzaminom sprawdzającym; wykonuje pracę zgodnie z przepisami i zasadami BHP oraz poleceniami przełożonych; dba o należyty stan maszyn, urządzeń i narzędzi oraz o porządek na stanowisku pracy; stosuje środki ochrony zbiorowej i przydzielone środki ochrony indywidualnej; poddaje się wymaganym badaniom lekarskim; niezwłocznie zawiadamia przełożonego o wypadku lub zagrożeniu życia albo zdrowia ludzkiego (art. 211 Kodeksu pracy).',
+  ocenaS: 'Ocena roczna przez przełożonego według zadań i profilu kompetencyjnego.',
+  ocenaM: 'Ocena roczna według zadań, profilu kompetencyjnego i realizacji celów jednostki.'
+};
+
+// [id, moduł, etykieta, wzór, właściciel (klucz), zmienność (klucz), wypełnienie (klucz), rodzaj pola, lista]
+const POLA = [
+ ['numer',1,'Numer stanowiska','SM',['HR'],'St','ręcznie','text'],
+ ['nazwa',1,'Nazwa stanowiska (poziom + zakres)','SM',['HR'],'St','lista + ręcznie','text'],
+ ['typ',1,'Typ stanowiska','SM',['HR'],'St','lista','one','typ'],
+ ['jednostka',1,'Jednostka organizacyjna','SM',['HR'],'St','lista','one','jednostka'],
+ ['lokalizacja',1,'Lokalizacja','SM',['HR'],'Zd','lista','many','lokalizacja'],
+ ['kategoria',1,'Kategoria zaszeregowania','SM',['Dział wynagrodzeń'],'Ok','lista','one','kategoria'],
+ ['przelozony',2,'Przełożony służbowy i funkcjonalny','SM',['HR'],'St','lista','one','stanowiska'],
+ ['podwladni',2,'Podwładni (stanowiska)','M',['HR'],'Zd','lista','dzial','stanowiska'],
+ ['zastepstwa',2,'Zastępstwa','SM',['Przełożony'],'Ok','lista','dzial','stanowiska'],
+ ['kooperacja',2,'Kooperacja wewnętrzna i zewnętrzna','SM',['Przełożony'],'Ok','lista','koop'],
+ ['cel',3,'Cel główny stanowiska','SM',['Przełożony'],'St','ręcznie','area'],
+ ['zad_typowe',4,'Zadania typowe','SM',['HR'],'Wz','z wzoru','typowe'],
+ ['zad_wyj',4,'Zadania własne stanowiska','SM',['SME','Przełożony'],'Ok','lista + ręcznie','wyjatkowe'],
+ ['decyzje',5,'Decyzje samodzielne i wymagające akceptacji','SM',['Przełożony'],'Ok','ręcznie','area'],
+ ['zespol',5,'Odpowiedzialność za zespół','M',['HR','BHP'],'Wz','z wzoru','wzor'],
+ ['budzet',5,'Budżet i limity finansowe','M',['Finanse'],'Ok','lista','one','budzet'],
+ ['dostep',5,'Dostęp do danych osobowych i systemów','SM',['IT','IOD'],'Zd','lista','many','dostep'],
+ ['wyksztalcenie',6,'Wykształcenie','SM',['Przełożony','HR'],'Ok','lista','one','wyksztalcenie'],
+ ['jezyki',6,'Języki obce','SM',['Przełożony'],'Ok','lista','jez'],
+ ['uprawnienia',6,'Uprawnienia zawodowe','SM',['BHP'],'Zd','lista','many','uprawnienia'],
+ ['kompetencje',6,'Profil kompetencyjny (wynika z typu stanowiska)','SM',['HR'],'Wz','z wzoru','profil'],
+ ['zawodowe',6,'Kompetencje zawodowe (rodzina zawodów)','SM',['Przełożony','HR'],'Ok','lista','rodzina'],
+ ['psych',6,'Profil psychologiczny (opcjonalnie)','SM',['HR'],'Ok','lista','psych'],
+ ['czas',7,'Czas i organizacja pracy','SM',['HR'],'Zd','lista','many','czas'],
+ ['miejsce',7,'Miejsce i czynniki środowiskowe','SM',['BHP'],'Zd','lista','many','miejsce'],
+ ['ryzyka',7,'Ryzyka zawodowe i środki ochrony','SM',['BHP'],'Zd','lista','many','ryzyka'],
+ ['badania',7,'Wymagane badania','SM',['BHP'],'Zd','lista','many','badania'],
+ ['bhp211',7,'Obowiązki pracownika w zakresie BHP','SM',['BHP'],'Wz','z wzoru','wzor'],
+ ['fizyczne',7,'Wymagania fizyczne','SM',['BHP','SME'],'Ok','lista','many','fizyczne'],
+ ['wyposazenie',7,'Wyposażenie (sprzęt, systemy, pojazdy)','SM',['IT','Administracja'],'Zd','lista','many','wyposazenie'],
+ ['kpi',8,'KPI stanowiska (miara bez wartości docelowej)','SM',['Przełożony'],'Ok','lista','many','kpi'],
+ ['ocena',8,'Metoda i częstotliwość oceny','SM',['HR'],'Wz','z wzoru','wzor'],
+ ['szkolenia',9,'Szkolenia obowiązkowe','SM',['HR','BHP'],'Zd','lista','many','szkolenia'],
+ ['sme',10,'Zespół SME (imię, nazwisko, stanowisko)','SM',['HR'],'Zd','ręcznie','area'],
+ ['zatwierdzenia',10,'Zatwierdzenia (przełożony, HR, zarząd)','SM',['HR'],'Zd','ręcznie','area'],
+ ['historia',10,'Wersja, data i zakres zmiany','SM',['HR'],'Zd','ręcznie','text'],
+ ['cykl',10,'Cykl przeglądu','SM',['HR','Przełożony'],'Ok','lista','one','cykl'],
+ ['nastepny',10,'Data następnego przeglądu (data zatwierdzenia + cykl)','SM',['HR'],'Ok','ręcznie','text'],
+];
+const MODULY = { 1: 'Identyfikacja', 2: 'Miejsce w strukturze', 3: 'Cel', 4: 'Zadania', 5: 'Uprawnienia i odpowiedzialność', 6: 'Wymagania', 7: 'Warunki pracy', 8: 'Mierniki', 9: 'Szkolenia', 10: 'Zespół i zatwierdzenie' };
+const WLASCICIELE = ['HR', 'Przełożony', 'SME', 'IT', 'BHP', 'Finanse', 'Dział wynagrodzeń', 'Administracja', 'IOD'];
+const ZMIENNOSC = { St: 'stałe', Ok: 'okresowe', Zd: 'zdarzeniowe', Wz: 'wzorcowe' };
+const WYPELNIENIE = ['lista', 'ręcznie', 'lista + ręcznie', 'z wzoru'];
+
+// [nr, dotyczy, kategoria, D, Z, I, K, częstotliwość]
+const ZT = [
+ ["ZT-01","Wszystkie S","Administracyjne i dokumentacyjne","rejestruje wykonaną pracę i jej wyniki","dla przełożonego i jednostek korzystających z tych danych","w systemie wskazanym dla stanowiska (ERP, MES, WMS lub arkusz jednostki)","w celu zapewnienia aktualnych danych o realizacji zadań","codzienna"],
+ ["ZT-02","Wszystkie S","Współpracy i komunikacji","przekazuje informacje o stanie pracy i napotkanych problemach","przełożonemu oraz osobom przejmującym lub kontynuującym pracę","w ustalonej formie (raport zmiany, spotkanie, komunikator)","w celu zachowania ciągłości pracy","codzienna"],
+ ["ZT-03","Wszystkie S","Jakości i bezpieczeństwa","wykonuje pracę zgodnie z instrukcjami stanowiskowymi i przepisami BHP","z uwzględnieniem bezpieczeństwa własnego i współpracowników","stosując instrukcje stanowiskowe, wnioski z oceny ryzyka zawodowego i przydzielone środki ochrony","w celu zapobiegania wypadkom i chorobom zawodowym","ciągła"],
+ ["ZT-04","Wszystkie S","Jakości i bezpieczeństwa","zgłasza niezgodności, awarie i zdarzenia potencjalnie wypadkowe","przełożonemu oraz służbom jakości, utrzymania ruchu lub BHP","zgodnie z procedurą zgłaszania zdarzeń","w celu usunięcia przyczyn i zapobiegania ich powtórzeniu","doraźna"],
+ ["ZT-05","Wszystkie S","Jakości i bezpieczeństwa","przetwarza informacje i dane osobowe wyłącznie w zakresie nadanych uprawnień","z uwzględnieniem praw pracowników, klientów i firmy","zgodnie z polityką ochrony danych i nadanymi uprawnieniami dostępu","w celu ochrony danych przed nieuprawnionym ujawnieniem","ciągła"],
+ ["ZT-06","Wykonawca","Merytoryczne","przygotowuje stanowisko pracy do rozpoczęcia zmiany","dla zespołu pracującego na zmianie","według listy kontrolnej stanowiska","w celu bezpiecznego i terminowego rozpoczęcia pracy","codzienna"],
+ ["ZT-07","Wykonawca","Jakości i bezpieczeństwa","utrzymuje porządek na stanowisku pracy","dla siebie i osób pracujących na kolejnych zmianach","zgodnie ze standardem organizacji stanowiska","w celu zapewnienia bezpieczeństwa i sprawnego przebiegu pracy","ciągła"],
+ ["ZT-08","Specjalista","Współpracy i komunikacji","udziela informacji i wyjaśnień w swoim zakresie działania","pracownikom innych jednostek","korzystając z dokumentacji i systemów swojej jednostki","w celu umożliwienia im realizacji ich zadań","codzienna"],
+ ["ZT-09","Specjalista","Administracyjne i dokumentacyjne","prowadzi i archiwizuje dokumentację swojego zakresu działania","dla jednostki oraz na potrzeby kontroli wewnętrznych i zewnętrznych","zgodnie z instrukcją kancelaryjną i okresami przechowywania dokumentów","w celu zapewnienia kompletności i dostępności dokumentów","codzienna"],
+ ["ZT-10","Specjalista","Przekazywania wiedzy","wdraża nowych pracowników do zadań swojego zakresu","dla osób nowo zatrudnionych w jednostce","według programu wdrożenia przygotowanego przez przełożonego","w celu skrócenia czasu dochodzenia do samodzielnej pracy","doraźna"],
+ ["ZT-11","Ekspert","Przekazywania wiedzy","doradza w sprawach wymagających wiedzy specjalistycznej","kadrze kierowniczej i specjalistom innych jednostek","opracowując opinie, analizy i rekomendacje","w celu podejmowania decyzji opartych na rzetelnej wiedzy","doraźna"],
+ ["ZT-12","Ekspert","Merytoryczne","opracowuje i aktualizuje standardy, procedury i instrukcje w swoim zakresie","dla pracowników stosujących te standardy","na podstawie analizy przepisów, danych z procesu i rozwiązań stosowanych w branży","w celu ujednolicenia i podniesienia jakości pracy","kwartalna lub roczna"],
+ ["ZT-13","Ekspert","Przekazywania wiedzy","prowadzi szkolenia wewnętrzne w swoim zakresie","dla pracowników organizacji","według programu uzgodnionego z działem HR","w celu rozwijania kompetencji wymaganych na stanowiskach","kwartalna lub roczna"],
+ ["ZT-14","Wszystkie M","Kadrowe","przekazuje informację zwrotną o wykonywanej pracy","podległym pracownikom","w rozmowach indywidualnych, z odwołaniem do zadań i kryteriów oceny","w celu utrzymania i poprawy jakości pracy","cotygodniowa"],
+ ["ZT-15","Wszystkie M","Kadrowe","przeprowadza okresową ocenę pracy","podległych pracowników","według systemu ocen okresowych organizacji","w celu rozpoznania potrzeb rozwojowych i powiązania wynagrodzeń z wynikami","kwartalna lub roczna"],
+ ["ZT-16","Wszystkie M","Kadrowe","uczestniczy w doborze pracowników","do kierowanego zespołu lub jednostki, we współpracy z działem HR","określając wymagania na podstawie opisu stanowiska i uczestnicząc w rozmowach kwalifikacyjnych","w celu zatrudnienia osób spełniających wymagania stanowiska","doraźna"],
+ ["ZT-17","Wszystkie M","Kadrowe","zatwierdza urlopy i inne nieobecności","podległych pracowników","w systemie kadrowym, zgodnie z planem urlopów","w celu zapewnienia obsady i ciągłości pracy","cotygodniowa"],
+ ["ZT-18","Wszystkie M","BHP osoby kierującej pracownikami","organizuje pracę zgodnie z przepisami i zasadami BHP oraz egzekwuje ich przestrzeganie","wobec podległych pracowników","zgodnie z art. 212 Kodeksu pracy, oceną ryzyka zawodowego i instrukcjami stanowiskowymi","w celu zapewnienia bezpiecznych i higienicznych warunków pracy","ciągła"],
+ ["ZT-19","Wszystkie M","Administracyjne i dokumentacyjne","zatwierdza opisy stanowisk w kierowanej jednostce i zgłasza potrzebę ich aktualizacji","działowi HR","według procedury opisu stanowisk","w celu utrzymania aktualnych wymagań stanowisk","kwartalna lub roczna"],
+ ["ZT-20","Lider","Planowania i organizacji pracy","przydziela zadania i ustala kolejność ich wykonania","członkom zespołu","na podstawie dziennego lub tygodniowego planu jednostki","w celu terminowego wykonania planu","codzienna"],
+ ["ZT-21","Lider","Planowania i organizacji pracy","kontroluje bieżące wykonanie pracy i reaguje na odchylenia","w kierowanym zespole","na podstawie obserwacji pracy i danych z systemów","w celu utrzymania wymaganej wydajności i jakości","ciągła"],
+ ["ZT-22","Lider","Raportowe","przekazuje raport z pracy zespołu","kierownikowi działu","w formie raportu zmiany lub zestawienia w systemie","w celu zapewnienia przełożonemu danych do decyzji","codzienna"],
+ ["ZT-23","Manager","Planowania i organizacji pracy","opracowuje plan pracy i cele jednostki","dla podległych zespołów, w uzgodnieniu z przełożonym","na podstawie celów organizacji i budżetu","w celu przełożenia celów organizacji na zadania zespołów","kwartalna lub roczna"],
+ ["ZT-24","Manager","Planowania i organizacji pracy","ustala strukturę i obsadę zespołów jednostki","dla kierowanej jednostki, w uzgodnieniu z działem HR","na podstawie planu pracy i opisów stanowisk","w celu dostosowania zasobów do zadań jednostki","kwartalna lub roczna"],
+ ["ZT-25","Manager","Finansowe","przygotowuje projekt budżetu jednostki i kontroluje jego realizację","dla przełożonego i działu finansów","w systemie ERP, według procedury budżetowania","w celu utrzymania kosztów jednostki w planowanych granicach","comiesięczna"],
+ ["ZT-26","Manager","Kadrowe","podejmuje decyzje o zatrudnieniu w ramach zatwierdzonego planu etatów","dla kierowanej jednostki","na podstawie rekomendacji z procesu rekrutacji","w celu zapewnienia obsady zgodnej z potrzebami jednostki","doraźna"],
+ ["ZT-27","Manager","Raportowe","raportuje wyniki jednostki","dyrektorowi pionu lub zarządowi","według wskaźników przyjętych dla jednostki","w celu oceny realizacji celów i podjęcia decyzji korygujących","comiesięczna"],
+ ["ZT-28","Strateg","Planowania i organizacji pracy","opracowuje strategię i cele pionu lub organizacji","dla zarządu i podległych jednostek","na podstawie analizy rynku, wyników i zasobów organizacji","w celu określenia kierunku rozwoju na kolejne lata","kwartalna lub roczna"],
+ ["ZT-29","Strateg","Planowania i organizacji pracy","zatwierdza strukturę organizacyjną i plan zatrudnienia","dla jednostek pionu","na podstawie wniosków kierowników działów i planu finansowego","w celu dostosowania organizacji do przyjętej strategii","kwartalna lub roczna"],
+ ["ZT-30","Strateg","Finansowe","zatwierdza budżety jednostek i decyduje o inwestycjach w granicach upoważnień","dla jednostek pionu","na podstawie projektów budżetów i analiz opłacalności","w celu efektywnego wykorzystania zasobów finansowych","kwartalna lub roczna"],
+ ["ZT-31","Strateg","Współpracy i komunikacji","reprezentuje organizację w relacjach z kluczowymi partnerami","wobec kluczowych klientów, dostawców i instytucji","w ramach udzielonych pełnomocnictw","w celu budowania trwałych relacji i ochrony interesów organizacji","doraźna"],
+ ["ZT-32","Strateg","Raportowe","raportuje wyniki pionu lub organizacji","zarządowi lub radzie nadzorczej","według wskaźników strategicznych","w celu oceny realizacji strategii","kwartalna lub roczna"],
+];
+
+
+
+// [część EKASP, treść pozycji]
+const EKASP = [
+ ["I — Środowisko pracy","Na stanowisku występuje hałas utrudniający porozumiewanie się."],
+ ["I — Środowisko pracy","Na stanowisku istnieje ryzyko urazu mechanicznego."],
+ ["II — Funkcjonowanie","Praca wymaga częstego kontaktu z klientami zewnętrznymi."],
+ ["II — Funkcjonowanie","Praca wymaga dostosowywania się do zmieniających się warunków i priorytetów."],
+ ["III — Procesy poznawcze","Praca wymaga utrzymywania uwagi przez długi czas bez przerw."],
+ ["III — Procesy poznawcze","Praca wymaga jednoczesnego śledzenia kilku procesów lub źródeł informacji."],
+ ["III — Procesy poznawcze","Praca wymaga przetwarzania i porównywania dużej liczby danych liczbowych."],
+ ["III — Procesy poznawcze","Praca wymaga podejmowania decyzji pod presją czasu."],
+ ["IV — Czynności fizyczne","Praca jest wykonywana w pozycji stojącej przez większość zmiany."],
+ ["V — Cechy pracownika wymagane na stanowisku","Praca wymaga systematyczności, dokładności i dotrzymywania zobowiązań."],
+];
+const SKALA_W = ['', 'nieistotna', 'marginalna', 'niska', 'średnia', 'istotna', 'bardzo ważna', 'kluczowa'];
+
+// ---------- Języki obce: język + poziom opisany w kontekście pracy ----------
+const JEZYKI = ['angielski', 'niemiecki', 'inny (wpisz w polu „Do czego potrzebny”)'];
+const POZIOMY_JEZ = [
+ ['A1', 'Rozumie pojedyncze słowa i zwroty związane ze stanowiskiem, np. oznaczenia na maszynach, etykiety, proste polecenia.'],
+ ['A2', 'Załatwia proste, rutynowe sprawy: krótka wiadomość, podstawowa informacja o zamówieniu lub dostawie.'],
+ ['B1', 'Prowadzi proste rozmowy i korespondencję w sprawach swojego zakresu pracy; rozumie instrukcje w znanych sprawach.'],
+ ['B2', 'Swobodnie prowadzi rozmowy, także telefoniczne, i korespondencję zawodową; rozumie złożoną dokumentację ze swojej dziedziny.'],
+ ['C1', 'Prowadzi negocjacje, prezentacje i spotkania; samodzielnie przygotowuje złożone dokumenty.'],
+ ['C2', 'Posługuje się językiem jak rodzimy użytkownik, także w sprawach umownych i prawnych.']
+];
+
+// ---------- Kooperacja: z kim, w jakim zakresie, jak często ----------
+const KOOP_ZEWN = ['Klienci — firmy spożywcze', 'Klienci — sklepy internetowe', 'Dostawcy surowców (tektura, kleje, farby)', 'Dostawcy usług (transport, serwis maszyn)',
+  'Agencje pracy tymczasowej', 'Banki i ubezpieczyciele', 'Urzędy i instytucje (ZUS, US, PIP, Sanepid)', 'Jednostki certyfikujące i audytorzy klientów'];
+const KOOP_ZAKRES = [
+ ['Wymiana informacji bieżących', 'przekazuje i otrzymuje informacje potrzebne do bieżącej pracy'],
+ ['Uzgadnianie planów i terminów', 'ustala terminy, kolejność i obsadę prac'],
+ ['Przekazywanie dokumentów i danych', 'przekazuje dokumenty lub dane do dalszego przetwarzania'],
+ ['Zamawianie i odbiór', 'zamawia materiały, usługi lub prace i odbiera ich wykonanie'],
+ ['Zgłaszanie i wyjaśnianie problemów', 'zgłasza i wyjaśnia reklamacje, awarie i niezgodności'],
+ ['Konsultowanie i doradzanie', 'udziela lub uzyskuje opinii w sprawach merytorycznych'],
+ ['Wspólna realizacja zadań', 'wykonuje zadanie lub projekt razem z inną jednostką'],
+ ['Negocjowanie warunków', 'ustala ceny, terminy lub warunki umów'],
+ ['Kontrola i sprawozdawczość', 'przekazuje sprawozdania, przechodzi kontrole i audyty']
+];
+const KOOP_CZESTO = ['codziennie', 'co tydzień', 'okresowo', 'doraźnie'];
+
+// ---------- Profile kompetencyjne zdefiniowane przez organizację (jeden na typ) ----------
+// [kompetencja, zachowanie wymagane na tym poziomie]
+const PROFILE = {
+ Wykonawca: [
+  ['Bezpieczna praca', 'Stosuje instrukcje stanowiskowe i środki ochrony także wtedy, gdy wydłuża to pracę; zatrzymuje pracę i zgłasza zagrożenie przełożonemu.'],
+  ['Dbałość o jakość', 'Sprawdza wyrób lub wynik pracy według wzorca, zanim przekaże go dalej, i odkłada partie niezgodne do wyjaśnienia.'],
+  ['Współpraca', 'Przekazuje stanowisko i informacje kolejnej zmianie lub osobie, pomaga przy zadaniach zespołu, gdy wymaga tego plan.'],
+  ['Komunikacja', 'Zgłasza przełożonemu problemy i odchylenia od planu od razu, z podaniem, czego dotyczą.'],
+  ['Planowanie i organizacja własnej pracy', 'Wykonuje zadania w kolejności wyznaczonej planem i przygotowuje stanowisko przed rozpoczęciem pracy.'],
+  ['Uczenie się', 'Opanowuje obsługę nowych maszyn i procedur w czasie wdrożenia i stosuje je bez stałego nadzoru.']],
+ Specjalista: [
+  ['Dbałość o jakość', 'Sprawdza poprawność dokumentów i danych przed przekazaniem i poprawia błędy u źródła, a nie tylko w wyniku.'],
+  ['Planowanie i organizacja własnej pracy', 'Ustala kolejność spraw według terminów i ważności, a przy kolizji terminów uzgadnia priorytet z przełożonym.'],
+  ['Rozwiązywanie problemów', 'Ustala przyczynę błędu lub opóźnienia na podstawie danych i proponuje rozwiązanie w swoim zakresie.'],
+  ['Orientacja na klienta', 'Ustala potrzeby klienta wewnętrznego lub zewnętrznego i informuje go o terminach i statusie spraw, zanim zapyta.'],
+  ['Współpraca', 'Uzgadnia z innymi działami sposób i terminy wspólnych zadań i dotrzymuje uzgodnień.'],
+  ['Komunikacja', 'Przekazuje informacje w formie i czasie, które pozwalają odbiorcy działać, i sprawdza, czy zostały zrozumiane.'],
+  ['Uczenie się', 'Śledzi zmiany przepisów, procedur i systemów w swoim zakresie i wprowadza je do własnej pracy.']],
+ Ekspert: [
+  ['Rozwiązywanie problemów', 'Rozwiązuje problemy nietypowe, dla których nie ma procedury, i opracowuje standard zapobiegający ich powtórzeniu.'],
+  ['Przekazywanie wiedzy', 'Przygotowuje instrukcje i szkolenia, po których inni samodzielnie stosują nowe rozwiązania.'],
+  ['Komunikacja', 'Przedstawia analizy i rekomendacje tak, aby osoby decydujące mogły porównać warianty i ich skutki.'],
+  ['Orientacja na klienta', 'Doradza innym jednostkom i klientom, dostosowując rozwiązanie do ich potrzeb w granicach przyjętych standardów.'],
+  ['Współpraca', 'Prowadzi uzgodnienia między jednostkami w sprawach swojej dziedziny, bez podległości służbowej.'],
+  ['Dbałość o jakość', 'Weryfikuje rozwiązania i dokumenty innych w swojej dziedzinie przed ich wdrożeniem.'],
+  ['Uczenie się', 'Śledzi rozwój swojej dziedziny i ocenia, które rozwiązania warto wprowadzić w organizacji.']],
+ Lider: [
+  ['Kierowanie zespołem', 'Przydziela zadania według planu, umiejętności i obciążenia osób, kontroluje wykonanie w trakcie zmiany i reaguje na odchylenia.'],
+  ['Rozwijanie pracowników', 'Wdraża nowe osoby, przekazuje informację zwrotną w rozmowie indywidualnej i wskazuje, czego się nauczyć.'],
+  ['Podejmowanie decyzji', 'Decyduje o zmianie kolejności prac i obsady w czasie zmiany, w granicach planu, i informuje o tym przełożonego.'],
+  ['Bezpieczna praca', 'Organizuje pracę zespołu zgodnie z przepisami BHP i egzekwuje stosowanie środków ochrony.'],
+  ['Rozwiązywanie problemów', 'Usuwa przyczyny przestojów i błędów w zespole, a problemy poza swoim zakresem przekazuje właściwej jednostce.'],
+  ['Komunikacja', 'Przekazuje zespołowi cele i zmiany planu oraz raportuje przełożonemu wyniki zmiany.'],
+  ['Współpraca', 'Uzgadnia pracę zespołu z sąsiednimi zespołami i działami, np. utrzymaniem ruchu i magazynem.']],
+ Manager: [
+  ['Kierowanie zespołem', 'Kieruje jednostką przez kierowników zespołów: ustala cele, rozlicza ich realizację i rozstrzyga sprawy sporne.'],
+  ['Planowanie i organizacja pracy jednostki', 'Przygotowuje plan i budżet jednostki oraz dostosowuje obsadę i zasoby do zadań.'],
+  ['Podejmowanie decyzji', 'Podejmuje decyzje w swoim zakresie w wymaganym czasie, z uwzględnieniem ich skutków dla innych jednostek.'],
+  ['Rozwijanie pracowników', 'Planuje rozwój kierowników zespołów i następstwo na kluczowych stanowiskach jednostki.'],
+  ['Prowadzenie zmian', 'Wyjaśnia cel zmiany, planuje jej wprowadzenie i sprawdza, czy zespoły stosują nowy sposób pracy.'],
+  ['Współpraca', 'Uzgadnia z innymi działami cele i zasady współpracy jednostek.'],
+  ['Komunikacja', 'Przekazuje decyzje zarządu w sposób, który pozwala kierownikom zespołów działać, i raportuje wyniki jednostki.']],
+ Strateg: [
+  ['Myślenie strategiczne', 'Łączy decyzje bieżące z celami długoterminowymi i ocenia wpływ zmian rynku i przepisów na organizację.'],
+  ['Podejmowanie decyzji', 'Podejmuje decyzje o skutkach rozłożonych na lata na podstawie analiz wariantów i ryzyk.'],
+  ['Prowadzenie zmian', 'Inicjuje zmiany w strukturze i sposobie działania pionu lub organizacji i rozlicza ich wprowadzenie.'],
+  ['Kierowanie zespołem', 'Kieruje kadrą kierowniczą przez cele i budżety, rozlicza wyniki jednostek.'],
+  ['Komunikacja', 'Reprezentuje organizację wobec klientów, właścicieli i instytucji i przekazuje strategię kadrze kierowniczej.'],
+  ['Współpraca', 'Uzgadnia z pozostałymi członkami zarządu priorytety i podział zasobów między pionami.']]
+};
+
+// ---------- Kompetencje zawodowe: katalog rodzin zawodów zdefiniowany przez organizację ----------
+// [rodzina, [[kompetencja, zachowanie]]]
+const RODZINY = [
+ ['Produkcja — obsługa maszyn', [['Prowadzenie procesu technologicznego', 'Ustawia i prowadzi maszynę według karty technologicznej i koryguje parametry przy odchyleniach.'], ['Kontrola wyrobu w procesie', 'Porównuje wyrób z wzorcem w ustalonych odstępach i zatrzymuje produkcję przy niezgodności.']]],
+ ['Produkcja — kierowanie', [['Planowanie produkcji zmiany', 'Rozdziela zlecenia na maszyny i osoby tak, aby wykonać plan zmiany przy najmniejszej liczbie przezbrojeń.'], ['Raportowanie produkcji', 'Rejestruje wyniki, przestoje i braki w systemie MES zgodnie ze stanem faktycznym.']]],
+ ['Utrzymanie ruchu', [['Diagnozowanie usterek', 'Ustala przyczynę awarii na podstawie objawów i dokumentacji maszyny, zanim wymieni części.'], ['Obsługa planowa maszyn', 'Wykonuje przeglądy według harmonogramu i dokumentuje stan maszyn.']]],
+ ['Jakość', [['Badanie zgodności wyrobu', 'Wykonuje badania według metodyki i dopuszcza partię tylko przy wynikach w granicach wymagań.'], ['Prowadzenie reklamacji', 'Ustala przyczynę reklamacji z produkcją i przygotowuje odpowiedź dla klienta w terminie.']]],
+ ['Logistyka i magazyn', [['Gospodarka magazynowa', 'Przyjmuje, składuje i wydaje towar zgodnie z dokumentami i rejestruje każdy ruch w systemie WMS.'], ['Organizacja transportu', 'Planuje trasy i ładunki tak, aby dostawy dotarły w terminie przy najniższym koszcie.']]],
+ ['Sprzedaż i obsługa klienta', [['Negocjowanie warunków sprzedaży', 'Przygotowuje stanowisko i granice ustępstw i prowadzi rozmowę do porozumienia zgodnego z polityką cenową.'], ['Obsługa zamówień', 'Wprowadza zamówienia do ERP, potwierdza terminy z planowaniem i informuje klienta o zmianach.']]],
+ ['Zakupy', [['Negocjowanie z dostawcami', 'Porównuje oferty i negocjuje cenę, terminy i warunki dostaw w granicach budżetu.'], ['Ocena dostawców', 'Ocenia dostawców według kryteriów jakości, terminowości i ceny i wnioskuje o zmianę dostawcy.']]],
+ ['Finanse i księgowość', [['Ewidencja i rozliczenia', 'Księguje dokumenty i rozlicza podatki zgodnie z przepisami i polityką rachunkowości.'], ['Analiza danych finansowych', 'Przygotowuje zestawienia wyników i kosztów i wyjaśnia odchylenia od budżetu.']]],
+ ['Kadry i płace', [['Stosowanie prawa pracy', 'Prowadzi sprawy pracownicze zgodnie z Kodeksem pracy i przepisami wewnętrznymi.'], ['Rozliczanie wynagrodzeń', 'Nalicza wynagrodzenia i składki na podstawie ewidencji czasu pracy i umów.']]],
+ ['IT', [['Utrzymanie systemów i sieci', 'Utrzymuje sprawność systemów, kopii zapasowych i uprawnień użytkowników.'], ['Obsługa zgłoszeń użytkowników', 'Przyjmuje zgłoszenia, ustala priorytet i rozwiązuje je w ustalonym czasie.']]],
+ ['BHP', [['Ocena ryzyka zawodowego', 'Identyfikuje zagrożenia na stanowiskach i proponuje środki ograniczające ryzyko.'], ['Szkolenie i kontrola BHP', 'Prowadzi szkolenia i kontrole stanowisk oraz rozlicza wykonanie zaleceń.']]],
+ ['Administracja biura', [['Obsługa biura i korespondencji', 'Prowadzi sekretariat, recepcję i obieg dokumentów według instrukcji kancelaryjnej.'], ['Nadzór nad umowami serwisowymi', 'Pilnuje terminów umów, przeglądów floty i budynku oraz zamawia usługi.']]],
+ ['Utrzymanie czystości', [['Utrzymanie czystości pomieszczeń', 'Sprząta pomieszczenia według harmonogramu i stosuje środki czystości zgodnie z kartami charakterystyki.']]]
+];
+
+// ---------- Profil psychologiczny: kategoria + krótka definicja ----------
+const PSYCH = [
+ ['Długotrwałe utrzymanie uwagi', 'Praca wymaga utrzymania uwagi na tym samym procesie przez długi czas.'],
+ ['Podzielność uwagi', 'Praca wymaga jednoczesnego śledzenia kilku procesów lub źródeł informacji.'],
+ ['Spostrzegawczość wzrokowa', 'Praca wymaga wychwytywania drobnych różnic, np. koloru lub wymiaru.'],
+ ['Pamięć robocza', 'Praca wymaga przetwarzania kilku informacji naraz bez sięgania do dokumentacji.'],
+ ['Praca z danymi liczbowymi', 'Praca wymaga przetwarzania i porównywania dużej liczby danych liczbowych.'],
+ ['Rozumowanie przyczynowo-skutkowe', 'Praca wymaga ustalania przyczyn zdarzeń i przewidywania skutków działań.'],
+ ['Decyzje pod presją czasu', 'Praca wymaga decyzji w krótkim czasie, przy niepełnych informacjach.'],
+ ['Odporność na monotonię', 'Praca polega w dużej części na powtarzaniu tych samych czynności.'],
+ ['Sumienność', 'Praca wymaga systematyczności, dokładności i dotrzymywania terminów.'],
+ ['Stabilność emocjonalna', 'Praca wymaga zachowania równowagi w sytuacjach napięcia i presji.'],
+ ['Otwartość na nowe rozwiązania', 'Praca wymaga poszukiwania i przyjmowania nowych rozwiązań.'],
+ ['Gotowość do częstego kontaktu z ludźmi', 'Praca wymaga częstego, inicjowanego przez pracownika kontaktu z wieloma osobami.'],
+ ['Nastawienie na współdziałanie', 'Praca wymaga uwzględniania potrzeb innych osób i współdziałania z nimi.'],
+ ['Panowanie nad emocjami w trudnych kontaktach', 'Praca wymaga panowania nad emocjami w rozmowach z niezadowolonymi lub napiętymi rozmówcami.']
+];
+
+// ---------- Przegląd EKASP: 46 rozdziałów i moduł opisu, do którego prowadzą ----------
+// [nr, nazwa, krótka informacja w kontekście KORVEX, moduł opisu (0 = bez polskich norm)]
+const ROZDZIALY = [
+ ['1.1', 'Miejsce pracy', 'Gdzie wykonuje się pracę: hala, biuro, magazyn, teren. W KORVEX np. hala produkcyjna albo magazyn zewnętrzny.', 7],
+ ['1.2', 'Makroklimat', 'Warunki atmosferyczne przy pracy na zewnątrz, np. kierowcy i załadunek na placu.', 7],
+ ['1.3', 'Mikroklimat', 'Temperatura, wilgotność i przeciągi na stanowisku, np. nieogrzewany magazyn zimą.', 7],
+ ['1.4', 'Oświetlenie', 'Natężenie i rodzaj światła, ważne np. przy porównywaniu kolorów druku.', 7],
+ ['1.5', 'Hałas i wibracja', 'Hałas maszyn na hali; w KORVEX wymaga ochronników słuchu i badań.', 7],
+ ['1.6', 'Higiena pracy', 'Pył papierowy, kleje i farby; czynniki szkodliwe dla zdrowia.', 7],
+ ['1.7', 'Urządzenia', 'Maszyny i urządzenia obsługiwane na stanowisku: tekturnica, sztance, wózki.', 7],
+ ['1.8', 'Narzędzia', 'Narzędzia ręczne i przyrządy pomiarowe: noże, przymiary, grubościomierz.', 7],
+ ['1.9', 'Ubiór', 'Odzież robocza i środki ochrony indywidualnej: obuwie, rękawice, kamizelki.', 7],
+ ['1.10', 'Zagrożenia', 'Zagrożenia wypadkowe: części ruchome maszyn, wózki, upadki, skaleczenia.', 7],
+ ['1.11', 'BHP', 'Szkolenia, instrukcje i badania wymagane przepisami BHP.', 7],
+ ['2.1', 'Sytuacje trudne', 'Awarie, reklamacje, presja terminu; jak często się zdarzają.', 6],
+ ['2.2', 'Cel profesjonalny', 'Po co stanowisko istnieje i jaki rezultat ma dawać.', 3],
+ ['2.3', 'Strategie pracy', 'Sposób działania: według instrukcji czy samodzielnie, w zmiennych warunkach.', 6],
+ ['2.4', 'Struktura pracy', 'Z jakich zadań składa się praca i jak często się powtarzają.', 4],
+ ['2.5', 'Kwalifikacje', 'Wykształcenie, uprawnienia i szkolenia wymagane do pracy.', 6],
+ ['2.6', 'Czas pracy', 'System i rozkład czasu pracy: zmiany, praca w nocy, praca hybrydowa.', 7],
+ ['2.7', 'Relacje interpersonalne', 'Z kim i jak często osoba na stanowisku współpracuje wewnątrz i na zewnątrz firmy.', 2],
+ ['2.8', 'Kultura organizacyjna', 'Normy i wartości firmy, które wpływają na sposób wykonywania pracy.', 6],
+ ['3.1', 'Źródła informacji', 'Z czego osoba korzysta w pracy: dokumentacja, systemy, polecenia, wskazania maszyn.', 4],
+ ['3.2', 'Wzrok', 'Wymagania wzrokowe, np. rozróżnianie barw przy kontroli druku.', 7],
+ ['3.3', 'Słuch', 'Wymagania słuchowe, np. rozpoznawanie sygnałów maszyn w hałasie.', 7],
+ ['3.4', 'Inne zmysły', 'Dotyk, węch i zmysł równowagi, np. ocena wilgotności tektury dotykiem.', 7],
+ ['3.5', 'Uwaga', 'Skupienie i podzielność uwagi przy prowadzeniu kilku procesów.', 6],
+ ['3.6', 'Czujność', 'Długotrwałe śledzenie procesu i wychwytywanie rzadkich odchyleń.', 6],
+ ['3.7', 'Pamięć', 'Zapamiętywanie parametrów, procedur i informacji bez sięgania do dokumentów.', 6],
+ ['3.8', 'Wiedza', 'Wiedza zawodowa potrzebna do pracy; w opisie ujmuje ją profil kompetencji zawodowych.', 6],
+ ['3.9', 'Dane', 'Przetwarzanie danych liczbowych i tekstowych, np. w ERP i arkuszach.', 6],
+ ['3.10', 'Rozumowanie', 'Ustalanie przyczyn i przewidywanie skutków, np. przy awarii lub reklamacji.', 6],
+ ['3.11', 'Decyzje', 'Jakie decyzje osoba podejmuje sama, a które wymagają akceptacji.', 5],
+ ['3.12', 'Odpowiedzialność', 'Za co osoba odpowiada: ludzie, mienie, pieniądze, bezpieczeństwo innych.', 5],
+ ['4.1', 'Czynności manualne', 'Praca rękami: podawanie, układanie, montowanie form i matryc.', 7],
+ ['4.2', 'Czynności manipulacyjne', 'Precyzyjne ruchy dłoni i palców, np. ustawianie noży sztancy.', 7],
+ ['4.3', 'Pozycja ciała', 'Praca stojąca, siedząca, w pochyleniu; jak długo w ciągu zmiany.', 7],
+ ['4.4', 'Koordynacja ruchowa', 'Koordynacja wzrokowo-ruchowa, np. przy prowadzeniu wózka.', 7],
+ ['4.5', 'Obciążenie fizyczne', 'Podnoszenie i przenoszenie ładunków, wysiłek w ciągu zmiany.', 7],
+ ['5.1', 'Cechy charakteru', 'Cechy wymagane przez pracę, np. sumienność przy kontroli jakości.', 6],
+ ['5.2', 'Temperament', 'Tempo i wytrzymałość na obciążenie, np. praca w stałym rytmie maszyny.', 6],
+ ['5.3', 'Cechy specyficzne', 'Np. odporność na monotonię albo na pracę w izolacji.', 6],
+ ['5.4', 'Wielka Piątka', 'Pięć wymiarów osobowości wymaganych na stanowisku, np. stabilność emocjonalna.', 6],
+ ['5.5', 'Kompetencje społeczne', 'Zachowania wobec innych: współpraca, komunikacja, obsługa klienta.', 6],
+ ['5.6', 'Kompetencje organizacyjne', 'Planowanie i organizacja pracy własnej lub zespołu.', 6],
+ ['5.7', 'Cechy ergonomiczne', 'Cechy fizyczne istotne dla pracy, np. zasięg ramion, wzrost przy maszynie.', 7],
+ ['5.8', 'Inteligencja moralna', 'Brak polskich norm; do rozważenia przy stanowiskach z dużą odpowiedzialnością etyczną.', 0],
+ ['5.9', 'Inteligencja emocjonalna', 'Panowanie nad emocjami i rozpoznawanie emocji innych, np. przy reklamacjach.', 6],
+ ['5.10', 'Style decyzji', 'Brak polskich norm; do rozważenia przy stanowiskach decyzyjnych.', 0]
+];
+// pole opisu, do którego prowadzi rozdział (podpowiedź w opisie)
+const ROZDZ_POLE = { '1.1': 'miejsce', '1.2': 'miejsce', '1.3': 'miejsce', '1.4': 'miejsce', '1.5': 'miejsce', '1.6': 'miejsce', '1.7': 'wyposazenie', '1.8': 'wyposazenie',
+  '1.9': 'ryzyka', '1.10': 'ryzyka', '1.11': 'badania', '2.1': 'psych', '2.2': 'cel', '2.3': 'kompetencje', '2.4': 'zad_typowe', '2.5': 'wyksztalcenie', '2.6': 'czas',
+  '2.7': 'kooperacja', '2.8': 'kompetencje', '3.1': 'zad_typowe', '3.2': 'fizyczne', '3.3': 'fizyczne', '3.4': 'fizyczne', '3.5': 'psych', '3.6': 'psych', '3.7': 'psych',
+  '3.8': 'zawodowe', '3.9': 'psych', '3.10': 'psych', '3.11': 'decyzje', '3.12': 'decyzje', '4.1': 'fizyczne', '4.2': 'fizyczne', '4.3': 'fizyczne', '4.4': 'fizyczne',
+  '4.5': 'fizyczne', '5.1': 'psych', '5.2': 'psych', '5.3': 'psych', '5.4': 'psych', '5.5': 'kompetencje', '5.6': 'kompetencje', '5.7': 'fizyczne', '5.9': 'psych' };
+const CZESCI_EKASP = { '1': 'I — Środowisko pracy', '2': 'II — Funkcjonowanie', '3': 'III — Procesy poznawcze', '4': 'IV — Czynności fizyczne', '5': 'V — Cechy pracownika' };
+
+// ---------- Wybór SME: sześciu kandydatów na stanowisko każdej pary grup ----------
+// [kto, opis, rekomendacja (tak/nie), uzasadnienie rekomendacji]
+const SME_KAND = {
+ 'S-003': [
+  ['Paweł, operator maszyn', 'Na stanowisku od 8 lat, pracuje na wszystkich trzech rodzajach maszyn (drukarki, sklejarki, sztance), w systemie trzyzmianowym.', 'tak', 'Zna pełny zakres pracy, bo operatorzy są przesuwani między maszynami.'],
+  ['Kamil, operator maszyn', 'Na stanowisku od 3 miesięcy, w okresie wdrożenia; dotąd pracował tylko przy sklejarce.', 'nie', 'Za krótki staż i jeden rodzaj maszyny: nie zna pełnego zakresu ani rzadszych sytuacji.'],
+  ['Grażyna, operatorka maszyn', 'Na stanowisku od 4 lat, głównie przy sztancach, na zmianie dziennej; wdraża nowych operatorów.', 'tak', 'Inna maszyna i inna zmiana niż u Pawła, więc zespół zobaczy różnice w pracy.'],
+  ['Mariusz, kierownik zespołu produkcji', 'Przełożony operatorów od 6 lat, wcześniej sam był operatorem.', 'tak', 'Przełożony widzi wymagania przez efekty pracy i zatwierdza zadania własne stanowiska.'],
+  ['Zbigniew, operator maszyn', 'Na stanowisku od 15 lat. Złożył wniosek o wyższą kategorię i mówi, że opis „pokaże, ile naprawdę robi”.', 'nie', 'Ma osobisty interes w zawyżeniu wymagań; opis dotyczy stanowiska, a nie oceny jego pracy.'],
+  ['Robert, ustawiacz maszyn', 'Przezbraja i ustawia wszystkie maszyny przetwórcze, zna je technicznie, ale nie prowadzi na nich produkcji.', 'nie', 'Zajmuje inne stanowisko (S-004); można go zapytać o przezbrojenia, ale nie jest SME tego stanowiska.']],
+ 'S-020': [
+  ['Jolanta, specjalistka ds. kadr i płac', 'W firmie od 9 lat; prowadzi akta osobowe, ewidencję czasu pracy i naliczanie płac.', 'tak', 'Zna pełny zakres pracy i jego zmiany w czasie.'],
+  ['Natalia, specjalistka ds. kadr i płac', 'Na stanowisku od półtora roku, wcześniej pracowała w biurze rachunkowym.', 'tak', 'Inny staż i inne doświadczenia niż u Jolanty, więc zespół oddzieli styl pracy jednej osoby od wymagań stanowiska.'],
+  ['Kierowniczka HR', 'Przełożona stanowiska od pół roku; przygotowuje regulamin wynagradzania.', 'tak', 'Przełożona zatwierdza zadania i wymagania; krótki staż w firmie uzupełniają dwie pracownice.'],
+  ['Główna księgowa', 'Co miesiąc otrzymuje listy płac do księgowania i przelewów.', 'nie', 'Jest odbiorcą wyników pracy, a nie jej wykonawcą; jej uwagi dotyczą kooperacji.'],
+  ['Konsultantka biura rachunkowego', 'Prowadziła płace KORVEX z zewnątrz do czasu przejęcia ich przez firmę dwa lata temu.', 'nie', 'Osoba zewnętrzna, a jej wiedza o pracy jest nieaktualna.'],
+  ['Stażysta w dziale kadr', 'Od dwóch miesięcy pomaga w archiwizacji akt.', 'nie', 'Krótki staż i wycinek zadań; nie zna pełnego zakresu pracy.']],
+ 'S-016': [
+  ['Monika, opiekunka klienta', 'Na stanowisku od 5 lat; obsługuje głównie klientów z branży spożywczej.', 'tak', 'Zna pełny zakres pracy i najtrudniejszych klientów.'],
+  ['Agata, asystentka sprzedaży', 'Od 2 lat przyjmuje zamówienia, a dodatkowo przygotowuje zestawienia sprzedaży dla kierownika.', 'tak', 'Jej udział pozwoli rozstrzygnąć, czy zestawienia należą do stanowiska, czy są zadaniem przypisanym osobie.'],
+  ['Kierownik działu sprzedaży', 'Przełożony stanowiska od 7 lat.', 'tak', 'Przełożony zatwierdza zadania i wymagania stanowiska.'],
+  ['Łukasz, specjalista ds. sprzedaży', 'Codziennie przekazuje obsłudze klienta nowe zamówienia od swoich klientów.', 'nie', 'Zajmuje inne stanowisko (S-015); jego uwagi dotyczą kooperacji.'],
+  ['Dawid, opiekun klienta', 'Na stanowisku od 6 tygodni.', 'nie', 'Za krótki staż, by znać pełny zakres pracy i sytuacje sezonowe.'],
+  ['Specjalista ds. planowania produkcji', 'Codziennie ustala z obsługą klienta terminy realizacji zamówień.', 'nie', 'Zajmuje inne stanowisko; jest partnerem w kooperacji, a nie wykonawcą tej pracy.']],
+ 'M-004': [
+  ['Mariusz, kierownik zmiany dziennej', 'Na stanowisku od 6 lat, kieruje zmianą liczącą około 30 osób.', 'tak', 'Zna pełny zakres pracy kierownika zespołu produkcji.'],
+  ['Henryk, kierownik zmiany nocnej', 'Na stanowisku od 10 lat; na nocnej zmianie sam rozstrzyga sprawy, które w dzień trafiają do kierownika działu.', 'tak', 'Inna zmiana pokazuje zakres decyzji, którego nie widać na zmianie dziennej.'],
+  ['Kierownik działu produkcji', 'Przełożony stanowiska; przygotowuje budżet działu.', 'tak', 'Przełożony zatwierdza zadania i uprawnienia stanowiska.'],
+  ['Paweł, operator maszyn', 'Podwładny Mariusza od 8 lat.', 'nie', 'Podwładny nie opisuje stanowiska przełożonego; jego opinię można zebrać w wywiadzie.'],
+  ['Kierownik zmiany przeniesiony z magazynu', 'Prowadzi zmianę od 2 miesięcy, wcześniej kierował magazynierami.', 'nie', 'Za krótki staż na tym stanowisku.'],
+  ['Kierownik zespołu utrzymania ruchu', 'Też jest Liderem i współpracuje z kierownikami zmian przy awariach.', 'nie', 'Ten sam typ stanowiska, ale inna praca; jego uwagi dotyczą kooperacji.']],
+ 'M-007': [
+  ['Kierownik działu logistyki', 'Jedyna osoba na stanowisku, od 4 lat; odpowiada za budżet transportu.', 'tak', 'Jedyna osoba wykonująca tę pracę; przy stanowisku jednoosobowym jej udział jest konieczny.'],
+  ['Dyrektor operacyjny', 'Przełożony stanowiska; zatwierdza budżet logistyki.', 'tak', 'Przełożony zatwierdza zadania, uprawnienia i budżet.'],
+  ['Kierownik zespołu magazynu', 'Podwładny kierownika logistyki; zastępuje go w czasie urlopu.', 'tak', 'Przy stanowisku jednoosobowym zastępca zna zakres pracy i pozwala sprawdzić opis drugą perspektywą.'],
+  ['Poprzedni kierownik logistyki', 'Odszedł z firmy rok temu, zgodził się odpowiedzieć na pytania.', 'nie', 'Osoba spoza firmy, a jej wiedza o pracy jest nieaktualna.'],
+  ['Specjalista ds. transportu', 'Podwładny od 3 lat; zna planowanie transportu.', 'nie', 'Zna tylko część pracy działu i nie zastępuje kierownika.'],
+  ['Kierownik działu sprzedaży', 'Codziennie uzgadnia z logistyką terminy dostaw do klientów.', 'nie', 'Partner w kooperacji, a nie wykonawca tej pracy.']]
+};
+
+const ZLOGO_SVG = `<svg viewBox="0 0 80 85" aria-hidden="true" class="zmlz"><path d="M76.75,44.38 L75.38,43.00 L73.75,42.25 L73.12,42.25 L71.50,43.00 L58.12,52.75 L51.50,57.12 L44.12,62.88 L42.12,64.12 L41.12,64.50 L40.38,64.50 L39.25,63.38 L39.00,62.62 L38.75,56.50 L38.00,52.25 L37.75,46.88 L37.12,41.88 L36.88,37.50 L35.88,32.50 L35.12,31.88 L33.62,31.62 L32.50,32.12 L29.25,34.88 L28.62,35.12 L26.12,37.62 L25.75,39.00 L25.75,41.25 L27.00,57.38 L28.00,61.88 L28.25,67.12 L28.88,72.62 L29.12,81.12 L30.12,84.00 L30.62,84.38 L31.62,84.50 L35.38,82.62 L38.38,80.00 L46.25,74.75 L56.88,67.00 L57.38,66.88 L69.38,58.12 L70.38,57.62 L75.50,53.88 L77.50,52.75 L78.88,51.38 L79.12,50.75 L79.88,50.38 L79.88,48.25 L79.50,48.25 L79.00,47.75ZM50.75,1.62 L50.00,1.00 L48.50,0.88 L47.38,1.12 L45.38,2.12 L42.25,4.75 L41.25,5.25 L35.38,9.62 L31.50,12.12 L19.62,20.88 L17.62,22.00 L15.25,23.88 L12.75,25.38 L5.50,30.88 L4.75,31.12 L2.50,32.75 L1.00,34.62 L1.00,36.62 L4.38,41.38 L6.75,42.88 L8.38,42.62 L14.25,38.00 L18.62,34.88 L20.62,33.75 L25.62,30.00 L26.50,29.62 L36.50,22.12 L38.62,20.88 L40.25,20.75 L41.00,21.38 L41.38,22.50 L42.12,32.00 L42.88,36.88 L43.12,44.50 L43.88,48.62 L44.00,51.00 L44.38,52.25 L45.75,53.25 L47.25,53.12 L48.25,52.62 L52.00,49.62 L53.62,48.12 L54.50,46.88 L54.88,46.00 L54.88,44.12 L54.12,39.25 L53.75,29.62 L53.00,26.25 L52.12,19.38 L51.50,6.75Z" fill="currentColor"/></svg>`;
+
+</script>
+<script>
+// ===================== APLIKACJA: praca grup bez bazy, plik grupy AP_Gxx.json =====================
+const URLP = new URLSearchParams(location.search);
+const PROW = URLP.get('prowadzacy') === '1';
+const $ = (s, r = document) => r.querySelector(s);
+const h = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k.startsWith('aria-')) { e.setAttribute(k, String(v)); continue; }
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+};
+const getP = (o, path) => path.reduce((a, k) => (a == null ? undefined : a[k]), o);
+const nest = (path, v) => path.reduceRight((acc, k) => ({ [k]: acc }), v);
+const norm = s => (s || '').toLowerCase().replace(/\s+/g, ' ').replace(/\bds\.\s*/g, 'ds. ').trim();
+const klucz = nr => KLUCZ.find(k => k[0] === nr);
+const merge = (a, b) => { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) a[k] = merge(a[k] && typeof a[k] === 'object' ? a[k] : {}, b[k]); else a[k] = b[k]; } return a; };
+const nrG = g => parseInt(String(g || '').slice(1), 10) || 0;
+const g2 = g => 'G' + String(nrG(g)).padStart(2, '0');
+const nazwaPliku = g => 'AP_' + g2(g) + '.json';
+const godz = t => new Date(t).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+const pl = x => String(x).replace('.', ',');
+const zywe = o => Object.entries(o || {}).filter(([, v]) => v && !v.del).sort((a, b) => (a[1].t || 0) - (b[1].t || 0));
+
+// ---------- Zapis w przeglądarce ----------
+const KL = 'zml-ap-zadania-';
+let PAMIEC_OK = true;
+const mem = {};
+function wczytajGrupe(g) {
+  if (mem[g]) return mem[g];
+  let d = {};
+  try { d = JSON.parse(localStorage.getItem(KL + g) || '{}'); } catch (e) { PAMIEC_OK = false; }
+  mem[g] = d.docs ? d : { docs: {} };
+  return mem[g];
+}
+function zapiszGrupe(g) { try { localStorage.setItem(KL + g, JSON.stringify(mem[g])); PAMIEC_OK = true; } catch (e) { PAMIEC_OK = false; } }
+const DB = {
+  subs: [],
+  get(id) { const g = id.split('_')[0]; return wczytajGrupe(g).docs[id] || {}; },
+  watchDoc(id, cb) { const s = { id, cb }; this.subs.push(s); setTimeout(() => cb(structuredClone(this.get(id))), 0); return () => { this.subs = this.subs.filter(x => x !== s); }; },
+  save(id, patch) {
+    const g = id.split('_')[0], G0 = wczytajGrupe(g);
+    if (G0.lock) return;
+    G0.docs[id] = merge(structuredClone(G0.docs[id] || {}), patch);
+    G0.zmieniono = Date.now();
+    zapiszGrupe(g);
+    PLIK.zmiana(g);
+    const d = G0.docs[id];
+    setTimeout(() => this.subs.forEach(s => { if (s.id === id) s.cb(structuredClone(d)); }), 0);
+  }
+};
+
+// ---------- Stan ----------
+const ZAD = [
+  ['nazwy', 'Z01', 'Nazwy stanowisk', 'Nazwy stanowisk w Waszych działach według reguły poziom + zakres oraz typ trudnego stanowiska z klasyfikatora.'],
+  ['sme', 'Z02', 'Wybór SME', 'Wybór dwóch lub trzech ekspertów przedmiotowych spośród sześciu kandydatów, z uzasadnieniem.'],
+  ['przeglad', 'Z03', 'Przegląd EKASP', 'Które z 46 rozdziałów EKASP dotyczą Waszego stanowiska i do których pól opisu prowadzą.'],
+  ['ekasp', 'Z04', 'Konsensus EKASP', 'Ocena dziesięciu pozycji EKASP w rolach SME według procedury konsensusu.'],
+  ['wzor', 'Z05', 'Wzór i właściciele pól', 'Kto w organizacji wypełnia każde pole wzoru opisu.'],
+  ['zadania', 'Z06', 'Zadania DZIK', 'Zadania typowe z wzoru oraz trzy do pięciu zadań własnych stanowiska w układzie DZIK.'],
+  ['opis', 'Z07', 'Opis stanowiska', 'Pełny opis stanowiska z wynikami poprzednich zadań i pobranie opisu jako PDF.']
+];
+const KEYS = ['start', ...ZAD.map(z => z[0])];
+const ST = { grupa: '', tab: KEYS.includes(URLP.get('zadanie')) ? URLP.get('zadanie') : 'start', unsub: [], potwierdz: false };
+try { const g = localStorage.getItem(KL + 'wybrana'); if (GRUPY.includes(g)) ST.grupa = g; } catch (e) {}
+if (GRUPY.includes(URLP.get('grupa'))) ST.grupa = URLP.get('grupa');
+const G = () => ST.grupa;
+const NR = () => STANOWISKO_GRUPY[G()];
+let statusTimer;
+function status(kind, txt) {
+  const el = $('#status'); if (!el) return;
+  el.textContent = txt || ''; el.className = 'status ' + (kind === 'err' ? 'err' : 'ok');
+  clearTimeout(statusTimer); if (kind !== 'err') statusTimer = setTimeout(() => { el.textContent = ''; }, 6000);
+}
+function save(docId, typ, path, value, extra = {}) { DB.save(docId, { typ, grupa: G(), ts: Date.now(), ...extra, ...nest(path, value) }); }
+const timers = {};
+function saveLater(key, fn) { clearTimeout(timers[key]); timers[key] = setTimeout(fn, 400); }
+
+// ---------- Plik grupy: jeden plik AP_Gxx.json aktualizowany automatycznie ----------
+const FS_OK = typeof window.showSaveFilePicker === 'function' && typeof window.showOpenFilePicker === 'function';
+const IDB = {
+  db() { return new Promise((ok, bad) => { try { const r = indexedDB.open('zml-ap-pliki', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => ok(r.result); r.onerror = () => bad(r.error); } catch (e) { bad(e); } }); },
+  async get(k) { try { const d = await this.db(); return await new Promise(ok => { const q = d.transaction('h').objectStore('h').get(k); q.onsuccess = () => ok(q.result); q.onerror = () => ok(null); }); } catch (e) { return null; } },
+  async set(k, v) { try { const d = await this.db(); await new Promise(ok => { const t = d.transaction('h', 'readwrite'); t.objectStore('h').put(v, k); t.oncomplete = ok; t.onerror = ok; }); } catch (e) {} }
+};
+const PLIK = {
+  h: {}, stan: {}, timer: null,
+  dane(g) { const m = wczytajGrupe(g); return { format: 'zml-analiza-pracy-grupa', wersja: 2, grupa: g, plik: nazwaPliku(g), zapisano: new Date().toISOString(), zmieniono: m.zmieniono || null, zakonczone: m.done || {}, docs: m.docs }; },
+  async zgoda(handle, pytaj) {
+    try {
+      const o = { mode: 'readwrite' };
+      if ((await handle.queryPermission(o)) === 'granted') return true;
+      if (pytaj) return (await handle.requestPermission(o)) === 'granted';
+    } catch (e) {}
+    return false;
+  },
+  async zapisz(g, pytaj) {
+    const handle = this.h[g]; if (!handle) return false;
+    if (!(await this.zgoda(handle, pytaj))) { this.stan[g] = 'wznow'; pasekPliku(); return false; }
+    try { const w = await handle.createWritable(); await w.write(JSON.stringify(this.dane(g), null, 1)); await w.close(); this.stan[g] = 'ok'; this.czas = Date.now(); pasekPliku(); return true; }
+    catch (e) { this.stan[g] = 'blad'; pasekPliku(); return false; }
+  },
+  zmiana(g) { clearTimeout(this.timer); this.timer = setTimeout(() => { if (this.h[g]) this.zapisz(g, false); else pasekPliku(); }, 700); },
+  async przywroc(g) { if (!FS_OK || this.h[g]) return; const hd = await IDB.get(g); if (hd) { this.h[g] = hd; this.stan[g] = (await this.zgoda(hd, false)) ? 'ok' : 'wznow'; pasekPliku(); } },
+  async utworz() {
+    const g = G();
+    if (!FS_OK) { this.pobierz(); return; }
+    try {
+      const hd = await window.showSaveFilePicker({ suggestedName: nazwaPliku(g), types: [{ description: 'Plik grupy', accept: { 'application/json': ['.json'] } }] });
+      this.h[g] = hd; await IDB.set(g, hd); await this.zapisz(g, true);
+      status('ok', 'Plik grupy ' + hd.name + ' utworzony; od teraz zapisuje się sam.');
+    } catch (e) { if (e && e.name !== 'AbortError') status('err', 'Nie udało się utworzyć pliku grupy.'); }
+  },
+  pobierz() {
+    const g = G(); const blob = new Blob([JSON.stringify(this.dane(g), null, 1)], { type: 'application/json' });
+    const a = h('a', { href: URL.createObjectURL(blob), download: nazwaPliku(g) });
+    document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    this.stan[g] = 'pobrany'; this.czas = Date.now(); pasekPliku();
+    status('ok', 'Plik ' + nazwaPliku(g) + ' zapisany w folderze Pobrane.');
+  },
+  wczytajDane(d) {
+    const g = d.grupa;
+    mem[g] = { docs: d.docs, zmieniono: d.zmieniono || Date.now(), done: d.zakonczone || {}, wczytano: d.zapisano };
+    zapiszGrupe(g);
+    ST.grupa = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {}
+  },
+  async kontynuuj() {
+    if (FS_OK) {
+      try {
+        const [hd] = await window.showOpenFilePicker({ types: [{ description: 'Plik grupy', accept: { 'application/json': ['.json'] } }] });
+        const d = await czytaj(await hd.getFile());
+        if (!this.nowszy(d)) return;
+        this.wczytajDane(d); this.h[d.grupa] = hd; await IDB.set(d.grupa, hd);
+        const ok = await this.zapisz(d.grupa, true);
+        ST.tab = 'start'; render();
+        status('ok', 'Wczytano plik ' + hd.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').' + (ok ? ' Dalsze zmiany zapisują się w tym samym pliku.' : ''));
+      } catch (e) { if (e && e.name !== 'AbortError') status('err', 'To nie jest plik grupy z tych zajęć.'); }
+      return;
+    }
+    const inp = h('input', { type: 'file', accept: '.json,application/json' });
+    inp.addEventListener('change', async () => {
+      const f = inp.files[0]; if (!f) return;
+      try { const d = await czytaj(f); if (!this.nowszy(d)) return; this.wczytajDane(d); ST.tab = 'start'; render(); status('ok', 'Wczytano plik ' + f.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').'); }
+      catch (e) { status('err', 'To nie jest plik grupy z tych zajęć.'); }
+    });
+    inp.click();
+  },
+  nowszy(d) {
+    const m = wczytajGrupe(d.grupa);
+    if (m.lock && new Date(d.zapisano).getTime() <= m.lock) { status('err', 'To jest plik przekazany z tej przeglądarki. Wczytajcie nowszy plik z czatu pokoju, zapisany przez osobę, która pracowała po Was.'); return false; }
+    return true;
+  },
+  async przekaz() {
+    const g = G(), m = wczytajGrupe(g);
+    let ok = false;
+    if (this.h[g]) ok = await this.zapisz(g, true);
+    if (!ok) this.pobierz();
+    m.lock = Date.now(); zapiszGrupe(g); render();
+  }
+};
+function czytaj(file) {
+  return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (d.format !== 'zml-analiza-pracy-grupa' || !GRUPY.includes(d.grupa) || !d.docs) throw new Error('format'); ok(d); } catch (e) { bad(e); } }; r.onerror = bad; r.readAsText(file); });
+}
+function pasekPliku() {
+  const el = $('#plikbar'); if (!el) return;
+  const g = G(); if (!g || wczytajGrupe(g).lock) { el.hidden = true; return; }
+  const st = PLIK.stan[g], m = wczytajGrupe(g);
+  let txt, btn = null, cls = 'plikbar';
+  if (FS_OK && PLIK.h[g] && st === 'ok') { txt = 'Plik grupy ' + PLIK.h[g].name + ' zaktualizowany ' + godz(PLIK.czas || Date.now()) + '.'; cls += ' ok'; }
+  else if (FS_OK && PLIK.h[g] && st === 'wznow') { txt = 'Przeglądarka wstrzymała zapis do pliku ' + PLIK.h[g].name + '.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.zapisz(g, true) }, 'Wznów zapis do pliku'); }
+  else if (FS_OK && PLIK.h[g] && st === 'blad') { txt = 'Nie udało się zapisać pliku grupy.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.utworz() }, 'Utwórz plik grupy'); }
+  else if (FS_OK) { txt = 'Grupa nie ma jeszcze pliku. Utwórzcie go raz; potem zapisuje się sam po każdej zmianie.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.utworz() }, 'Utwórz plik grupy'); }
+  else { txt = (st === 'pobrany' ? 'Plik ' + nazwaPliku(g) + ' pobrany ' + godz(PLIK.czas) + '. ' : '') + 'Ta przeglądarka nie zapisuje pliku sama. Dane są w przeglądarce; plik pobierzcie przed przekazaniem pracy.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.pobierz() }, 'Pobierz plik grupy'); }
+  if (!m.zmieniono && !PLIK.h[g] && FS_OK) cls += ' nowy';
+  el.className = cls; el.hidden = false;
+  el.replaceChildren(h('div', { class: 'plikin' }, h('span', {}, txt), btn));
+}
+
+// ---------- Pola powiązane z dokumentem ----------
+function bindText(el, docId, typ, path, extra) {
+  el.dataset.p = path.join('.');
+  el.addEventListener('input', () => { el.dataset.dirty = '1'; saveLater(docId + el.dataset.p, () => { delete el.dataset.dirty; save(docId, typ, path, el.value, extra); }); });
+  return el;
+}
+function bindSelect(el, docId, typ, path, extra, after) {
+  el.dataset.p = path.join('.');
+  el.addEventListener('change', () => { save(docId, typ, path, el.value, extra); if (after) after(el.value); });
+  return el;
+}
+function chip(label, docId, typ, path, extra, title) {
+  const b = h('button', { class: 'chip', type: 'button', 'aria-pressed': 'false', 'data-p': path.join('.'), 'data-k': 'chip', title }, label);
+  b.addEventListener('click', () => { const v = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', v); save(docId, typ, path, v, extra); });
+  return b;
+}
+function wybor(opcje, docId, typ, path, extra) {
+  const box = h('div', { class: 'chips', 'data-p': path.join('.'), 'data-k': 'radio' });
+  opcje.forEach(([v, l]) => box.append(h('button', { class: 'chip', type: 'button', 'aria-pressed': 'false', 'data-v': v, onclick: () => { box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === v)); save(docId, typ, path, v, extra); } }, l)));
+  return box;
+}
+function applyDoc(root, data) {
+  root.querySelectorAll('[data-p]').forEach(el => {
+    const v = getP(data, el.dataset.p.split('.'));
+    if (el.dataset.k === 'chip') el.setAttribute('aria-pressed', v === true);
+    else if (el.dataset.k === 'radio') el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(v) === b.dataset.v));
+    else if (el !== document.activeElement && !el.dataset.dirty) el.value = v ?? '';
+  });
+}
+function selectEl(options, placeholder = 'wybierz…') {
+  return h('select', {}, h('option', { value: '' }, placeholder), options.map(o => Array.isArray(o) ? h('optgroup', { label: o[0] }, o[1].map(x => h('option', { value: x }, x))) : h('option', { value: o }, o)));
+}
+function card(...kids) { return h('div', { class: 'card' }, ...kids); }
+function tag(t, cls = '') { return h('span', { class: 'tag ' + cls }, t); }
+function intro(...ps) { return h('div', { class: 'intro' }, ps.map(p => typeof p === 'string' ? h('p', {}, p) : p)); }
+function tbl(head, rows, cls = '') {
+  return h('div', { class: 'tw ' + cls }, h('table', {}, h('thead', {}, h('tr', {}, head.map(x => h('th', {}, x)))),
+    h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c)))))));
+}
+function stanowiskoInfo(nr) {
+  const k = klucz(nr);
+  return h('div', { class: 'stan' }, h('div', { class: 'stan-nr' }, k[0]), h('div', {}, h('div', { class: 'stan-n' }, k[1]),
+    h('div', { class: 'muted' }, k[2] + ' · wzór ' + WZOR_TYPU[k[2]] + ' · ' + k[5] + ' · ' + k[4] + (k[4] === 1 ? ' osoba' : ' os.'))));
+}
+function koniecZadania(key) {
+  const g = G(), m = wczytajGrupe(g);
+  const done = !!(m.done && m.done[key]);
+  const b = h('button', { class: 'btn', type: 'button', onclick: () => { m.done = m.done || {}; m.done[key] = !done; m.zmieniono = Date.now(); zapiszGrupe(g); PLIK.zmiana(g); render(); } }, done ? 'Cofnij oznaczenie' : 'Oznacz zadanie jako zakończone');
+  return h('div', { class: 'card przyp' }, h('b', {}, done ? 'Zadanie oznaczone jako zakończone' : 'Na koniec zadania'),
+    h('p', { class: 'desc' }, 'Oznaczcie zadanie jako zakończone. Jeśli następne zadanie wpisuje inna osoba, kliknijcie „Przekaż pracę”, wyślijcie plik ' + nazwaPliku(g) + ' na czat pokoju grupy (spinacz), a następna osoba otwiera tę stronę i klika „Kontynuuj pracę grupy z pliku”.'),
+    h('div', { class: 'actions' }, b, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę następnej osobie')));
+}
+const typowe = nr => { const k = klucz(nr), w = WZOR_TYPU[k[2]]; return ZT.filter(z => z[1] === 'Wszystkie ' + w || z[1] === k[2]); };
+const DZIK_HEAD = ['Nr', 'D — działanie', 'Z — dla kogo / z kim', 'I — instrument, technologia, procedura', 'K — korzyść', 'Kategoria · częstotliwość'];
+const typoweWiersze = nr => typowe(nr).map(z => [z[0], z[3], z[4], z[5], z[6], z[2] + ' · ' + z[7]]);
+const wlasneWiersze = d => zywe(d.z).map(([, v]) => v).filter(v => (v.D || '').trim()).map((v, i) => ['W-' + String(i + 1).padStart(2, '0'), v.D || '', v.Z || '', v.I || '', v.K || '', [v.kat, v.cz].filter(Boolean).join(' · ')]);
+
+// ---------- Z01: NAZWY ----------
+const KLAS_GRUPY = { 1: 'Technolog', 2: 'Dyrektor ds. rozwoju', 3: 'Kierownik logistyki', 4: 'Key Account Manager', 5: 'Kierownik HR' };
+function tabNazwy(main) {
+  const id = G() + '_nazwy', typ = 'nazwy';
+  const rows = OBECNE.map((r, i) => [r, i]).filter(([r]) => DZIALY_GRUP[G()].includes(r[1]));
+  const trudne = KLAS_GRUPY[nrG(G()) > 5 ? nrG(G()) - 5 : nrG(G())];
+  const tr = OBECNE.find(r => r[0] === trudne);
+  let showKey = false;
+  main.append(intro(
+    'Porządkujecie nazwy stanowisk w działach: ' + DZIALY_GRUP[G()].join(', ') + '. Przy każdej obecnej nazwie wpiszcie nazwę docelową według reguły poziom + zakres i wybierzcie typ stanowiska.',
+    'Jeśli kilka obecnych nazw opisuje tę samą pracę, wpiszcie przy nich tę samą nazwę docelową. Jeśli jedna nazwa obejmuje różną pracę, wpiszcie obie nazwy docelowe, rozdzielając je ukośnikiem.'));
+  const klas = h('div', { class: 'card krok' }, h('div', { class: 'row-h' }, h('span', { class: 'kn' }, '1'), h('b', {}, 'Najpierw klasyfikator: stanowisko „' + trudne + '”')),
+    h('p', { class: 'desc' }, tr[4]),
+    h('p', { class: 'desc' }, 'Otwórzcie klasyfikator, odpowiedzcie na pytania dla tego stanowiska i wpiszcie wynik. Wynik graniczny omówcie w grupie, zanim wybierzecie typ w kroku 2.'),
+    h('div', { class: 'actions' }, h('a', { class: 'btn', href: KLASYFIKATOR_URL, target: '_blank', rel: 'noopener' }, 'Otwórz klasyfikator stanowisk')),
+    h('div', { class: 'grid3' },
+      h('label', {}, h('span', {}, 'Wynik klasyfikatora: typ'), bindSelect(selectEl(TYPY, 'typ…'), id, typ, ['klas', 'typ'])),
+      h('label', {}, h('span', {}, 'Dopasowanie [%]'), bindText(h('input', { type: 'number', min: 0, max: 100 }), id, typ, ['klas', 'proc'])),
+      h('label', {}, h('span', {}, 'Co przesądziło o typie'), bindText(h('input', { type: 'text' }), id, typ, ['klas', 'uz']))));
+  const list = h('div', { class: 'list' });
+  const keyEls = [];
+  rows.forEach(([r, i]) => {
+    const name = bindText(h('input', { type: 'text', placeholder: 'nazwa docelowa' }), id, typ, ['w', String(i), 'nazwa']);
+    const ty = bindSelect(selectEl(TYPY, 'typ…'), id, typ, ['w', String(i), 'typ']);
+    const key = h('div', { class: 'key', hidden: true });
+    keyEls.push([key, r, i]);
+    list.append(card(
+      h('div', { class: 'row-h' }, h('b', {}, r[0]), tag(r[1]), tag(r[2] + (r[2] === 1 ? ' osoba' : ' os.')), tag('przełożony: ' + r[3], 'soft'), r[0] === trudne ? tag('sprawdzone w klasyfikatorze', 'gold') : null),
+      h('p', { class: 'desc' }, r[4]),
+      h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Nazwa docelowa'), name), h('label', {}, h('span', {}, 'Typ'), ty)),
+      key));
+  });
+  main.append(klas, h('div', { class: 'card krok' }, h('div', { class: 'row-h' }, h('span', { class: 'kn' }, '2'), h('b', {}, 'Nazwy docelowe i typy wszystkich stanowisk w Waszych działach'))), list, koniecZadania('nazwy'));
+  let data = {};
+  const paintKey = () => keyEls.forEach(([el, r, i]) => {
+    el.hidden = !showKey; if (!showKey) return;
+    const w = getP(data, ['w', String(i)]) || {};
+    const okT = w.typ === r[7], okN = (r[6] || '').split(' / ').some(n => norm(n) === norm(w.nazwa)) || norm(r[6]) === norm(w.nazwa);
+    el.replaceChildren(h('span', { class: okN && okT ? 'ok' : 'no' }, okN && okT ? 'Zgodne z kluczem' : 'Inaczej niż w kluczu'), ' · ', h('b', {}, r[5] + ' ' + r[6]), ' · ' + r[7]);
+  });
+  if (PROW) {
+    const btn = h('button', { class: 'btn', type: 'button', onclick: () => { showKey = !showKey; btn.textContent = showKey ? 'Ukryj klucz' : 'Pokaż klucz'; paintKey(); } }, 'Pokaż klucz');
+    list.before(h('div', { class: 'actions' }, btn));
+  }
+  ST.unsub.push(DB.watchDoc(id, d => { data = d; applyDoc(main, d); paintKey(); }));
+}
+
+// ---------- Z02: WYBÓR SME ----------
+function tabSme(main) {
+  const id = G() + '_sme', typ = 'sme', nr = NR(), kand = SME_KAND[nr];
+  let show = false, data = {};
+  main.append(intro(
+    'Komisja opisu dobiera skład zmienny: ekspertów przedmiotowych (SME), którzy opiszą zadania własne i wymagania Waszego stanowiska. Poniżej jest sześciu kandydatów.',
+    'Przy każdym kandydacie zdecydujcie, czy wchodzi do zespołu SME, i zapiszcie jedno zdanie uzasadnienia. Wybierzcie od dwóch do trzech osób. Kierujcie się stażem i pełnym zakresem pracy, różnorodnością perspektyw (zmiana, maszyna, staż), rolą przełożonego oraz brakiem osobistego interesu w wyniku.'),
+    stanowiskoInfo(nr));
+  const sum = h('p', { class: 'muted' });
+  const list = h('div', { class: 'list' });
+  const keys = [];
+  kand.forEach((c, i) => {
+    const key = h('div', { class: 'key', hidden: true });
+    keys.push([key, c, i]);
+    list.append(card(h('div', { class: 'row-h' }, h('span', { class: 'kn' }, String(i + 1)), h('b', {}, c[0])), h('p', { class: 'desc' }, c[1]),
+      h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Decyzja'), wybor([['tak', 'Wchodzi do zespołu SME'], ['nie', 'Nie wchodzi']], id, typ, ['k', String(i), 'w'])),
+        h('label', {}, h('span', {}, 'Uzasadnienie'), bindText(h('input', { type: 'text' }), id, typ, ['k', String(i), 'u']))), key));
+  });
+  const btn = h('button', { class: 'btn', type: 'button', onclick: () => { show = !show; btn.textContent = show ? 'Ukryj rekomendację' : 'Porównaj z rekomendacją'; paint(); } }, 'Porównaj z rekomendacją');
+  main.append(list, sum, h('div', { class: 'actions' }, btn), koniecZadania('sme'));
+  const paint = () => {
+    const n = kand.filter((_, i) => getP(data, ['k', String(i), 'w']) === 'tak').length;
+    sum.textContent = 'Wybrani do zespołu SME: ' + n + (n < 2 ? ' — wybierzcie co najmniej dwie osoby.' : n > 3 ? ' — to więcej niż trzy osoby; zostawcie najwyżej trzy.' : ' — liczba w zalecanym przedziale.');
+    sum.className = n >= 2 && n <= 3 ? 'muted' : 'muted no';
+    keys.forEach(([el, c, i]) => {
+      el.hidden = !show; if (!show) return;
+      const w = getP(data, ['k', String(i), 'w']);
+      el.replaceChildren(h('span', { class: w === c[2] ? 'ok' : 'no' }, w === c[2] ? 'Tak jak w rekomendacji' : 'Inaczej niż w rekomendacji'), ' · rekomendacja: ', h('b', {}, c[2] === 'tak' ? 'wchodzi' : 'nie wchodzi'), ' — ' + c[3]);
+    });
+  };
+  ST.unsub.push(DB.watchDoc(id, d => { data = d; applyDoc(main, d); paint(); }));
+}
+
+// ---------- Z03: PRZEGLĄD EKASP ----------
+function tabPrzeglad(main) {
+  const id = G() + '_przeglad', typ = 'przeglad', nr = NR();
+  let data = {};
+  main.append(intro(
+    'EKASP ma 46 rozdziałów w pięciu częściach. Komisja opisu decyduje, które z nich dotyczą stanowisk w organizacji; Wy decydujecie dla swojego stanowiska.',
+    'Najedźcie na kafelek, aby przeczytać, czego dotyczy rozdział w KORVEX. Kliknijcie kafelek albo przeciągnijcie go na prawą stronę, jeśli rozdział dotyczy Waszego stanowiska. Po prawej rozdziały układają się same według modułów opisu, do których prowadzą. Kliknięcie kafelka po prawej przenosi go z powrotem.'),
+    stanowiskoInfo(nr));
+  const info = h('div', { class: 'rinfo' }, h('b', {}, 'Wskaż kafelek'), h('span', {}, 'Tu pojawi się krótka informacja o rozdziale.'));
+  const lewa = h('div', { class: 'rlewa' }), prawa = h('div', { class: 'rprawa' });
+  const tiles = {};
+  const pokaz = r => info.replaceChildren(h('b', {}, r[0] + ' ' + r[1]), h('span', {}, r[2]), h('em', {}, r[3] ? 'Prowadzi do: moduł ' + r[3] + ' — ' + MODULY[r[3]] : 'Bez polskich norm — do rozważenia'));
+  const przelacz = r => save(id, typ, ['w', r[0].replace('.', '_')], !getP(data, ['w', r[0].replace('.', '_')]), { numer: nr });
+  ROZDZIALY.forEach(r => {
+    const t = h('button', { class: 'rk' + (r[3] ? '' : ' brak'), type: 'button', draggable: 'true', title: r[2], 'data-r': r[0],
+      onmouseenter: () => pokaz(r), onfocus: () => pokaz(r), onclick: () => przelacz(r),
+      ondragstart: e => { e.dataTransfer.setData('text/plain', r[0]); pokaz(r); } }, h('span', { class: 'rn' }, r[0]), r[1]);
+    tiles[r[0]] = t;
+  });
+  const drop = (el, chce) => {
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('nad'); });
+    el.addEventListener('dragleave', () => el.classList.remove('nad'));
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('nad'); const r = ROZDZIALY.find(x => x[0] === e.dataTransfer.getData('text/plain')); if (r && !!getP(data, ['w', r[0].replace('.', '_')]) !== chce) przelacz(r); });
+  };
+  drop(prawa, true); drop(lewa, false);
+  const licz = h('p', { class: 'muted' });
+  main.append(h('div', { class: 'rplansza' }, h('div', {}, h('h2', {}, 'Rozdziały EKASP'), lewa), h('div', {}, h('h2', {}, 'Dotyczą Waszego stanowiska'), prawa)), info, licz, koniecZadania('przeglad'));
+  const paint = () => {
+    const wyb = r => !!getP(data, ['w', r[0].replace('.', '_')]);
+    lewa.replaceChildren(...Object.keys(CZESCI_EKASP).map(c => {
+      const rr = ROZDZIALY.filter(r => r[0].split('.')[0] === c && !wyb(r));
+      return h('div', { class: 'rgr' }, h('span', { class: 'lbl' }, CZESCI_EKASP[c]), h('div', { class: 'rks' }, rr.map(r => tiles[r[0]])));
+    }));
+    const mods = [...new Set(ROZDZIALY.filter(wyb).map(r => r[3]))].sort((a, b) => (a || 99) - (b || 99));
+    prawa.replaceChildren(...(mods.length ? mods.map(m => h('div', { class: 'rgr' }, h('span', { class: 'lbl' }, m ? 'Moduł ' + m + ' — ' + MODULY[m] : 'Bez polskich norm — do rozważenia'),
+      h('div', { class: 'rks' }, ROZDZIALY.filter(r => wyb(r) && r[3] === m).map(r => tiles[r[0]])))) : [h('p', { class: 'muted' }, 'Przeciągnijcie tu rozdziały, które dotyczą Waszego stanowiska.')]));
+    const n = ROZDZIALY.filter(wyb).length;
+    licz.textContent = 'Wybrane rozdziały: ' + n + ' z 46. Wybrane rozdziały pojawią się jako podpowiedzi przy polach opisu w zadaniu Z07.';
+  };
+  ST.unsub.push(DB.watchDoc(id, d => { data = d; paint(); }));
+}
+
+// ---------- Z04: KONSENSUS EKASP ----------
+const OSOBY = ['o0', 'o1', 'o2', 'o3', 'o4'];
+const ROLE_SME = ['Pracownik A', 'Pracownik B', 'Przełożony', 'HR', 'BHP'];
+function ekaspWyniki(d) {
+  return EKASP.map((_, i) => {
+    const r1 = OSOBY.map(o => getP(d, ['r1', String(i), o])).map(Number).filter(v => v >= 1);
+    const r2 = OSOBY.map(o => getP(d, ['r2', String(i), o])).map(Number).filter(v => v >= 1);
+    const range = r1.length >= 2 ? Math.max(...r1) - Math.min(...r1) : null;
+    const zgoda = range !== null && range <= 2;
+    const src = zgoda ? r1 : r2;
+    const final = range !== null && src.length ? Math.round(src.reduce((a, b) => a + b, 0) / src.length * 10) / 10 : null;
+    return { r1, r2, range, zgoda, final };
+  });
+}
+function ocena(id, typ, path) {
+  return bindSelect(h('select', { class: 'sel-ocena' }, h('option', { value: '' }, '–'), [1, 2, 3, 4, 5, 6, 7].map(n => h('option', { value: n }, String(n)))), id, typ, path);
+}
+function tabEkasp(main) {
+  const id = G() + '_ekasp', typ = 'ekasp';
+  main.append(intro(
+    'Osoby w rolach SME oceniają każdą pozycję na skali wagi od 1 (nieistotna) do 7 (kluczowa). Każda osoba najpierw zapisuje swoją ocenę dla siebie, a dopiero potem wszyscy podają oceny jednocześnie. Protokolant wpisuje je do tabeli.',
+    'Gdy oceny różnią się najwyżej o 2 punkty, wynikiem jest średnia. Gdy różnica wynosi 3 punkty lub więcej, osoby ze skrajnymi ocenami uzasadniają je, a potem wszyscy oceniają tę pozycję ponownie w rundzie 2. Pozycje z wynikiem 5 lub wyższym trafiają do opisu stanowiska.'),
+    stanowiskoInfo(NR()));
+  const osoby = h('div', { class: 'card' }, h('b', {}, 'Kto ocenia'), h('p', { class: 'muted' }, 'Wpiszcie role osób, które oceniają (można zmienić podpowiedzi).'),
+    h('div', { class: 'osoby' }, OSOBY.map((o, k) => h('label', {}, h('span', {}, 'Osoba ' + (k + 1)), bindText(h('input', { type: 'text', placeholder: ROLE_SME[k] }), id, typ, ['osoby', o])))));
+  const list = h('div', { class: 'list' });
+  main.append(osoby, list);
+  const rows = EKASP.map((e, i) => {
+    const r1 = h('div', { class: 'oceny' }, OSOBY.map(o => h('label', { class: 'oc' }, h('span', { class: 'oc-l', 'data-o': o }), ocena(id, typ, ['r1', String(i), o]))));
+    const r2 = h('div', { class: 'oceny' }, OSOBY.map(o => h('label', { class: 'oc' }, h('span', { class: 'oc-l', 'data-o': o }), ocena(id, typ, ['r2', String(i), o]))));
+    const r2box = h('div', { class: 'r2', hidden: true }, h('span', { class: 'lbl' }, 'Runda 2 — oceny po uzasadnieniu skrajnych ocen'), r2);
+    const st = h('div', {});
+    list.append(card(h('div', { class: 'row-h' }, tag(e[0]), h('b', {}, (i + 1) + '. ' + e[1])), h('span', { class: 'lbl' }, 'Runda 1'), r1, st, r2box));
+    return { st, r2box };
+  });
+  main.append(koniecZadania('ekasp'));
+  ST.unsub.push(DB.watchDoc(id, d => {
+    applyDoc(main, d);
+    main.querySelectorAll('.oc-l').forEach(el => { const k = OSOBY.indexOf(el.dataset.o); el.textContent = (getP(d, ['osoby', el.dataset.o]) || '').trim() || ROLE_SME[k]; });
+    ekaspWyniki(d).forEach((w, i) => {
+      const { st, r2box } = rows[i];
+      r2box.hidden = !(w.range !== null && !w.zgoda);
+      st.replaceChildren(w.range === null ? h('span', { class: 'muted' }, 'Wpiszcie oceny co najmniej dwóch osób.')
+        : w.zgoda ? h('span', { class: 'ok' }, 'Zgoda (różnica ' + w.range + '): średnia ' + pl(w.final))
+        : w.r2.length >= 2 ? h('span', { class: 'ok' }, 'Rozbieżność w rundzie 1 (różnica ' + w.range + '); po rundzie 2 średnia ' + pl(w.final))
+        : h('span', { class: 'no' }, 'Rozbieżność (różnica ' + w.range + '): osoby ze skrajnymi ocenami uzasadniają je, potem runda 2'),
+        w.final !== null && w.final >= 5 ? tag('trafia do opisu', 'gold') : '');
+    });
+  }));
+}
+
+// ---------- Z05: WZÓR I WŁAŚCICIELE ----------
+function tabWzor(main) {
+  const id = G() + '_wzor', typ = 'wzor';
+  let showKey = false, data = {};
+  main.append(intro(
+    'Dla każdego pola wzoru wskażcie, kto je wypełnia w organizacji. Pole może mieć więcej niż jednego właściciela. Typ zmienności i sposób wypełnienia są już wpisane przy każdym polu; jeśli się z nimi nie zgadzacie, zanotujcie to do omówienia.',
+    'Typ zmienności: stałe zmieniają się tylko przy reorganizacji, okresowe przy przeglądzie w cyklu przypisanym do stanowiska (6, 12 lub 24 miesiące), zdarzeniowe przy zmianie przepisu, systemu lub wyposażenia, a wzorcowe wpisuje się raz we wzorze dla wszystkich opisów danego typu.'));
+  const list = h('div', { class: 'list' });
+  const keyEls = [];
+  let mod = 0;
+  POLA.forEach(p => {
+    if (p[1] !== mod) { mod = p[1]; list.append(h('h2', {}, 'Moduł ' + mod + ' — ' + MODULY[mod])); }
+    const owners = h('div', { class: 'chips' }, WLASCICIELE.map((w, k) => chip(w, id, typ, ['p', p[0], 'w', 'o' + k])));
+    const key = h('div', { class: 'key', hidden: true });
+    keyEls.push([key, p]);
+    list.append(card(h('div', { class: 'row-h' }, h('b', {}, p[2]), tag(p[3] === 'M' ? 'tylko wzór M' : 'wzory S i M', 'soft'), tag('zmienność: ' + ZMIENNOSC[p[5]], 'soft'), tag('wypełnienie: ' + p[6], 'soft')),
+      h('label', {}, h('span', {}, 'Kto wypełnia'), owners), key));
+  });
+  const paintKey = () => keyEls.forEach(([el, p]) => {
+    el.hidden = !showKey; if (!showKey) return;
+    const d = getP(data, ['p', p[0]]) || {};
+    const chosen = WLASCICIELE.filter((w, k) => getP(d, ['w', 'o' + k]) === true);
+    const okW = chosen.length === p[4].length && p[4].every(x => chosen.includes(x));
+    el.replaceChildren(h('div', {}, h('span', { class: okW ? 'ok' : 'no' }, okW ? 'Tak jak w strukturze' : 'Inaczej niż w strukturze'), ' · struktura: ', h('b', {}, p[4].join(', '))));
+  });
+  const btn = h('button', { class: 'btn', type: 'button', onclick: () => { showKey = !showKey; btn.textContent = showKey ? 'Ukryj porównanie' : 'Porównaj ze strukturą'; paintKey(); } }, 'Porównaj ze strukturą');
+  main.append(h('div', { class: 'actions' }, btn), list, koniecZadania('wzor'));
+  ST.unsub.push(DB.watchDoc(id, d => { data = d; applyDoc(list, d); paintKey(); }));
+}
+
+// ---------- Z06: ZADANIA DZIK ----------
+function tabZadania(main) {
+  const id = G() + '_zadania', typ = 'zadania', nr = NR(), k = klucz(nr), w = WZOR_TYPU[k[2]];
+  main.append(intro(
+    'Zadania typowe są już wpisane z wzoru i są jednakowe dla wszystkich stanowisk tego typu; poniżej widać, że są zapisane w układzie DZIK. Waszym zadaniem jest opisanie od trzech do pięciu zadań własnych stanowiska, czyli tych, które odróżniają je od innych stanowisk tego samego typu.',
+    'D — działanie: konkretny czasownik czynnościowy, jedna czynność. Z — dla kogo lub z kim: konkretny odbiorca. I — instrument, technologia, procedura: narzędzie, system lub technologia albo procedura, z której korzysta osoba na stanowisku. K — korzyść: rezultat, który nie powtarza działania.'),
+    stanowiskoInfo(nr));
+  const fakty = OBECNE.filter(r => r[5].split(' / ').includes(nr) || r[5] === nr);
+  main.append(h('h2', {}, 'Skąd brać treść'), card(h('p', { class: 'desc' }, 'Materiałem są opisy pracy z zadania Z01 i Wasza wiedza jako SME. Opisy obecnych nazw, które składają się na to stanowisko:'),
+    h('ul', { class: 'locked' }, fakty.map(r => h('li', {}, h('b', {}, r[0] + ': '), r[4])))));
+  main.append(h('h2', {}, 'Zadania typowe z wzoru (' + typowe(nr).length + ')'), tbl(DZIK_HEAD, typoweWiersze(nr), 'dziktab'));
+  const kats = w === 'M' ? [...L.katS, ...L.katM] : L.katS;
+  const list = h('div', { class: 'list' });
+  const sum = h('p', { class: 'muted' });
+  const dodaj = () => save(id, typ, ['z', 'z' + Date.now() + Math.random().toString(36).slice(2, 5), 't'], Date.now(), { numer: nr });
+  main.append(h('h2', {}, 'Zadania własne stanowiska'), list, sum, h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: dodaj }, 'Dodaj zadanie')), koniecZadania('zadania'));
+  let ids = '', start = false;
+  ST.unsub.push(DB.watchDoc(id, d => {
+    if (!start && !d.z) { start = true; for (let i = 0; i < 3; i++) setTimeout(dodaj, i * 5); return; }
+    start = true;
+    const z = zywe(d.z);
+    const nids = z.map(e => e[0]).join();
+    if (nids !== ids) {
+      ids = nids;
+      list.replaceChildren(...z.map(([zid], n) => {
+        const P = f => ['z', zid, f];
+        return card(h('div', { class: 'row-h' }, h('b', {}, 'Zadanie własne ' + (n + 1))),
+          h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Kategoria'), bindSelect(selectEl(kats), id, typ, P('kat'))),
+            h('label', {}, h('span', {}, 'Częstotliwość'), bindSelect(selectEl(L.czestotliwosc), id, typ, P('cz')))),
+          h('div', { class: 'grid2' },
+            h('label', {}, h('span', {}, 'D — działanie'), bindText(h('input', { type: 'text', placeholder: 'np. przezbraja sztancę przy zmianie zlecenia' }), id, typ, P('D'))),
+            h('label', {}, h('span', {}, 'Z — dla kogo / z kim'), bindText(h('input', { type: 'text' }), id, typ, P('Z'))),
+            h('label', {}, h('span', {}, 'I — instrument, technologia, procedura'), bindText(h('input', { type: 'text' }), id, typ, P('I'))),
+            h('label', {}, h('span', {}, 'K — korzyść'), bindText(h('input', { type: 'text' }), id, typ, P('K')))),
+          h('div', { class: 'actions end' }, h('button', { class: 'btn', type: 'button', onclick: () => save(id, typ, P('del'), true) }, 'Usuń zadanie')));
+      }));
+    }
+    applyDoc(list, d);
+    const n = z.filter(([, v]) => (v.D || '').trim()).length;
+    sum.textContent = 'Opisane zadania własne stanowiska: ' + n + ' (cel: od 3 do 5).';
+  }));
+}
+
+// ---------- Z07: OPIS ----------
+const polaWzoru = w => POLA.filter(p => p[3] === 'SM' || p[3] === w);
+function przelozonyNr(nr) {
+  const r = OBECNE.find(x => x[5].split(' / ').includes(nr)); if (!r) return '';
+  const p = OBECNE.find(x => x[0] === r[3].split(' / ')[0]);
+  return p ? p[5].split(' / ')[0] : '';
+}
+const stanLabel = nr => { const k = klucz(nr); return k ? k[0] + ' ' + k[1] : nr; };
+function wartoscPola(p, d, nr) {
+  const v = getP(d, ['pola', p[0]]);
+  const k = klucz(nr), w = WZOR_TYPU[k[2]];
+  switch (p[7]) {
+    case 'text': case 'area': case 'one': return (v || '').trim();
+    case 'many': return L[p[8]].filter((_, i) => getP(v, ['o' + i]) === true).join('; ');
+    case 'dzial': return [...KLUCZ.filter(x => getP(v, [x[0]]) === true).map(x => x[0] + ' ' + x[1]), (getP(v, ['inne']) || '').trim()].filter(Boolean).join('; ');
+    case 'wzor': return p[0] === 'ocena' ? (w === 'M' ? WZOROWE.ocenaM : WZOROWE.ocenaS) : WZOROWE[p[0]];
+    case 'rodzina': return (getP(d, ['pola', 'zawodowe']) || '');
+  }
+  return '';
+}
+function tabOpis(main) {
+  const id = G() + '_opis', typ = 'opis', nr = NR(), k = klucz(nr), w = WZOR_TYPU[k[2]];
+  main.append(intro(
+    'Wypełniacie opis stanowiska przydzielonego Waszej grupie. Przy każdym polu widać, kto je wypełnia w organizacji i jak często się zmienia. Pola wzorcowe i profil kompetencyjny wynikają z wzoru i typu stanowiska; zadania przychodzą z zadania Z06.',
+    'Opis dotyczy stanowiska, a nie osoby, która je zajmuje. Imiona i nazwiska wpisuje się wyłącznie w module 10, przy osobach, które opracowały i zatwierdziły opis. Pod polami widać podpowiedzi z przeglądu EKASP (Z03).'),
+    stanowiskoInfo(nr));
+  const prog = h('p', { class: 'muted' });
+  main.append(prog);
+  const root = h('div', {});
+  const live = {}, wsk = {};
+  const ex = { numer: nr };
+  for (const m of Object.keys(MODULY).map(Number)) {
+    const pola = polaWzoru(w).filter(p => p[1] === m);
+    if (!pola.length) continue;
+    const sec = h('section', { class: 'mod' }, h('h2', {}, 'Moduł ' + m + ' — ' + MODULY[m]));
+    pola.forEach(p => {
+      const head = h('div', { class: 'row-h' }, h('b', {}, p[2]), tag('wypełnia: ' + p[4].join(', '), 'soft'), tag(ZMIENNOSC[p[5]], 'soft'));
+      const P = ['pola', p[0]];
+      let body;
+      switch (p[7]) {
+        case 'text': body = bindText(h('input', { type: 'text' }), id, typ, P, ex); break;
+        case 'area': body = bindText(h('textarea', { rows: 3 }), id, typ, P, ex); break;
+        case 'one': body = bindSelect(selectEl(L[p[8]]), id, typ, P, ex); break;
+        case 'many': body = h('div', { class: 'chips' }, L[p[8]].map((o, i) => chip(o, id, typ, [...P, 'o' + i], ex))); break;
+        case 'dzial': {
+          const st = KLUCZ.filter(x => x[5] === k[5] && x[0] !== nr);
+          body = h('div', { class: 'col' }, h('div', { class: 'chips' }, st.map(x => chip(x[0] + ' ' + x[1], id, typ, [...P, x[0]], ex))),
+            h('label', {}, h('span', {}, 'Inne stanowisko (spoza działu ' + k[5] + ')'), bindText(h('input', { type: 'text', placeholder: 'numer i nazwa' }), id, typ, [...P, 'inne'], ex)));
+          break;
+        }
+        case 'koop': body = h('div', { class: 'col' }); live.koop = body; break;
+        case 'jez': body = h('div', { class: 'col' }); live.jez = body; break;
+        case 'wzor': body = h('p', { class: 'locked' }, wartoscPola(p, {}, nr)); break;
+        case 'typowe': body = tbl(DZIK_HEAD, typoweWiersze(nr), 'dziktab'); break;
+        case 'wyjatkowe': body = h('div', {}); live.wyj = body; break;
+        case 'profil': body = h('div', { class: 'col' }, h('p', { class: 'muted' }, 'Profil „' + k[2] + '” zdefiniowany przez organizację; wpisuje się automatycznie z typu stanowiska.'),
+          tbl(['Kompetencja', 'Zachowanie wymagane na stanowisku'], PROFILE[k[2]].map(x => [x[0], x[1]]))); break;
+        case 'rodzina': {
+          const opis = h('div', {});
+          const pokaz = v => { const r = RODZINY.find(x => x[0] === v); opis.replaceChildren(r ? tbl(['Kompetencja zawodowa', 'Zachowanie wymagane na stanowisku'], r[1].map(x => [x[0], x[1]])) : ''); };
+          live.rodzina = pokaz;
+          body = h('div', { class: 'col' }, bindSelect(selectEl(RODZINY.map(r => r[0]), 'rodzina zawodów…'), id, typ, P, ex, pokaz), opis); break;
+        }
+        case 'psych': body = h('div', { class: 'psych' }, PSYCH.map((x, i) => h('label', { class: 'pline' }, h('span', {}, h('b', {}, x[0]), h('small', {}, x[1])),
+          bindSelect(h('select', {}, h('option', { value: '' }, '—'), [1, 2, 3, 4, 5, 6, 7].map(n => h('option', { value: n }, n + ' — ' + SKALA_W[n]))), id, typ, [...P, String(i)], ex))));
+          live.psych = h('p', { class: 'muted' }); body.prepend(live.psych); break;
+      }
+      const hint = h('p', { class: 'hint', hidden: true }); wsk[p[0]] = hint;
+      sec.append(card(head, body, hint));
+    });
+    root.append(sec);
+  }
+  const pdf = h('section', { class: 'mod' }, h('h2', {}, 'Opis jako PDF'),
+    card(h('p', { class: 'desc' }, 'Przycisk otwiera okno drukowania z gotowym opisem w układzie A4. Jako drukarkę wybierzcie „Zapisz jako PDF”. Nazwa pliku podpowie się sama: AP_' + g2(G()) + '_opis_' + nr + '.pdf. Puste pola są w opisie oznaczone jako „do uzupełnienia”.'),
+      h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => drukuj() }, 'Pobierz opis jako PDF'))));
+  main.append(root, pdf, koniecZadania('opis'));
+  // kooperacja i języki: wiersze
+  let koopIds = null, jezIds = null;
+  const zew = [['Wewnątrz KORVEX', L.jednostka.filter(j => j !== k[5])], ['Na zewnątrz', KOOP_ZEWN]];
+  const wierszKoop = kid => {
+    const P = ['pola', 'koop', kid];
+    const def = h('small', { class: 'muted' });
+    const zak = bindSelect(selectEl(KOOP_ZAKRES.map(x => x[0]), 'zakres…'), id, typ, [...P, 'zakres'], ex, v => { def.textContent = (KOOP_ZAKRES.find(x => x[0] === v) || ['', ''])[1]; });
+    zak.dataset.def = '1';
+    return h('div', { class: 'wiersz' }, h('div', { class: 'grid3' },
+      h('label', {}, h('span', {}, 'Z kim'), bindSelect(selectEl(zew, 'jednostka lub podmiot…'), id, typ, [...P, 'kto'], ex)),
+      h('label', {}, h('span', {}, 'W jakim zakresie'), zak, def),
+      h('label', {}, h('span', {}, 'Jak często'), bindSelect(selectEl(KOOP_CZESTO), id, typ, [...P, 'jak'], ex))),
+      h('div', { class: 'actions end' }, h('button', { class: 'btn', type: 'button', onclick: () => save(id, typ, [...P, 'del'], true, ex) }, 'Usuń')));
+  };
+  const wierszJez = jid => {
+    const P = ['pola', 'jez', jid];
+    const def = h('small', { class: 'muted' });
+    return h('div', { class: 'wiersz' }, h('div', { class: 'grid3' },
+      h('label', {}, h('span', {}, 'Język'), bindSelect(selectEl(JEZYKI), id, typ, [...P, 'j'], ex)),
+      h('label', {}, h('span', {}, 'Poziom'), bindSelect(selectEl(POZIOMY_JEZ.map(x => x[0])), id, typ, [...P, 'p'], ex, v => { def.textContent = (POZIOMY_JEZ.find(x => x[0] === v) || ['', ''])[1]; }), def),
+      h('label', {}, h('span', {}, 'Do czego potrzebny (opcjonalnie)'), bindText(h('input', { type: 'text' }), id, typ, [...P, 'po'], ex))),
+      h('div', { class: 'actions end' }, h('button', { class: 'btn', type: 'button', onclick: () => save(id, typ, [...P, 'del'], true, ex) }, 'Usuń')));
+  };
+  const hintEkasp = dP => {
+    const wyb = ROZDZIALY.filter(r => getP(dP, ['w', r[0].replace('.', '_')]) && ROZDZ_POLE[r[0]]);
+    Object.entries(wsk).forEach(([pole, el]) => {
+      const rr = wyb.filter(r => ROZDZ_POLE[r[0]] === pole);
+      el.hidden = !rr.length; el.textContent = rr.length ? 'Z przeglądu EKASP (Z03): ' + rr.map(r => r[0] + ' ' + r[1]).join('; ') : '';
+    });
+  };
+  ST.unsub.push(DB.watchDoc(id, d => {
+    if (!getP(d, ['pola', 'numer']) && !d._pref) {
+      d._pref = true;
+      DB.save(id, { typ, grupa: G(), numer: nr, ts: Date.now(), pola: { numer: k[0], nazwa: k[1], typ: k[2], jednostka: k[5], kategoria: L.kategoria.includes(k[3]) ? k[3] : '', przelozony: stanLabel(przelozonyNr(nr)) } });
+    }
+    const kz = zywe(getP(d, ['pola', 'koop'])), nk = kz.map(e => e[0]).join();
+    if (nk !== koopIds) { koopIds = nk; live.koop.replaceChildren(...kz.map(([kid]) => wierszKoop(kid)), h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => save(id, typ, ['pola', 'koop', 'k' + Date.now(), 't'], Date.now(), ex) }, 'Dodaj kooperację'))); }
+    const jz = zywe(getP(d, ['pola', 'jez'])), nj = jz.map(e => e[0]).join() + '|' + !!getP(d, ['pola', 'jezBrak']);
+    if (nj !== jezIds) {
+      jezIds = nj;
+      const brak = !!getP(d, ['pola', 'jezBrak']);
+      live.jez.replaceChildren(chip('Język obcy nie jest wymagany', id, typ, ['pola', 'jezBrak'], ex), ...(brak ? [] : jz.map(([jid]) => wierszJez(jid))),
+        brak ? '' : h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => save(id, typ, ['pola', 'jez', 'j' + Date.now(), 't'], Date.now(), ex) }, 'Dodaj język')));
+    }
+    applyDoc(root, d);
+    root.querySelectorAll('select[data-def]').forEach(s => { const x = KOOP_ZAKRES.find(z => z[0] === s.value); s.nextSibling.textContent = x ? x[1] : ''; });
+    live.jez.querySelectorAll('.wiersz').forEach(r => { const s = r.querySelectorAll('select')[1]; const x = POZIOMY_JEZ.find(z => z[0] === s.value); s.nextSibling.textContent = x ? x[1] : ''; });
+    live.rodzina(getP(d, ['pola', 'zawodowe']) || '');
+    prog.textContent = 'Wypełnione pola: ' + wypelnienie(d, nr) + '%.';
+  }));
+  ST.unsub.push(DB.watchDoc(G() + '_zadania', d => {
+    const rows = wlasneWiersze(d);
+    live.wyj.replaceChildren(rows.length ? tbl(DZIK_HEAD, rows, 'dziktab') : h('p', { class: 'muted' }, 'Zadania własne stanowiska opisujecie w zadaniu Z06.'));
+  }));
+  ST.unsub.push(DB.watchDoc(G() + '_ekasp', dE => {
+    const W = ekaspWyniki(dE);
+    const top = EKASP.map((e, i) => [e, W[i]]).filter(([, x]) => x.final !== null && x.final >= 5);
+    live.psych.textContent = top.length ? 'Wynik konsensusu EKASP (Z04) — pozycje z wagą 5 lub wyższą: ' + top.map(([e, x]) => e[1].replace(/\.$/, '') + ' (' + pl(x.final) + ')').join('; ') + '.' : 'Wyniki konsensusu EKASP pojawią się tu po wystawieniu ocen w zadaniu Z04.';
+  }));
+  ST.unsub.push(DB.watchDoc(G() + '_przeglad', hintEkasp));
+}
+function wypelnienie(d, nr) {
+  const w = WZOR_TYPU[klucz(nr)[2]];
+  const ed = polaWzoru(w).filter(p => !['typowe', 'wzor', 'wyjatkowe', 'psych', 'profil'].includes(p[7]));
+  const ok = ed.filter(p => {
+    if (p[7] === 'koop') return zywe(getP(d, ['pola', 'koop'])).length > 0;
+    if (p[7] === 'jez') return !!getP(d, ['pola', 'jezBrak']) || zywe(getP(d, ['pola', 'jez'])).length > 0;
+    return !!wartoscPola(p, d, nr);
+  });
+  return Math.round(ok.length / ed.length * 100);
+}
+
+// ---------- PDF opisu: wydruk A4 przez okno drukowania ----------
+function drukuj() {
+  const g = G(), nr = NR(), k = klucz(nr), w = WZOR_TYPU[k[2]];
+  const d = DB.get(g + '_opis'), dz = DB.get(g + '_zadania'), dE = DB.get(g + '_ekasp');
+  const brak = () => h('span', { class: 'dou' }, 'do uzupełnienia');
+  const tab = (head, rows) => h('table', { class: 'dt' }, h('thead', {}, h('tr', {}, head.map(x => h('th', {}, x)))), h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c))))));
+  const out = h('div', { class: 'druk-in' });
+  out.append(h('div', { class: 'dh' }, h('div', { class: 'dl', html: ZLOGO_SVG }), h('div', {}, h('small', {}, 'KORVEX · opis stanowiska · wzór ' + w),
+    h('h1', {}, k[0] + ' ' + (getP(d, ['pola', 'nazwa']) || k[1])), h('p', {}, 'Typ: ' + k[2] + ' · Jednostka: ' + k[5] + ' · Opracowanie: grupa ' + g2(g)))));
+  for (const m of Object.keys(MODULY).map(Number)) {
+    const pola = polaWzoru(w).filter(p => p[1] === m);
+    if (!pola.length) continue;
+    const sec = h('section', {}, h('h2', {}, m + '. ' + MODULY[m]));
+    pola.forEach(p => {
+      let val;
+      switch (p[7]) {
+        case 'typowe': val = tab(DZIK_HEAD, typoweWiersze(nr)); break;
+        case 'wyjatkowe': { const r = wlasneWiersze(dz); val = r.length ? tab(DZIK_HEAD, r) : brak(); break; }
+        case 'koop': { const r = zywe(getP(d, ['pola', 'koop'])).map(([, v]) => [v.kto || '—', v.zakres || '—', v.jak || '—']); val = r.length ? tab(['Z kim', 'W jakim zakresie', 'Jak często'], r) : brak(); break; }
+        case 'jez': {
+          if (getP(d, ['pola', 'jezBrak'])) { val = 'Język obcy nie jest wymagany.'; break; }
+          const r = zywe(getP(d, ['pola', 'jez'])).filter(([, v]) => v.j).map(([, v]) => [v.j, v.p ? v.p + ' — ' + POZIOMY_JEZ.find(x => x[0] === v.p)[1] : '—', v.po || '—']);
+          val = r.length ? tab(['Język', 'Poziom', 'Do czego potrzebny'], r) : brak(); break;
+        }
+        case 'profil': val = h('div', {}, h('p', {}, 'Profil kompetencyjny: ' + k[2] + ' (zdefiniowany przez organizację).'), tab(['Kompetencja', 'Zachowanie wymagane na stanowisku'], PROFILE[k[2]].map(x => [x[0], x[1]]))); break;
+        case 'rodzina': { const r = RODZINY.find(x => x[0] === getP(d, ['pola', 'zawodowe'])); val = r ? h('div', {}, h('p', {}, 'Rodzina zawodów: ' + r[0] + '.'), tab(['Kompetencja zawodowa', 'Zachowanie wymagane na stanowisku'], r[1].map(x => [x[0], x[1]]))) : brak(); break; }
+        case 'psych': {
+          const r = PSYCH.map((x, i) => [x, getP(d, ['pola', 'psych', String(i)])]).filter(([, v]) => v).map(([x, v]) => [x[0], x[1], v + ' — ' + SKALA_W[v]]);
+          if (!r.length) return;
+          val = tab(['Kategoria', 'Definicja', 'Waga'], r); break;
+        }
+        default: { const v = wartoscPola(p, d, nr); val = v || brak(); }
+      }
+      sec.append(h('div', { class: 'dp' + (val && val.nodeType && val.querySelector && val.querySelector('table') || (val && val.tagName === 'TABLE') ? ' duza' : '') }, h('div', { class: 'dk' }, p[2]), h('div', { class: 'dv' }, val)));
+    });
+    if (m === 6) {
+      const W = ekaspWyniki(dE);
+      const r = EKASP.map((e, i) => [e, W[i]]).filter(([, x]) => x.final !== null).map(([e, x]) => [e[1], pl(x.final), x.final >= 5 ? 'wymaganie' : '—']);
+      if (r.length) sec.append(h('div', { class: 'dp duza' }, h('div', { class: 'dk' }, 'Wagi pozycji EKASP (konsensus SME)'), h('div', { class: 'dv' }, tab(['Pozycja EKASP', 'Waga', 'W opisie'], r))));
+    }
+    out.append(sec);
+  }
+  out.append(h('div', { class: 'df' }, 'Analiza i opis pracy · MERITO 2026 · ZMIANOLOGICA · plik ' + nazwaPliku(g) + ' · ' + new Date().toLocaleString('pl-PL')));
+  const box = $('#druk'); box.replaceChildren(out);
+  const t = document.title; document.title = 'AP_' + g2(g) + '_opis_' + nr;
+  document.body.classList.add('drukuj');
+  const po = () => { document.body.classList.remove('drukuj'); document.title = t; window.removeEventListener('afterprint', po); };
+  window.addEventListener('afterprint', po);
+  setTimeout(() => { window.print(); setTimeout(po, 500); }, 50);
+}
+
+// ---------- Ekran startowy, wybór grupy, blokada po przekazaniu ----------
+function adres(zad, g) { const u = new URL(location.href); u.search = ''; if (zad && zad !== 'start') u.searchParams.set('zadanie', zad); if (g) u.searchParams.set('grupa', g); return u.toString(); }
+const para = g => 'G' + (nrG(g) > 5 ? nrG(g) - 5 : nrG(g) + 5);
+function idz(k) { ST.tab = k; try { history.replaceState(null, '', adres(k, G())); } catch (e) {} render(); }
+function tabStart(main) {
+  const m = wczytajGrupe(G());
+  const docs = Object.keys(m.docs || {});
+  main.append(h('h1', {}, 'Praca w grupach — zadania'),
+    h('div', { class: 'grupa' }, h('div', { class: 'gnr' }, h('small', {}, 'Grupa'), String(nrG(G()))), h('div', {}, stanowiskoInfo(NR()),
+      h('p', { class: 'muted' }, 'To samo stanowisko opisuje niezależnie grupa ' + nrG(para(G())) + '. W omówieniu porównacie, w czym Wasze wyniki się różnią. Plik Waszej grupy: ' + nazwaPliku(G()) + '.'))));
+  const tiles = h('div', { class: 'tiles' });
+  ZAD.forEach(([key, nr, nazwa, opis]) => {
+    const done = m.done && m.done[key], ruszone = docs.includes(G() + '_' + key);
+    tiles.append(h('a', { class: 'tile' + (done ? ' done' : ''), href: adres(key, G()), onclick: e => { e.preventDefault(); idz(key); } },
+      h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('em', {}, done ? '✓ zakończone' : ruszone ? 'w toku' : 'nierozpoczęte')));
+  });
+  main.append(tiles, h('div', { class: 'card' }, h('b', {}, 'Przejęcie pracy od innej osoby'),
+    h('p', { class: 'desc' }, 'Jeśli przejmujecie pracę grupy, pobierzcie z czatu pokoju najnowszy plik ' + nazwaPliku(G()) + ' i kliknijcie „Kontynuuj pracę grupy z pliku”.'),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku'))));
+}
+function wyborGrupy(main) {
+  main.append(h('div', { class: 'card narrow' }, h('h2', {}, 'Wybierzcie swoją grupę'),
+    h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, nie wybierajcie grupy, tylko wczytajcie plik grupy z czatu pokoju.'),
+    h('div', { class: 'grupy' }, GRUPY.map(g => h('button', { class: 'btn', type: 'button', onclick: () => { ST.grupa = g; ST.tab = 'start'; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {} render(); } }, 'Grupa ' + nrG(g)))),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku')),
+    FS_OK ? '' : h('p', { class: 'no' }, 'Ta przeglądarka nie zapisuje pliku grupy automatycznie. Najlepiej pracować w Chrome albo Edge na komputerze.')));
+}
+function zablokowana(main) {
+  const g = G(), m = wczytajGrupe(g);
+  const pot = h('div', { class: 'actions', hidden: true }, h('span', { class: 'no' }, 'Odblokowanie pozwala pisać w tej przeglądarce. Jeśli następna osoba już pracuje, powstaną dwie różne wersje pracy grupy.'),
+    h('button', { class: 'btn', type: 'button', onclick: () => { delete m.lock; zapiszGrupe(g); render(); } }, 'Tak, odblokuj'));
+  main.append(h('div', { class: 'card narrow lock' }, h('h2', {}, 'Praca grupy ' + nrG(g) + ' przekazana o ' + godz(m.lock)),
+    h('ol', {}, h('li', {}, 'Wyślijcie plik ' + nazwaPliku(g) + ' na czat pokoju grupy: spinacz, „Prześlij z tego urządzenia”, plik z folderu Pobrane albo z miejsca, w którym go zapisaliście.'),
+      h('li', {}, 'Następna osoba pobiera plik z czatu, otwiera tę stronę i klika „Kontynuuj pracę grupy z pliku”.'),
+      h('li', {}, 'Ta przeglądarka jest zablokowana, żeby nikt nie pisał równolegle. Aby wrócić do pisania, wczytajcie nowszy plik z czatu.')),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { pot.hidden = false; } }, 'Odblokuj mimo to')), pot));
+}
+
+// ---------- Ramy aplikacji ----------
+function naglowek() {
+  const top = $('#topin'); const g = G();
+  const z = ZAD.find(x => x[0] === ST.tab);
+  if (!g) { top.replaceChildren(h('b', { class: 'tyt' }, 'Analiza i opis pracy — praca w grupach')); return; }
+  const potw = h('div', { class: 'potw', hidden: !ST.potwierdz }, h('span', {}, 'Zmienić grupę? Dane grupy ' + nrG(g) + ' zostają w pliku i w tej przeglądarce.'),
+    h('button', { class: 'btn', type: 'button', onclick: () => { ST.grupa = ''; ST.potwierdz = false; try { localStorage.removeItem(KL + 'wybrana'); } catch (e) {} render(); } }, 'Tak, zmień grupę'),
+    h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = false; naglowek(); } }, 'Anuluj'));
+  top.replaceChildren(
+    h('div', { class: 'lewo' }, h('b', { class: 'tyt' }, z ? z[1] + ' · ' + z[2] : 'Wszystkie zadania'), z ? h('button', { class: 'btn', type: 'button', onclick: () => idz('start') }, 'Wszystkie zadania') : null),
+    h('div', { class: 'prawo' }, h('span', { class: 'status', id: 'status', 'aria-live': 'polite' }),
+      wczytajGrupe(g).lock ? null : h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = true; naglowek(); } }, 'Zmień grupę')),
+    potw);
+}
+function render() {
+  ST.unsub.forEach(u => { try { u(); } catch (e) {} }); ST.unsub = [];
+  const main = $('#main'); main.replaceChildren();
+  const g = G();
+  $('#who').replaceChildren(...(g ? [h('span', { class: 'gb' }, 'Grupa ' + nrG(g)), ' ' + klucz(NR()).slice(0, 2).join(' ')] : []));
+  naglowek();
+  main.className = 'wrap' + (ST.tab === 'start' ? ' szeroki' : '');
+  document.body.classList.toggle('szer', ST.tab === 'start' || !g);
+  if (!g) wyborGrupy(main);
+  else if (wczytajGrupe(g).lock) zablokowana(main);
+  else if (ST.tab === 'start') tabStart(main);
+  else ({ nazwy: tabNazwy, sme: tabSme, przeglad: tabPrzeglad, ekasp: tabEkasp, wzor: tabWzor, zadania: tabZadania, opis: tabOpis })[ST.tab](main);
+  pasekPliku();
+  if (g) PLIK.przywroc(g);
+  window.scrollTo(0, 0);
+}
+try { localStorage.setItem(KL + 'test', '1'); localStorage.removeItem(KL + 'test'); } catch (e) { PAMIEC_OK = false; }
+render();
+if (!PAMIEC_OK) status('err', 'Przeglądarka nie zapisuje danych (np. tryb prywatny). Otwórzcie stronę w zwykłym oknie Chrome albo Edge.');
+
+</script>
+</body>
+</html>
