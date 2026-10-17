@@ -215,6 +215,26 @@ body { padding-bottom: 44px }
 a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none }
 .tile .tile-t { font-weight: 700; color: var(--head); font-size: 13px; margin-top: auto } .tile .tile-t + em { margin-top: 0 }
 .topin .czas { background: var(--navy); color: var(--honey); border-radius: 999px; padding: 3px 10px; font-weight: 800; font-size: 13px; white-space: nowrap }
+
+/* zegar zadania: pływające okienko, można przestawić, nie można zamknąć */
+.zegar { position: fixed; right: 10px; bottom: 54px; z-index: 30; width: 98px; height: 98px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 6px 20px rgba(31,68,96,.3); cursor: grab; font-family: var(--font); touch-action: none; user-select: none }
+.zegar.ciagnij { cursor: grabbing; box-shadow: 0 10px 28px rgba(31,68,96,.4) }
+.zegar svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
+.zegar .tor { fill: none; stroke: #E6ECF1; stroke-width: 10 }
+.zegar .luk { fill: none; stroke-width: 10; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 66px 66px; transition: stroke .6s, stroke-dashoffset .5s linear }
+.zegar .srodek { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; pointer-events: none }
+.zegar .srodek small { font-size: 7px; font-weight: 800; letter-spacing: .1em; color: #61788C }
+.zegar .srodek b { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; margin: 3px 0 2px }
+.zegar .srodek span { font-size: 8px; font-weight: 700; color: #61788C }
+.zegar.f0 .luk { stroke: #2E6B4A } .zegar.f0 b { color: #2E6B4A; font-size: 16px }
+.zegar.f1 .luk { stroke: #1F4460 } .zegar.f1 b { color: #1F4460 }
+.zegar.f2 .luk { stroke: #E8B62C } .zegar.f2 b { color: #8A6A10 }
+.zegar.f3 .luk { stroke: #C8202E } .zegar.f3 b { color: #C8202E }
+.zegar.f4 { background: #C8202E; animation: zgpuls 1.6s ease-in-out infinite }
+.zegar.f4 .tor { stroke: rgba(255,255,255,.35) } .zegar.f4 .luk { stroke: #FFFFFF }
+.zegar.f4 b, .zegar.f4 small, .zegar.f4 span { color: #FFFFFF }
+@keyframes zgpuls { 0%, 100% { box-shadow: 0 0 0 0 rgba(200,32,46,.55) } 50% { box-shadow: 0 0 0 14px rgba(200,32,46,0) } }
+@media print { .zegar { display: none !important } }
 </style>
 </head>
 <body>
@@ -223,6 +243,10 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
   <div class="top"><div class="topin" id="topin"></div></div>
   <div class="plikbar" id="plikbar" hidden></div>
   <main class="wrap" id="main"></main>
+</div>
+<div class="zegar f1" id="zegar" hidden title="Przeciągnij, aby przestawić zegar">
+  <svg viewBox="0 0 132 132" aria-hidden="true"><circle class="tor" cx="66" cy="66" r="56"/><circle class="luk" id="zg-luk" cx="66" cy="66" r="56"/></svg>
+  <div class="srodek"><small id="zg-nap">ZOSTAŁO</small><b id="zg-czas">20:00</b><span id="zg-pod">z 20 min</span></div>
 </div>
 <footer class="stopka"><span class="zmlstop" role="img" aria-label="ZMIANOLOGICA"><svg viewBox="0 0 80 85" aria-hidden="true" class="zmlz"><path d="M76.75,44.38 L75.38,43.00 L73.75,42.25 L73.12,42.25 L71.50,43.00 L58.12,52.75 L51.50,57.12 L44.12,62.88 L42.12,64.12 L41.12,64.50 L40.38,64.50 L39.25,63.38 L39.00,62.62 L38.75,56.50 L38.00,52.25 L37.75,46.88 L37.12,41.88 L36.88,37.50 L35.88,32.50 L35.12,31.88 L33.62,31.62 L32.50,32.12 L29.25,34.88 L28.62,35.12 L26.12,37.62 L25.75,39.00 L25.75,41.25 L27.00,57.38 L28.00,61.88 L28.25,67.12 L28.88,72.62 L29.12,81.12 L30.12,84.00 L30.62,84.38 L31.62,84.50 L35.38,82.62 L38.38,80.00 L46.25,74.75 L56.88,67.00 L57.38,66.88 L69.38,58.12 L70.38,57.62 L75.50,53.88 L77.50,52.75 L78.88,51.38 L79.12,50.75 L79.88,50.38 L79.88,48.25 L79.50,48.25 L79.00,47.75ZM50.75,1.62 L50.00,1.00 L48.50,0.88 L47.38,1.12 L45.38,2.12 L42.25,4.75 L41.25,5.25 L35.38,9.62 L31.50,12.12 L19.62,20.88 L17.62,22.00 L15.25,23.88 L12.75,25.38 L5.50,30.88 L4.75,31.12 L2.50,32.75 L1.00,34.62 L1.00,36.62 L4.38,41.38 L6.75,42.88 L8.38,42.62 L14.25,38.00 L18.62,34.88 L20.62,33.75 L25.62,30.00 L26.50,29.62 L36.50,22.12 L38.62,20.88 L40.25,20.75 L41.00,21.38 L41.38,22.50 L42.12,32.00 L42.88,36.88 L43.12,44.50 L43.88,48.62 L44.00,51.00 L44.38,52.25 L45.75,53.25 L47.25,53.12 L48.25,52.62 L52.00,49.62 L53.62,48.12 L54.50,46.88 L54.88,46.00 L54.88,44.12 L54.12,39.25 L53.75,29.62 L53.00,26.25 L52.12,19.38 L51.50,6.75Z" fill="currentColor"/></svg><b>ZMIANOLOGICA</b></span></footer>
 <div id="druk"></div>
@@ -781,7 +805,7 @@ const IDB = {
 };
 const PLIK = {
   h: {}, stan: {}, timer: null,
-  dane(g) { const m = wczytajGrupe(g); return { format: 'zml-analiza-pracy-grupa', wersja: 2, grupa: g, plik: nazwaPliku(g), zapisano: new Date().toISOString(), zmieniono: m.zmieniono || null, zakonczone: m.done || {}, docs: m.docs }; },
+  dane(g) { const m = wczytajGrupe(g); return { format: 'zml-analiza-pracy-grupa', wersja: 2, grupa: g, plik: nazwaPliku(g), zapisano: new Date().toISOString(), zmieniono: m.zmieniono || null, zakonczone: m.done || {}, czasy: { start: m.start || {}, stop: m.stop || {} }, docs: m.docs }; },
   async zgoda(handle, pytaj) {
     try {
       const o = { mode: 'readwrite' };
@@ -816,7 +840,7 @@ const PLIK = {
   },
   wczytajDane(d) {
     const g = d.grupa;
-    mem[g] = { docs: d.docs, zmieniono: d.zmieniono || Date.now(), done: d.zakonczone || {}, wczytano: d.zapisano };
+    mem[g] = { docs: d.docs, zmieniono: d.zmieniono || Date.now(), done: d.zakonczone || {}, start: (d.czasy || {}).start || {}, stop: (d.czasy || {}).stop || {}, wczytano: d.zapisano };
     zapiszGrupe(g);
     ST.grupa = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {}
   },
@@ -916,10 +940,55 @@ function stanowiskoInfo(nr) {
   return h('div', { class: 'stan' }, h('div', { class: 'stan-nr' }, k[0]), h('div', {}, h('div', { class: 'stan-n' }, k[1]),
     h('div', { class: 'muted' }, k[2] + ' · wzór ' + WZOR_TYPU[k[2]] + ' · ' + k[5] + ' · ' + k[4] + (k[4] === 1 ? ' osoba' : ' os.'))));
 }
+// ---------- Zegar zadania: odlicza czas od pierwszego otwarcia zadania ----------
+const ZEGAR = { el: null, key: null, timer: null };
+function zegarStart(key) {
+  const g = G(), m = wczytajGrupe(g);
+  m.start = m.start || {};
+  if (!m.start[key] && !(m.done && m.done[key])) { m.start[key] = Date.now(); m.zmieniono = Date.now(); zapiszGrupe(g); PLIK.zmiana(g); }
+  ZEGAR.key = key; zegarTik();
+}
+const fmt = sek => { const s = Math.abs(Math.round(sek)); return (sek < 0 ? '−' : '') + String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+function zegarTik() {
+  const el = $('#zegar'); if (!el) return;
+  const g = G(), key = ZEGAR.key;
+  if (!g || !key || ST.tab !== key || wczytajGrupe(g).lock) { el.hidden = true; return; }
+  const m = wczytajGrupe(g), t0 = (m.start || {})[key], t1 = (m.stop || {})[key], min = CZAS[key];
+  if (!t0) { el.hidden = true; return; }
+  el.hidden = false;
+  const uplyw = ((t1 || Date.now()) - t0) / 1000, zostalo = min * 60 - uplyw;
+  const L = 2 * Math.PI * 56;
+  $('#zg-luk').style.strokeDasharray = L;
+  $('#zg-luk').style.strokeDashoffset = t1 ? 0 : L * (1 - Math.max(0, zostalo) / (min * 60));
+  let f, nap, czas, pod;
+  if (t1) { f = 'f0'; nap = 'UKOŃCZONE'; czas = Math.max(1, Math.round(uplyw / 60)) + ' min'; pod = 'z ' + min + ' min'; }
+  else { f = zostalo < 0 ? 'f4' : zostalo <= 180 ? 'f3' : zostalo <= min * 30 ? 'f2' : 'f1'; nap = zostalo < 0 ? 'PO CZASIE' : 'ZOSTAŁO'; czas = fmt(zostalo); pod = 'z ' + min + ' min'; }
+  el.className = 'zegar ' + f + (el.classList.contains('ciagnij') ? ' ciagnij' : '');
+  $('#zg-nap').textContent = nap; $('#zg-czas').textContent = czas; $('#zg-pod').textContent = pod;
+}
+setInterval(zegarTik, 500);
+// przestawianie zegara myszą; pozycja zapamiętana w przeglądarce
+(function () {
+  const el = $('#zegar'); if (!el) return;
+  const KP = KL + 'zegar-poz';
+  const ustaw = (x, y) => {
+    const w = el.offsetWidth || 98, hh = el.offsetHeight || 98;
+    x = Math.min(Math.max(4, x), innerWidth - w - 4); y = Math.min(Math.max(4, y), innerHeight - hh - 4);
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto';
+    return [x, y];
+  };
+  try { const p = JSON.parse(localStorage.getItem(KP) || 'null'); if (p) ustaw(p[0], p[1]); } catch (e) {}
+  let dx = 0, dy = 0, ruch = false;
+  el.addEventListener('pointerdown', e => { const r = el.getBoundingClientRect(); dx = e.clientX - r.left; dy = e.clientY - r.top; ruch = true; el.classList.add('ciagnij'); el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointermove', e => { if (ruch) ustaw(e.clientX - dx, e.clientY - dy); });
+  const koniec = () => { if (!ruch) return; ruch = false; el.classList.remove('ciagnij'); if (el.style.left) { try { localStorage.setItem(KP, JSON.stringify([parseFloat(el.style.left), parseFloat(el.style.top)])); } catch (e) {} } };
+  el.addEventListener('pointerup', koniec); el.addEventListener('pointercancel', koniec);
+  addEventListener('resize', () => { if (el.style.left) ustaw(parseFloat(el.style.left), parseFloat(el.style.top)); });
+})();
 function koniecZadania(key) {
   const g = G(), m = wczytajGrupe(g);
   const done = !!(m.done && m.done[key]);
-  const b = h('button', { class: 'btn', type: 'button', onclick: () => { m.done = m.done || {}; m.done[key] = !done; m.zmieniono = Date.now(); zapiszGrupe(g); PLIK.zmiana(g); render(); } }, done ? 'Cofnij oznaczenie' : 'Oznacz zadanie jako zakończone');
+  const b = h('button', { class: 'btn', type: 'button', onclick: () => { m.done = m.done || {}; m.done[key] = !done; m.stop = m.stop || {}; if (!done) m.stop[key] = Date.now(); else delete m.stop[key]; m.zmieniono = Date.now(); zapiszGrupe(g); PLIK.zmiana(g); render(); } }, done ? 'Cofnij oznaczenie' : 'Oznacz zadanie jako zakończone');
   return h('div', { class: 'card przyp' }, h('b', {}, done ? 'Zadanie oznaczone jako zakończone' : 'Na koniec zadania'),
     h('p', { class: 'desc' }, 'Oznaczcie zadanie jako zakończone. Jeśli następne zadanie wpisuje inna osoba, kliknijcie „Przekaż pracę”, wyślijcie plik ' + nazwaPliku(g) + ' na czat pokoju grupy (spinacz), a następna osoba otwiera tę stronę i klika „Kontynuuj pracę grupy z pliku”.'),
     h('div', { class: 'actions' }, b, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę następnej osobie')));
@@ -1402,7 +1471,7 @@ function tabStart(main) {
   ZAD.forEach(([key, nr, nazwa, opis]) => {
     const done = m.done && m.done[key], ruszone = docs.includes(G() + '_' + key);
     tiles.append(h('a', { class: 'tile' + (done ? ' done' : ''), href: adres(key, G()), onclick: e => { e.preventDefault(); idz(key); } },
-      h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('span', { class: 'tile-t' }, 'około ' + CZAS[key] + ' minut'), h('em', {}, done ? '✓ zakończone' : ruszone ? 'w toku' : 'nierozpoczęte')));
+      h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('span', { class: 'tile-t' }, 'około ' + CZAS[key] + ' minut'), h('em', {}, done ? '✓ zakończone' + ((m.stop || {})[key] && (m.start || {})[key] ? ' w ' + Math.max(1, Math.round((m.stop[key] - m.start[key]) / 60000)) + ' min' : '') : ruszone ? 'w toku' : 'nierozpoczęte')));
   });
   main.append(tiles, h('div', { class: 'card' }, h('b', {}, 'Przejęcie pracy od innej osoby'),
     h('p', { class: 'desc' }, 'Jeśli przejmujecie pracę grupy, pobierzcie z czatu pokoju najnowszy plik ' + nazwaPliku(G()) + ' i kliknijcie „Kontynuuj pracę grupy z pliku”.'),
@@ -1486,8 +1555,9 @@ function render() {
   else if (!g) wyborGrupy(main);
   else if (wczytajGrupe(g).lock) zablokowana(main);
   else if (ST.tab === 'start') tabStart(main);
-  else ({ nazwy: tabNazwy, sme: tabSme, przeglad: tabPrzeglad, ekasp: tabEkasp, wzor: tabWzor, zadania: tabZadania, opis: tabOpis })[ST.tab](main);
+  else { ({ nazwy: tabNazwy, sme: tabSme, przeglad: tabPrzeglad, ekasp: tabEkasp, wzor: tabWzor, zadania: tabZadania, opis: tabOpis })[ST.tab](main); zegarStart(ST.tab); }
   pasekPliku();
+  zegarTik();
   if (g) PLIK.przywroc(g);
   window.scrollTo(0, 0);
 }
