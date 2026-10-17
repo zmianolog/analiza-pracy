@@ -1399,6 +1399,18 @@ function tabStart(main) {
     h('p', { class: 'desc' }, 'Jeśli przejmujecie pracę grupy, pobierzcie z czatu pokoju najnowszy plik ' + nazwaPliku(G()) + ' i kliknijcie „Kontynuuj pracę grupy z pliku”.'),
     h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku'))));
 }
+function czyszczenie(main, g) {
+  const m = wczytajGrupe(g);
+  main.append(h('div', { class: 'card narrow' }, h('h2', {}, 'Usunąć dane grupy ' + nrG(g) + ' z tej przeglądarki?'),
+    h('p', { class: 'desc' }, m.zmieniono ? 'Ostatnia zmiana: ' + new Date(m.zmieniono).toLocaleString('pl-PL') + '. Plik grupy zapisany na dysku zostaje bez zmian.' : 'Ta przeglądarka nie ma danych grupy ' + nrG(g) + '.'),
+    h('div', { class: 'actions' },
+      h('button', { class: 'btn', type: 'button', onclick: async () => {
+        try { localStorage.removeItem(KL + g); if (OSTATNIA === g) localStorage.removeItem(KL + 'wybrana'); } catch (e) {} delete mem[g]; delete PLIK.h[g]; delete PLIK.stan[g];
+        await IDB.set(g, null);
+        location.replace(adres('start'));
+      } }, 'Tak, usuń dane grupy ' + nrG(g)),
+      h('a', { class: 'btn', href: adres('start') }, 'Anuluj'))));
+}
 function wyborGrupy(main) {
   const przyciski = GRUPY.map(g => {
     const m = wczytajGrupe(g), ost = g === OSTATNIA;
@@ -1408,10 +1420,9 @@ function wyborGrupy(main) {
       ost ? h('small', { class: 'ostt' }, '● ostatnio używana tutaj') : null);
   });
   main.append(h('div', { class: 'card narrow wide' }, h('h2', {}, 'Wybierzcie swoją grupę'),
-    h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, nie wybierajcie grupy, tylko wczytajcie plik grupy z czatu pokoju. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
+    h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, wybierzcie grupę, a potem kliknijcie „Kontynuuj pracę grupy z pliku”. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
     h('div', { class: 'grupy' }, przyciski),
-    h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : h('a', { class: 'btn', href: 'index.html' }, 'Wróć do strony startowej'),
-      h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku')),
+    h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : h('a', { class: 'btn', href: 'index.html' }, 'Wróć do strony startowej')),
     FS_OK ? '' : h('p', { class: 'no' }, 'Ta przeglądarka nie zapisuje pliku grupy automatycznie. Najlepiej pracować w Chrome albo Edge na komputerze.')));
 }
 function zablokowana(main) {
@@ -1448,7 +1459,9 @@ function render() {
   naglowek();
   main.className = 'wrap' + (ST.tab === 'start' ? ' szeroki' : '');
   document.body.classList.toggle('szer', ST.tab === 'start' || !g);
-  if (!g) wyborGrupy(main);
+  const wycz = 'G' + (URLP.get('wyczysc') || '');
+  if (GRUPY.includes(wycz)) czyszczenie(main, wycz);
+  else if (!g) wyborGrupy(main);
   else if (wczytajGrupe(g).lock) zablokowana(main);
   else if (ST.tab === 'start') tabStart(main);
   else ({ nazwy: tabNazwy, sme: tabSme, przeglad: tabPrzeglad, ekasp: tabEkasp, wzor: tabWzor, zadania: tabZadania, opis: tabOpis })[ST.tab](main);
