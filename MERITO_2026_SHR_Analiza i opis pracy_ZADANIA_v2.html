@@ -213,6 +213,8 @@ body { padding-bottom: 44px }
 .druk-in .df { display: flex; align-items: center; gap: 6px; color: #1F4460 }
 .druk-in .df .dz svg { height: 16px; width: auto } .druk-in .df span:last-child { color: #61788C; font-weight: 400 }
 a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none }
+.tile .tile-t { font-weight: 700; color: var(--head); font-size: 13px; margin-top: auto } .tile .tile-t + em { margin-top: 0 }
+.topin .czas { background: var(--navy); color: var(--honey); border-radius: 999px; padding: 3px 10px; font-weight: 800; font-size: 13px; white-space: nowrap }
 </style>
 </head>
 <body>
@@ -754,6 +756,7 @@ const ZAD = [
   ['zadania', 'Z06', 'Zadania DZIK', 'Zadania typowe z wzoru oraz trzy do pięciu zadań własnych stanowiska w układzie DZIK.'],
   ['opis', 'Z07', 'Opis stanowiska', 'Pełny opis stanowiska z wynikami poprzednich zadań i pobranie opisu jako PDF.']
 ];
+const CZAS = { nazwy: 30, sme: 10, przeglad: 15, ekasp: 20, wzor: 20, zadania: 20, opis: 20 };
 const KEYS = ['start', ...ZAD.map(z => z[0])];
 const ST = { grupa: '', tab: KEYS.includes(URLP.get('zadanie')) ? URLP.get('zadanie') : 'start', unsub: [], potwierdz: false };
 let OSTATNIA = ''; try { OSTATNIA = localStorage.getItem(KL + 'wybrana') || ''; } catch (e) {}
@@ -1393,7 +1396,7 @@ function tabStart(main) {
   ZAD.forEach(([key, nr, nazwa, opis]) => {
     const done = m.done && m.done[key], ruszone = docs.includes(G() + '_' + key);
     tiles.append(h('a', { class: 'tile' + (done ? ' done' : ''), href: adres(key, G()), onclick: e => { e.preventDefault(); idz(key); } },
-      h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('em', {}, done ? '✓ zakończone' : ruszone ? 'w toku' : 'nierozpoczęte')));
+      h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('span', { class: 'tile-t' }, 'około ' + CZAS[key] + ' minut'), h('em', {}, done ? '✓ zakończone' : ruszone ? 'w toku' : 'nierozpoczęte')));
   });
   main.append(tiles, h('div', { class: 'card' }, h('b', {}, 'Przejęcie pracy od innej osoby'),
     h('p', { class: 'desc' }, 'Jeśli przejmujecie pracę grupy, pobierzcie z czatu pokoju najnowszy plik ' + nazwaPliku(G()) + ' i kliknijcie „Kontynuuj pracę grupy z pliku”.'),
@@ -1458,7 +1461,7 @@ function naglowek() {
     h('button', { class: 'btn', type: 'button', onclick: () => { ST.poprz = G(); krok(() => { ST.grupa = ''; }); } }, 'Tak, zmień grupę'),
     h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = false; naglowek(); } }, 'Anuluj'));
   top.replaceChildren(
-    h('div', { class: 'lewo' }, h('span', { class: 'gb' }, 'Grupa ' + nrG(g)), h('span', { class: 'gst' }, klucz(NR()).slice(0, 2).join(' ')), h('b', { class: 'tyt' }, z ? z[1] + ' · ' + z[2] : 'Wszystkie zadania'), z ? h('button', { class: 'btn', type: 'button', onclick: () => idz('start') }, 'Wszystkie zadania') : null),
+    h('div', { class: 'lewo' }, h('span', { class: 'gb' }, 'Grupa ' + nrG(g)), h('span', { class: 'gst' }, klucz(NR()).slice(0, 2).join(' ')), h('b', { class: 'tyt' }, z ? z[1] + ' · ' + z[2] : 'Wszystkie zadania'), z ? h('span', { class: 'czas' }, 'około ' + CZAS[z[0]] + ' min') : null, z ? h('button', { class: 'btn', type: 'button', onclick: () => idz('start') }, 'Wszystkie zadania') : null),
     h('div', { class: 'prawo' }, h('span', { class: 'status', id: 'status', 'aria-live': 'polite' }),
       wczytajGrupe(g).lock ? null : h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę'),
       h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = true; naglowek(); } }, 'Zmień grupę')),
