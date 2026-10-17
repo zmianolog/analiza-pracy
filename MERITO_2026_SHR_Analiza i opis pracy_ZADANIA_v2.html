@@ -235,6 +235,9 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .zegar.f4 b, .zegar.f4 small, .zegar.f4 span { color: #FFFFFF }
 @keyframes zgpuls { 0%, 100% { box-shadow: 0 0 0 0 rgba(200,32,46,.55) } 50% { box-shadow: 0 0 0 14px rgba(200,32,46,0) } }
 @media print { .zegar { display: none !important } }
+.okno-tlo { position: fixed; inset: 0; z-index: 50; background: rgba(15,27,38,.55); display: flex; align-items: center; justify-content: center; padding: 16px }
+.okno { background: var(--surface); color: var(--fg); border-radius: 16px; max-width: 560px; width: 100%; padding: 22px 24px; box-shadow: 0 20px 50px rgba(0,0,0,.3); border-top: 6px solid var(--honey) }
+.okno h2 { margin: 0 0 10px; font-size: 19px } .okno ol { margin: 0 0 14px; padding-left: 22px; line-height: 1.5 } .okno li + li { margin-top: 6px }
 </style>
 </head>
 <body>
@@ -760,7 +763,6 @@ const DB = {
   watchDoc(id, cb) { const s = { id, cb }; this.subs.push(s); setTimeout(() => cb(structuredClone(this.get(id))), 0); return () => { this.subs = this.subs.filter(x => x !== s); }; },
   save(id, patch) {
     const g = id.split('_')[0], G0 = wczytajGrupe(g);
-    if (G0.lock) return;
     G0.docs[id] = merge(structuredClone(G0.docs[id] || {}), patch);
     G0.zmieniono = Date.now();
     zapiszGrupe(g);
@@ -804,97 +806,51 @@ const IDB = {
   async set(k, v) { try { const d = await this.db(); await new Promise(ok => { const t = d.transaction('h', 'readwrite'); t.objectStore('h').put(v, k); t.oncomplete = ok; t.onerror = ok; }); } catch (e) {} }
 };
 const PLIK = {
-  h: {}, stan: {}, timer: null,
+  h: {}, stan: {},
   dane(g) { const m = wczytajGrupe(g); return { format: 'zml-analiza-pracy-grupa', wersja: 2, grupa: g, plik: nazwaPliku(g), zapisano: new Date().toISOString(), zmieniono: m.zmieniono || null, zakonczone: m.done || {}, czasy: { start: m.start || {}, stop: m.stop || {} }, docs: m.docs }; },
-  async zgoda(handle, pytaj) {
-    try {
-      const o = { mode: 'readwrite' };
-      if ((await handle.queryPermission(o)) === 'granted') return true;
-      if (pytaj) return (await handle.requestPermission(o)) === 'granted';
-    } catch (e) {}
-    return false;
-  },
-  async zapisz(g, pytaj) {
-    const handle = this.h[g]; if (!handle) return false;
-    if (!(await this.zgoda(handle, pytaj))) { this.stan[g] = 'wznow'; pasekPliku(); return false; }
-    try { const w = await handle.createWritable(); await w.write(JSON.stringify(this.dane(g), null, 1)); await w.close(); this.stan[g] = 'ok'; this.czas = Date.now(); pasekPliku(); return true; }
-    catch (e) { this.stan[g] = 'blad'; pasekPliku(); return false; }
-  },
-  zmiana(g) { clearTimeout(this.timer); this.timer = setTimeout(() => { if (this.h[g]) this.zapisz(g, false); else pasekPliku(); }, 700); },
-  async przywroc(g) { if (!FS_OK || this.h[g]) return; const hd = await IDB.get(g); if (hd) { this.h[g] = hd; this.stan[g] = (await this.zgoda(hd, false)) ? 'ok' : 'wznow'; pasekPliku(); } },
-  async utworz() {
-    const g = G();
-    if (!FS_OK) { this.pobierz(); return; }
-    try {
-      const hd = await window.showSaveFilePicker({ suggestedName: nazwaPliku(g), types: [{ description: 'Plik grupy', accept: { 'application/json': ['.json'] } }] });
-      this.h[g] = hd; await IDB.set(g, hd); await this.zapisz(g, true);
-      status('ok', 'Plik grupy ' + hd.name + ' utworzony; od teraz zapisuje się sam.');
-    } catch (e) { if (e && e.name !== 'AbortError') status('err', 'Nie udało się utworzyć pliku grupy.'); }
-  },
+  zmiana() {}, przywroc() {},
   pobierz() {
     const g = G(); const blob = new Blob([JSON.stringify(this.dane(g), null, 1)], { type: 'application/json' });
     const a = h('a', { href: URL.createObjectURL(blob), download: nazwaPliku(g) });
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    this.stan[g] = 'pobrany'; this.czas = Date.now(); pasekPliku();
-    status('ok', 'Plik ' + nazwaPliku(g) + ' zapisany w folderze Pobrane.');
   },
   wczytajDane(d) {
     const g = d.grupa;
     mem[g] = { docs: d.docs, zmieniono: d.zmieniono || Date.now(), done: d.zakonczone || {}, start: (d.czasy || {}).start || {}, stop: (d.czasy || {}).stop || {}, wczytano: d.zapisano };
     zapiszGrupe(g);
-    ST.grupa = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {}
+    ST.grupa = g; OSTATNIA = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {}
   },
-  async kontynuuj() {
-    if (FS_OK) {
-      try {
-        const [hd] = await window.showOpenFilePicker({ types: [{ description: 'Plik grupy', accept: { 'application/json': ['.json'] } }] });
-        const d = await czytaj(await hd.getFile());
-        if (!this.nowszy(d)) return;
-        this.wczytajDane(d); this.h[d.grupa] = hd; await IDB.set(d.grupa, hd);
-        const ok = await this.zapisz(d.grupa, true);
-        krok(() => { ST.tab = 'start'; });
-        status('ok', 'Wczytano plik ' + hd.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').' + (ok ? ' Dalsze zmiany zapisują się w tym samym pliku.' : ''));
-      } catch (e) { if (e && e.name !== 'AbortError') status('err', 'To nie jest plik grupy z tych zajęć.'); }
-      return;
-    }
+  kontynuuj() {
     const inp = h('input', { type: 'file', accept: '.json,application/json' });
     inp.addEventListener('change', async () => {
       const f = inp.files[0]; if (!f) return;
-      try { const d = await czytaj(f); if (!this.nowszy(d)) return; this.wczytajDane(d); krok(() => { ST.tab = 'start'; }); status('ok', 'Wczytano plik ' + f.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').'); }
-      catch (e) { status('err', 'To nie jest plik grupy z tych zajęć.'); }
+      try { const d = await czytaj(f); this.wczytajDane(d); krok(() => { ST.tab = 'start'; }); okno('Wczytano pracę grupy ' + nrG(d.grupa), ['Plik ' + f.name + ' z ' + new Date(d.zapisano).toLocaleString('pl-PL') + '.', 'Możesz pisać dalej. Zmiany zapisują się same w tej przeglądarce.']); }
+      catch (e) { okno('To nie jest plik grupy', ['Wskaż plik o nazwie AP_G…json, który dostałeś od osoby, która pisała wcześniej.']); }
     });
     inp.click();
   },
-  nowszy(d) {
-    const m = wczytajGrupe(d.grupa);
-    if (m.lock && new Date(d.zapisano).getTime() <= m.lock) { status('err', 'To jest plik przekazany z tej przeglądarki. Wczytajcie nowszy plik z czatu pokoju, zapisany przez osobę, która pracowała po Was.'); return false; }
-    return true;
-  },
-  async przekaz() {
-    const g = G(), m = wczytajGrupe(g);
-    let ok = false;
-    if (this.h[g]) ok = await this.zapisz(g, true);
-    if (!ok) this.pobierz();
-    m.lock = Date.now(); zapiszGrupe(g); render();
+  przekaz() {
+    this.pobierz();
+    const n = nazwaPliku(G());
+    okno('Plik ' + n + ' jest w folderze Pobrane', [
+      'Wyślij go osobie, która pisze dalej: czatem, e-mailem albo komunikatorem.',
+      'Ta osoba otwiera link do zadań, wybiera grupę ' + nrG(G()) + ' i klika „Wczytaj plik grupy”.',
+      'Jeśli w folderze Pobrane jest kilka plików, np. ' + n.replace('.json', ' (1).json') + ', wyślij najnowszy.']);
   }
 };
+function okno(tytul, punkty) {
+  const tlo = h('div', { class: 'okno-tlo' });
+  const zamknij = () => tlo.remove();
+  tlo.append(h('div', { class: 'okno', role: 'dialog', 'aria-modal': 'true' }, h('h2', {}, tytul),
+    h('ol', {}, punkty.map(p => h('li', {}, p))),
+    h('div', { class: 'actions end' }, h('button', { class: 'btn', type: 'button', onclick: zamknij }, 'Rozumiem'))));
+  document.body.append(tlo);
+  tlo.querySelector('.btn').focus();
+}
 function czytaj(file) {
   return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (d.format !== 'zml-analiza-pracy-grupa' || !GRUPY.includes(d.grupa) || !d.docs) throw new Error('format'); ok(d); } catch (e) { bad(e); } }; r.onerror = bad; r.readAsText(file); });
 }
-function pasekPliku() {
-  const el = $('#plikbar'); if (!el) return;
-  const g = G(); if (!g || wczytajGrupe(g).lock) { el.hidden = true; return; }
-  const st = PLIK.stan[g], m = wczytajGrupe(g);
-  let txt, btn = null, cls = 'plikbar';
-  if (FS_OK && PLIK.h[g] && st === 'ok') { txt = 'Plik grupy ' + PLIK.h[g].name + ' zaktualizowany ' + godz(PLIK.czas || Date.now()) + '.'; cls += ' ok'; }
-  else if (FS_OK && PLIK.h[g] && st === 'wznow') { txt = 'Przeglądarka wstrzymała zapis do pliku ' + PLIK.h[g].name + '.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.zapisz(g, true) }, 'Wznów zapis do pliku'); }
-  else if (FS_OK && PLIK.h[g] && st === 'blad') { txt = 'Nie udało się zapisać pliku grupy.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.utworz() }, 'Utwórz plik grupy'); }
-  else if (FS_OK) { txt = 'Grupa nie ma jeszcze pliku. Utwórzcie go raz; potem zapisuje się sam po każdej zmianie.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.utworz() }, 'Utwórz plik grupy'); }
-  else { txt = (st === 'pobrany' ? 'Plik ' + nazwaPliku(g) + ' pobrany ' + godz(PLIK.czas) + '. ' : '') + 'Ta przeglądarka nie zapisuje pliku sama. Dane są w przeglądarce; plik pobierzcie przed przekazaniem pracy.'; btn = h('button', { class: 'btn', type: 'button', onclick: () => PLIK.pobierz() }, 'Pobierz plik grupy'); }
-  if (!m.zmieniono && !PLIK.h[g] && FS_OK) cls += ' nowy';
-  el.className = cls; el.hidden = false;
-  el.replaceChildren(h('div', { class: 'plikin' }, h('span', {}, txt), btn));
-}
+function pasekPliku() { const el = $('#plikbar'); if (el) el.hidden = true; }
 
 // ---------- Pola powiązane z dokumentem ----------
 function bindText(el, docId, typ, path, extra) {
@@ -952,7 +908,7 @@ const fmt = sek => { const s = Math.abs(Math.round(sek)); return (sek < 0 ? '−
 function zegarTik() {
   const el = $('#zegar'); if (!el) return;
   const g = G(), key = ZEGAR.key;
-  if (!g || !key || ST.tab !== key || wczytajGrupe(g).lock) { el.hidden = true; return; }
+  if (!g || !key || ST.tab !== key) { el.hidden = true; return; }
   const m = wczytajGrupe(g), t0 = (m.start || {})[key], t1 = (m.stop || {})[key], min = CZAS[key];
   if (!t0) { el.hidden = true; return; }
   el.hidden = false;
@@ -990,8 +946,8 @@ function koniecZadania(key) {
   const done = !!(m.done && m.done[key]);
   const b = h('button', { class: 'btn', type: 'button', onclick: () => { m.done = m.done || {}; m.done[key] = !done; m.stop = m.stop || {}; if (!done) m.stop[key] = Date.now(); else delete m.stop[key]; m.zmieniono = Date.now(); zapiszGrupe(g); PLIK.zmiana(g); render(); } }, done ? 'Cofnij oznaczenie' : 'Oznacz zadanie jako zakończone');
   return h('div', { class: 'card przyp' }, h('b', {}, done ? 'Zadanie oznaczone jako zakończone' : 'Na koniec zadania'),
-    h('p', { class: 'desc' }, 'Oznaczcie zadanie jako zakończone. Jeśli następne zadanie wpisuje inna osoba, kliknijcie „Przekaż pracę”, wyślijcie plik ' + nazwaPliku(g) + ' na czat pokoju grupy (spinacz), a następna osoba otwiera tę stronę i klika „Kontynuuj pracę grupy z pliku”.'),
-    h('div', { class: 'actions' }, b, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę następnej osobie')));
+    h('p', { class: 'desc' }, 'Oznaczcie zadanie jako zakończone. Jeśli następne zadanie pisze inna osoba, kliknijcie „Przekaż pracę”.'),
+    h('div', { class: 'actions' }, b, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę')));
 }
 const typowe = nr => { const k = klucz(nr), w = WZOR_TYPU[k[2]]; return ZT.filter(z => z[1] === 'Wszystkie ' + w || z[1] === k[2]); };
 const DZIK_HEAD = ['Nr', 'D — działanie', 'Z — dla kogo / z kim', 'I — instrument, technologia, procedura', 'K — korzyść', 'Kategoria · częstotliwość'];
@@ -1473,9 +1429,9 @@ function tabStart(main) {
     tiles.append(h('a', { class: 'tile' + (done ? ' done' : ''), href: adres(key, G()), onclick: e => { e.preventDefault(); idz(key); } },
       h('span', { class: 'tile-n' }, nr), h('b', {}, nazwa), h('span', {}, opis), h('span', { class: 'tile-t' }, 'około ' + CZAS[key] + ' minut'), h('em', {}, done ? '✓ zakończone' + ((m.stop || {})[key] && (m.start || {})[key] ? ' w ' + Math.max(1, Math.round((m.stop[key] - m.start[key]) / 60000)) + ' min' : '') : ruszone ? 'w toku' : 'nierozpoczęte')));
   });
-  main.append(tiles, h('div', { class: 'card' }, h('b', {}, 'Przejęcie pracy od innej osoby'),
-    h('p', { class: 'desc' }, 'Jeśli przejmujecie pracę grupy, pobierzcie z czatu pokoju najnowszy plik ' + nazwaPliku(G()) + ' i kliknijcie „Kontynuuj pracę grupy z pliku”.'),
-    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku'))));
+  main.append(tiles, h('div', { class: 'card' }, h('b', {}, 'Przejęcie pisania od innej osoby'),
+    h('p', { class: 'desc' }, 'Przejmujesz pisanie od innej osoby? Kliknij „Wczytaj plik grupy” i wskaż plik ' + nazwaPliku(G()) + ', który od niej dostałeś.'),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Wczytaj plik grupy'))));
 }
 function czyszczenie(main, g) {
   const m = wczytajGrupe(g);
@@ -1510,21 +1466,10 @@ function wyborGrupy(main) {
       ost ? h('small', { class: 'ostt' }, '● ostatnio używana tutaj') : null);
   });
   main.append(h('div', { class: 'card narrow wide' }, h('h2', {}, 'Wybierzcie swoją grupę'),
-    h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, wybierzcie grupę, a potem kliknijcie „Kontynuuj pracę grupy z pliku”. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
+    h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
     h('div', { class: 'grupy' }, przyciski),
     h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : null),
     FS_OK ? '' : h('p', { class: 'no' }, 'Ta przeglądarka nie zapisuje pliku grupy automatycznie. Najlepiej pracować w Chrome albo Edge na komputerze.')));
-}
-function zablokowana(main) {
-  const g = G(), m = wczytajGrupe(g);
-  const pot = h('div', { class: 'actions', hidden: true }, h('span', { class: 'no' }, 'Odblokowanie pozwala pisać w tej przeglądarce. Jeśli następna osoba już pracuje, powstaną dwie różne wersje pracy grupy.'),
-    h('button', { class: 'btn', type: 'button', onclick: () => { delete m.lock; zapiszGrupe(g); render(); } }, 'Tak, odblokuj'));
-  main.append(h('div', { class: 'card narrow lock' }, h('h2', {}, 'Praca grupy ' + nrG(g) + ' przekazana o ' + godz(m.lock)),
-    h('ol', {}, h('li', {}, 'Wyślijcie plik ' + nazwaPliku(g) + ' na czat pokoju grupy: spinacz, „Prześlij z tego urządzenia”, plik z folderu Pobrane albo z miejsca, w którym go zapisaliście.'),
-      h('li', {}, 'Następna osoba pobiera plik z czatu, otwiera tę stronę i klika „Kontynuuj pracę grupy z pliku”.'),
-      h('li', {}, 'Ta przeglądarka jest zablokowana, żeby nikt nie pisał równolegle. Aby wrócić do pisania, wczytajcie nowszy plik z czatu.')),
-    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku'),
-      h('button', { class: 'btn', type: 'button', onclick: () => { pot.hidden = false; } }, 'Odblokuj mimo to')), pot));
 }
 
 // ---------- Ramy aplikacji ----------
@@ -1538,7 +1483,7 @@ function naglowek() {
   top.replaceChildren(
     h('div', { class: 'lewo' }, h('span', { class: 'gb' }, 'Grupa ' + nrG(g)), h('span', { class: 'gst' }, klucz(NR()).slice(0, 2).join(' ')), h('b', { class: 'tyt' }, z ? z[1] + ' · ' + z[2] : 'Wszystkie zadania'), z ? h('span', { class: 'czas' }, 'około ' + CZAS[z[0]] + ' min') : null, z ? h('button', { class: 'btn', type: 'button', onclick: () => idz('start') }, 'Wszystkie zadania') : null),
     h('div', { class: 'prawo' }, h('span', { class: 'status', id: 'status', 'aria-live': 'polite' }),
-      wczytajGrupe(g).lock ? null : h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę'),
+      h('button', { class: 'btn', type: 'button', onclick: () => PLIK.przekaz() }, 'Przekaż pracę'),
       h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = true; naglowek(); } }, 'Zmień grupę')),
     potw);
 }
@@ -1553,7 +1498,6 @@ function render() {
   if (URLP.get('wyczysc') === 'wszystkie') czyszczenieWszystkich(main);
   else if (GRUPY.includes(wycz)) czyszczenie(main, wycz);
   else if (!g) wyborGrupy(main);
-  else if (wczytajGrupe(g).lock) zablokowana(main);
   else if (ST.tab === 'start') tabStart(main);
   else { ({ nazwy: tabNazwy, sme: tabSme, przeglad: tabPrzeglad, ekasp: tabEkasp, wzor: tabWzor, zadania: tabZadania, opis: tabOpis })[ST.tab](main); zegarStart(ST.tab); }
   pasekPliku();
