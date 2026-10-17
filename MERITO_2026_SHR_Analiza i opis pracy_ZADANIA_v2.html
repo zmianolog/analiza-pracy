@@ -824,7 +824,7 @@ const PLIK = {
         if (!this.nowszy(d)) return;
         this.wczytajDane(d); this.h[d.grupa] = hd; await IDB.set(d.grupa, hd);
         const ok = await this.zapisz(d.grupa, true);
-        ST.tab = 'start'; render();
+        krok(() => { ST.tab = 'start'; });
         status('ok', 'Wczytano plik ' + hd.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').' + (ok ? ' Dalsze zmiany zapisują się w tym samym pliku.' : ''));
       } catch (e) { if (e && e.name !== 'AbortError') status('err', 'To nie jest plik grupy z tych zajęć.'); }
       return;
@@ -832,7 +832,7 @@ const PLIK = {
     const inp = h('input', { type: 'file', accept: '.json,application/json' });
     inp.addEventListener('change', async () => {
       const f = inp.files[0]; if (!f) return;
-      try { const d = await czytaj(f); if (!this.nowszy(d)) return; this.wczytajDane(d); ST.tab = 'start'; render(); status('ok', 'Wczytano plik ' + f.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').'); }
+      try { const d = await czytaj(f); if (!this.nowszy(d)) return; this.wczytajDane(d); krok(() => { ST.tab = 'start'; }); status('ok', 'Wczytano plik ' + f.name + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').'); }
       catch (e) { status('err', 'To nie jest plik grupy z tych zajęć.'); }
     });
     inp.click();
@@ -1373,7 +1373,15 @@ function drukuj() {
 // ---------- Ekran startowy, wybór grupy, blokada po przekazaniu ----------
 function adres(zad, g) { const u = new URL(location.href); u.search = ''; if (zad && zad !== 'start') u.searchParams.set('zadanie', zad); return u.toString(); }
 const para = g => 'G' + (nrG(g) > 5 ? nrG(g) - 5 : nrG(g) + 5);
-function idz(k) { ST.tab = k; try { history.replaceState(null, '', adres(k, G())); } catch (e) {} render(); }
+function stanHist() { return { tab: ST.tab, grupa: G() }; }
+function krok(zmiana) { zmiana(); ST.potwierdz = false; try { history.pushState(stanHist(), '', adres(ST.tab)); } catch (e) {} render(); }
+function idz(k) { krok(() => { ST.tab = k; }); }
+window.addEventListener('popstate', e => {
+  const s = e.state || {};
+  ST.tab = KEYS.includes(s.tab) ? s.tab : 'start';
+  ST.grupa = GRUPY.includes(s.grupa) ? s.grupa : '';
+  ST.potwierdz = false; render();
+});
 function tabStart(main) {
   const m = wczytajGrupe(G());
   const docs = Object.keys(m.docs || {});
@@ -1393,7 +1401,7 @@ function tabStart(main) {
 function wyborGrupy(main) {
   const przyciski = GRUPY.map(g => {
     const m = wczytajGrupe(g), ost = g === OSTATNIA;
-    return h('button', { class: 'btn gbtn' + (ost ? ' ost' : ''), type: 'button', onclick: () => { ST.grupa = g; OSTATNIA = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {} render(); } },
+    return h('button', { class: 'btn gbtn' + (ost ? ' ost' : ''), type: 'button', onclick: () => { OSTATNIA = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {} ST.poprz = ''; krok(() => { ST.grupa = g; }); } },
       h('span', { class: 'gl' }, 'Grupa ' + nrG(g)),
       m.zmieniono ? h('small', {}, 'są dane, ostatnia zmiana ' + godz(m.zmieniono)) : null,
       ost ? h('small', { class: 'ostt' }, '● ostatnio używana tutaj') : null);
@@ -1401,7 +1409,8 @@ function wyborGrupy(main) {
   main.append(h('div', { class: 'card narrow wide' }, h('h2', {}, 'Wybierzcie swoją grupę'),
     h('p', { class: 'muted' }, 'Numer grupy to numer pokoju w Teams. Jeśli przejmujecie pracę od innej osoby z grupy, nie wybierajcie grupy, tylko wczytajcie plik grupy z czatu pokoju. Przy grupach, które mają już dane w tej przeglądarce, widać godzinę ostatniej zmiany.'),
     h('div', { class: 'grupy' }, przyciski),
-    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku')),
+    h('div', { class: 'actions' }, ST.poprz ? h('button', { class: 'btn', type: 'button', onclick: () => history.back() }, 'Wróć do grupy ' + nrG(ST.poprz)) : null,
+      h('button', { class: 'btn', type: 'button', onclick: () => PLIK.kontynuuj() }, 'Kontynuuj pracę grupy z pliku')),
     FS_OK ? '' : h('p', { class: 'no' }, 'Ta przeglądarka nie zapisuje pliku grupy automatycznie. Najlepiej pracować w Chrome albo Edge na komputerze.')));
 }
 function zablokowana(main) {
@@ -1422,7 +1431,7 @@ function naglowek() {
   const z = ZAD.find(x => x[0] === ST.tab);
   if (!g) { top.replaceChildren(h('b', { class: 'tyt' }, 'Analiza i opis pracy — praca w grupach')); return; }
   const potw = h('div', { class: 'potw', hidden: !ST.potwierdz }, h('span', {}, 'Zmienić grupę? Dane grupy ' + nrG(g) + ' zostają w pliku i w tej przeglądarce.'),
-    h('button', { class: 'btn', type: 'button', onclick: () => { ST.grupa = ''; ST.potwierdz = false; try { localStorage.removeItem(KL + 'wybrana'); } catch (e) {} render(); } }, 'Tak, zmień grupę'),
+    h('button', { class: 'btn', type: 'button', onclick: () => { ST.poprz = G(); krok(() => { ST.grupa = ''; }); } }, 'Tak, zmień grupę'),
     h('button', { class: 'btn', type: 'button', onclick: () => { ST.potwierdz = false; naglowek(); } }, 'Anuluj'));
   top.replaceChildren(
     h('div', { class: 'lewo' }, h('span', { class: 'gb' }, 'Grupa ' + nrG(g)), h('span', { class: 'gst' }, klucz(NR()).slice(0, 2).join(' ')), h('b', { class: 'tyt' }, z ? z[1] + ' · ' + z[2] : 'Wszystkie zadania'), z ? h('button', { class: 'btn', type: 'button', onclick: () => idz('start') }, 'Wszystkie zadania') : null),
@@ -1447,6 +1456,7 @@ function render() {
   window.scrollTo(0, 0);
 }
 try { localStorage.setItem(KL + 'test', '1'); localStorage.removeItem(KL + 'test'); } catch (e) { PAMIEC_OK = false; }
+try { history.replaceState(stanHist(), '', adres(ST.tab)); } catch (e) {}
 render();
 if (!PAMIEC_OK) status('err', 'Przeglądarka nie zapisuje danych (np. tryb prywatny). Otwórzcie stronę w zwykłym oknie Chrome albo Edge.');
 
