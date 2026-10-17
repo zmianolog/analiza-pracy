@@ -112,7 +112,7 @@ td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top }
 <script>
 // ===================== DANE SZKOLENIA =====================
 const KLASYFIKATOR_URL = 'MERITO_2026_SHR_Analiza%20i%20opis%20pracy_KLASYFIKATOR%20STANOWISK_v2.html';
-const GRUPY = ['G1', 'G2', 'G3', 'G4', 'G5'];
+const GRUPY = ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10'];
 
 const TYPY = ['Wykonawca', 'Specjalista', 'Ekspert', 'Lider', 'Manager', 'Strateg'];
 const WZOR_TYPU = { Wykonawca: 'S', Specjalista: 'S', Ekspert: 'S', Lider: 'M', Manager: 'M', Strateg: 'M' };
@@ -221,6 +221,8 @@ const KLUCZ = [
 ];
 const STANOWISKO_GRUPY = { G1: 'S-003', G2: 'S-020', G3: 'S-016', G4: 'M-004', G5: 'M-007' };
 const MODULY_GRUPY = { G1: [1, 2], G2: [3, 4, 9, 10], G3: [5, 8], G4: [6], G5: [7] };
+// grupy G6–G10 pracują na tych samych stanowiskach i działach co G1–G5 (pary: G1–G6, G2–G7, G3–G8, G4–G9, G5–G10)
+for (let i = 1; i <= 5; i++) { DZIALY_GRUP['G' + (i + 5)] = DZIALY_GRUP['G' + i]; STANOWISKO_GRUPY['G' + (i + 5)] = STANOWISKO_GRUPY['G' + i]; }
 
 const L = {
   typ: TYPY,
@@ -775,6 +777,7 @@ function tbl(head, rows) {
     h('tbody', {}, rows.length ? rows.map(r => h('tr', {}, r.map(c => h('td', {}, c)))) : h('tr', {}, h('td', { colspan: head.length, class: 'muted' }, 'Brak danych w opisach.')))));
 }
 const PLIKI = {};
+const nrG = g => parseInt(String(g || '').slice(1), 10) || 0;
 async function tabZestawienia(main) {
   main.append(intro(
     'Zestawienia powstają z opisów wypełnionych przez wszystkie grupy. Wczytajcie pliki grup (można zaznaczyć kilka naraz). Opisy zapisane w jednym wzorze, z wartościami wybieranymi ze słowników, działają jak baza danych: jedno zestawienie odpowiada na pytanie, które bez takiej bazy wymagałoby przeczytania wszystkich opisów.',
@@ -795,15 +798,16 @@ async function tabZestawienia(main) {
     const zrodla = {};
     GRUPY.forEach(g => { const loc = wczytajGrupe(g).docs; if (Object.keys(loc).length) zrodla[g] = loc; });
     Object.assign(zrodla, PLIKI);
-    info.textContent = 'Dane grup: ' + (Object.keys(zrodla).sort().join(', ') || 'brak') + '.';
+    info.textContent = 'Dane grup: ' + (Object.keys(zrodla).sort((a, b) => nrG(a) - nrG(b)).join(', ') || 'brak') + '.';
     const docs = Object.values(zrodla).flatMap(d => Object.values(d));
     let opisy = docs.filter(d => d.typ === 'opis'), zad = docs.filter(d => d.typ === 'zadania');
-    opisy = opisy.filter(o => o.pola && o.pola.numer).sort((a, b) => (a.grupa || '').localeCompare(b.grupa || ''));
+    opisy = opisy.filter(o => o.pola && o.pola.numer).sort((a, b) => (a.pola.numer || '').localeCompare(b.pola.numer || '') || nrG(a.grupa) - nrG(b.grupa));
     const S = opisy.map(o => { const k = klucz(o.pola.numer); const t = o.pola.typ || (k && k[2]); return { o, k, nr: o.pola.numer, n: o.pola.nazwa || (k && k[1]), t, w: WZOR_TYPU[t] || 'S', os: k ? k[4] : 1 }; });
     const has = (s, f, i) => getP(s.o, ['pola', f, 'o' + i]) === true;
-    const lab = s => s.nr + ' ' + s.n;
+    const lab = s => s.nr + ' ' + s.n + ' (' + s.o.grupa + ')';
+    const osob = st => [...new Map(st.map(s => [s.nr, s.os])).values()].reduce((x, y) => x + y, 0);
     const sec = (t, p, el) => h('section', { class: 'mod' }, h('h2', {}, t), h('p', { class: 'muted' }, p), el);
-    const byOption = (f, idxs) => idxs.map(i => { const st = S.filter(s => has(s, f, i)); return [L[f][i], st.map(lab).join('; ') || '—', String(st.reduce((a, s) => a + s.os, 0))]; });
+    const byOption = (f, idxs) => idxs.map(i => { const st = S.filter(s => has(s, f, i)); return [L[f][i], st.map(lab).join('; ') || '—', String(osob(st))]; });
     const all = n => [...Array(L[n].length).keys()];
     out.replaceChildren(
       sec('1. Przegląd opisów', 'Każdy wiersz to jeden rekord bazy: jedno stanowisko, niezależnie od liczby osób, które je zajmują.',
@@ -819,7 +823,7 @@ async function tabZestawienia(main) {
       sec('6. Uprawnienia zawodowe', 'Rejestr wymaganych uprawnień pozwala pilnować terminów ich ważności.',
         tbl(['Uprawnienie', 'Stanowiska', 'Osoby'], byOption('uprawnienia', all('uprawnienia').slice(1)))),
       sec('7. Kompetencje', 'Częstość kompetencji w opisach wskazuje, które programy rozwojowe obejmą najwięcej osób.',
-        tbl(['Kompetencja', 'Stanowiska', 'Osoby'], KOMPETENCJE.map(x => { const st = S.filter(s => Object.values(getP(s.o, ['pola', 'komp']) || {}).some(v => !v.del && v.k === x[0])); return [x[0], st.map(lab).join('; ') || '—', String(st.reduce((a, s) => a + s.os, 0))]; }))),
+        tbl(['Kompetencja', 'Stanowiska', 'Osoby'], KOMPETENCJE.map(x => { const st = S.filter(s => Object.values(getP(s.o, ['pola', 'komp']) || {}).some(v => !v.del && v.k === x[0])); return [x[0], st.map(lab).join('; ') || '—', String(osob(st))]; }))),
       sec('8. Pola wzorcowe', 'Pola wzorcowe mają jednakową treść we wszystkich opisach danego wzoru. Zmiana przepisu wymaga poprawienia jednego wpisu we wzorze, a nie każdego opisu osobno.',
         tbl(['Pole', 'Wzór', 'Liczba opisów z tą samą treścią'], POLA.filter(p => p[7] === 'wzor' || p[7] === 'typowe').flatMap(p => (p[3] === 'M' ? ['M'] : ['S', 'M']).map(w => [p[2], w, String(S.filter(s => s.w === w).length)])))),
       sec('9. Zadania typowe i zadania własne stanowiska', 'Porównanie pokazuje, w jakiej części opis powstaje hurtowo z wzoru, a w jakiej wymaga pracy SME.',
@@ -842,11 +846,13 @@ const OPISY_ZAD = {
   opis: 'Pełny opis Waszego stanowiska, z wynikami poprzednich zadań.'
 };
 function adres(zad, g) { const u = new URL(location.href); u.search = ''; u.searchParams.set('zadanie', zad); if (g) u.searchParams.set('grupa', g); return u.toString(); }
+const para = g => 'G' + (nrG(g) > 5 ? nrG(g) - 5 : nrG(g) + 5);
 function tabStart(main) {
   main.append(h('h1', {}, 'Praca w grupach — zadania'),
     intro('Pracuje jedna osoba w grupie, protokolant, który udostępnia ekran w pokoju grupy. Wszystko, co wpisuje, zapisuje się w jego przeglądarce, a po każdym zadaniu grupa zapisuje plik grupy i wrzuca go na czat grupy w Teams.',
       'Jeśli protokolant się zmienia, nowa osoba otwiera tę stronę, klika „Wczytaj plik grupy” i wybiera ostatni plik z czatu.'),
-    stanowiskoInfo(STANOWISKO_GRUPY[G()]));
+    stanowiskoInfo(STANOWISKO_GRUPY[G()]),
+    h('p', { class: 'muted' }, 'To samo stanowisko opisuje niezależnie grupa ' + para(G()).slice(1) + '. W omówieniu porównacie, w czym Wasze wyniki się różnią.'));
   const list = h('div', { class: 'tiles' });
   ['nazwy', 'ekasp', 'wzor', 'zadania', 'opis'].forEach((k, n) => list.append(h('a', { class: 'tile', href: adres(k, G()) }, h('span', { class: 'tile-n' }, String(n + 1)), h('b', {}, TABS.find(t => t[0] === k)[1].replace(/^\d\. /, '')), h('span', {}, OPISY_ZAD[k]))));
   main.append(list, h('h2', {}, 'Plik grupy'), h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: pobierzPlik }, 'Zapisz plik grupy'), h('button', { class: 'btn', type: 'button', onclick: wczytajPlik }, 'Wczytaj plik grupy')));
