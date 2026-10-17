@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Analiza pracy — praca grup</title>
+<title>Analiza pracy — zadania grup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
@@ -84,28 +84,34 @@ p.locked { padding-left: 14px }
 table { width: 100%; border-collapse: collapse; font-size: 14px }
 th { text-align: left; background: var(--navy); color: #FFFFFF; padding: 8px 10px; font-weight: 700; white-space: nowrap }
 td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 6px 0 10px }
+.tile { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--navy); border-radius: var(--r); padding: 14px 16px }
+.tile:hover { border-color: var(--honey) }
+.tile b { color: var(--head); font-size: 17px }
+.tile span { font-size: 14px; color: var(--muted) }
+.tile .tile-n { font-size: 26px; font-weight: 800; color: var(--honey); line-height: 1 }
+.grupy { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 6px 0 4px }
+.grupy .btn { min-width: 0 }
+.osoby { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px }
+.oceny { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px }
+.oc { gap: 3px }
+.oc-l { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.sel-ocena { text-align: center; font-weight: 700 }
+@media (max-width: 640px) { .oceny { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.przyp { border: 2px solid var(--honey); background: var(--gold-bg) }
+.przyp b { color: var(--gold-fg) }
 </style>
 </head>
 <body>
 <div class="brand"><span>ZMIANOLOGICA · Analiza i opis pracy · KORVEX</span><span class="who" id="who"></span></div>
-<main id="login" class="wrap"></main>
-<div id="app" hidden>
-  <div class="top"><div class="topin"><nav class="seg" id="tabs" aria-label="Ćwiczenia"></nav>
-    <div class="seg"><span class="status" id="status" aria-live="polite"></span><button class="btn" id="change" type="button">Zmień grupę</button></div></div></div>
+<div id="app">
+  <div class="top"><div class="topin"><nav class="seg" id="tabs" aria-label="Zadania"></nav>
+    <div class="seg"><span class="status" id="status" aria-live="polite"></span><button class="btn" id="plik" type="button">Zapisz plik grupy</button><button class="btn" id="change" type="button">Zmień grupę</button></div></div></div>
   <main class="wrap" id="main"></main>
 </div>
 <script>
 // ===================== DANE SZKOLENIA =====================
-const SESJA_DOMYSLNA = 'analiza-pracy-merito-2026';
 const KLASYFIKATOR_URL = 'MERITO_2026_SHR_Analiza%20i%20opis%20pracy_KLASYFIKATOR%20STANOWISK_v2.html';
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDUVBglR2h1r-MRoMQ6F-yi5be-NW9q7VA",
-  authDomain: "zmianologica-szkolenia.firebaseapp.com",
-  projectId: "zmianologica-szkolenia",
-  storageBucket: "zmianologica-szkolenia.firebasestorage.app",
-  messagingSenderId: "518737570063",
-  appId: "1:518737570063:web:454c1dd4f574fc5c5d767a"
-};
 const GRUPY = ['G1', 'G2', 'G3', 'G4', 'G5'];
 
 const TYPY = ['Wykonawca', 'Specjalista', 'Ekspert', 'Lider', 'Manager', 'Strateg'];
@@ -239,6 +245,7 @@ const L = {
   wyposazenie: ["Komputer przenośny","Komputer stacjonarny","Telefon służbowy","Terminal z czytnikiem kodów","Wózek jezdniowy podnośnikowy","Linia do produkcji tektury","Sztanca i maszyny do przetwarzania tektury","Narzędzia ręczne (noże, przymiary)","Przyrządy pomiarowe (grubościomierz, wilgotnościomierz)","Samochód osobowy służbowy","Samochód ciężarowy"],
   kpi: ["Terminowość realizacji zleceń","Wydajność (liczba wyrobów na zmianę)","Udział braków i odpadów","Liczba uzasadnionych reklamacji klientów","Zgodność stanów magazynowych","Terminowość dostaw do klientów","Dostępność maszyn (czas przestojów awaryjnych)","Czas obsługi zgłoszenia","Realizacja planu sprzedaży","Poprawność rozliczeń (liczba korekt)","Rotacja pracowników w zespole","Realizacja budżetu jednostki","Liczba wypadków przy pracy i zdarzeń potencjalnie wypadkowych"],
   szkolenia: ["Szkolenie BHP wstępne (instruktaż ogólny i stanowiskowy)","Szkolenie BHP okresowe — stanowiska robotnicze","Szkolenie BHP okresowe — stanowiska administracyjno-biurowe","Szkolenie BHP okresowe — pracodawcy i osoby kierujące pracownikami","Szkolenie z ochrony danych osobowych","Szkolenie stanowiskowe z obsługi maszyny"],
+  cykl: ["6 miesięcy","12 miesięcy","24 miesiące"],
   czestotliwosc: ["ciągła","codzienna","cotygodniowa","comiesięczna","kwartalna lub roczna","doraźna"],
   katS: ["Merytoryczne","Administracyjne i dokumentacyjne","Współpracy i komunikacji","Jakości i bezpieczeństwa","Przekazywania wiedzy"],
   katM: ["Planowania i organizacji pracy","Kadrowe","Finansowe","Raportowe","BHP osoby kierującej pracownikami"],
@@ -265,7 +272,7 @@ const POLA = [
  ['kooperacja',2,'Kooperacja wewnętrzna i zewnętrzna','SM',['Przełożony'],'Ok','lista','many','kooperacja'],
  ['cel',3,'Cel główny stanowiska','SM',['Przełożony'],'St','ręcznie','area'],
  ['zad_typowe',4,'Zadania typowe','SM',['HR'],'Wz','z wzoru','typowe'],
- ['zad_wyj',4,'Zadania wyjątkowe','SM',['SME','Przełożony'],'Ok','lista + ręcznie','wyjatkowe'],
+ ['zad_wyj',4,'Zadania własne stanowiska','SM',['SME','Przełożony'],'Ok','lista + ręcznie','wyjatkowe'],
  ['decyzje',5,'Decyzje samodzielne i wymagające akceptacji','SM',['Przełożony'],'Ok','ręcznie','area'],
  ['zespol',5,'Odpowiedzialność za zespół','M',['HR','BHP'],'Wz','z wzoru','wzor'],
  ['budzet',5,'Budżet i limity finansowe','M',['Finanse'],'Ok','lista','one','budzet'],
@@ -291,7 +298,9 @@ const POLA = [
  ['awans',9,'Ścieżka awansu','SM',['HR'],'Ok','lista','many','stanowiska'],
  ['sme',10,'Zespół SME (imię, nazwisko, stanowisko)','SM',['HR'],'Zd','ręcznie','area'],
  ['zatwierdzenia',10,'Zatwierdzenia (przełożony, HR, zarząd)','SM',['HR'],'Zd','ręcznie','area'],
- ['historia',10,'Wersja, data i zakres zmiany, data następnego przeglądu','SM',['HR'],'Zd','ręcznie','text'],
+ ['historia',10,'Wersja, data i zakres zmiany','SM',['HR'],'Zd','ręcznie','text'],
+ ['cykl',10,'Cykl przeglądu','SM',['HR','Przełożony'],'Ok','lista','one','cykl'],
+ ['nastepny',10,'Data następnego przeglądu (data zatwierdzenia + cykl)','SM',['HR'],'Ok','ręcznie','text'],
 ];
 const MODULY = { 1: 'Identyfikacja', 2: 'Miejsce w strukturze', 3: 'Cel', 4: 'Zadania', 5: 'Uprawnienia i odpowiedzialność', 6: 'Wymagania', 7: 'Warunki pracy', 8: 'Mierniki', 9: 'Rozwój (opcjonalnie)', 10: 'Zespół i zatwierdzenie' };
 const WLASCICIELE = ['HR', 'Przełożony', 'SME', 'IT', 'BHP', 'Finanse', 'Dział wynagrodzeń', 'Administracja', 'IOD'];
@@ -364,18 +373,15 @@ const EKASP = [
  ["III — Procesy poznawcze","Praca wymaga przetwarzania i porównywania dużej liczby danych liczbowych."],
  ["III — Procesy poznawcze","Praca wymaga podejmowania decyzji pod presją czasu."],
  ["IV — Czynności fizyczne","Praca jest wykonywana w pozycji stojącej przez większość zmiany."],
- ["V — Cechy pracownika","Praca wymaga systematyczności, dokładności i dotrzymywania zobowiązań."],
+ ["V — Cechy pracownika wymagane na stanowisku","Praca wymaga systematyczności, dokładności i dotrzymywania zobowiązań."],
 ];
 const SKALA_W = ['', 'nieistotna', 'marginalna', 'niska', 'średnia', 'istotna', 'bardzo ważna', 'kluczowa'];
 
 </script>
-<script type="module">
-// ===================== APLIKACJA =====================
+<script>
+// ===================== APLIKACJA (praca grup bez bazy) =====================
 const URLP = new URLSearchParams(location.search);
-const DEMO = URLP.get('demo') === '1';
 const PROW = URLP.get('prowadzacy') === '1';
-const SESJA = URLP.get('sesja') || SESJA_DOMYSLNA;
-
 const $ = (s, r = document) => r.querySelector(s);
 const h = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -394,67 +400,85 @@ const getP = (o, path) => path.reduce((a, k) => (a == null ? undefined : a[k]), 
 const nest = (path, v) => path.reduceRight((acc, k) => ({ [k]: acc }), v);
 const norm = s => (s || '').toLowerCase().replace(/\s+/g, ' ').replace(/\bds\.\s*/g, 'ds. ').trim();
 const klucz = nr => KLUCZ.find(k => k[0] === nr);
+const merge = (a, b) => { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) a[k] = merge(a[k] && typeof a[k] === 'object' ? a[k] : {}, b[k]); else a[k] = b[k]; } return a; };
 
-// ---------- Warstwa danych ----------
+// ---------- Zapis w przeglądarce ----------
+const KL = 'zml-ap-zadania-';
+let PAMIEC_OK = true;
+const mem = {};
+function wczytajGrupe(g) {
+  if (mem[g]) return mem[g];
+  let d = {};
+  try { d = JSON.parse(localStorage.getItem(KL + g) || '{}'); } catch (e) { PAMIEC_OK = false; }
+  mem[g] = d.docs ? d : { docs: {} };
+  return mem[g];
+}
+function zapiszGrupe(g) {
+  try { localStorage.setItem(KL + g, JSON.stringify(mem[g])); PAMIEC_OK = true; } catch (e) { PAMIEC_OK = false; }
+}
 const DB = {
-  uid: null,
-  async init() {
-    if (DEMO) { this.uid = 'demo-' + Math.random().toString(36).slice(2, 8); this.mem = new Map(); this.subs = []; return; }
-    const app = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const auth = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-    const fs = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    this.fs = fs;
-    const a = app.initializeApp(FIREBASE_CONFIG);
-    this.db = fs.getFirestore(a);
-    const au = auth.getAuth(a);
-    const cred = await auth.signInAnonymously(au);
-    this.uid = cred.user.uid;
-    this.col = fs.collection(this.db, 'sesje', SESJA, 'grupy');
-  },
-  watchDoc(id, cb) {
-    if (DEMO) { const s = { id, cb }; this.subs.push(s); setTimeout(() => cb(this.mem.get(id) || {}), 0); return () => { this.subs = this.subs.filter(x => x !== s); }; }
-    return this.fs.onSnapshot(this.fs.doc(this.col, id), snap => cb(snap.exists() ? snap.data() : {}), err => status('err', err));
-  },
-  watchTyp(typ, cb) {
-    if (DEMO) { const s = { typ, cb }; this.subs.push(s); setTimeout(() => cb(this._list(typ)), 0); return () => { this.subs = this.subs.filter(x => x !== s); }; }
-    const q = this.fs.query(this.col, this.fs.where('typ', '==', typ));
-    return this.fs.onSnapshot(q, snap => cb(snap.docs.map(d => ({ _id: d.id, ...d.data() }))), err => status('err', err));
-  },
-  async listTyp(typ) {
-    if (DEMO) return this._list(typ);
-    const snap = await this.fs.getDocs(this.fs.query(this.col, this.fs.where('typ', '==', typ)));
-    return snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-  },
-  async save(id, patch) {
-    if (DEMO) {
-      const merge = (a, b) => { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) { a[k] = merge(a[k] && typeof a[k] === 'object' ? a[k] : {}, b[k]); } else a[k] = b[k]; } return a; };
-      this.mem.set(id, merge(structuredClone(this.mem.get(id) || {}), patch));
-      setTimeout(() => this.subs.forEach(s => { if (s.id === id) s.cb(this.mem.get(id)); if (s.typ && patch.typ === s.typ) s.cb(this._list(s.typ)); }), 0);
-      return;
-    }
-    await this.fs.setDoc(this.fs.doc(this.col, id), patch, { merge: true });
-  },
-  _list(typ) { return [...this.mem.entries()].filter(([, v]) => v.typ === typ).map(([k, v]) => ({ _id: k, ...v })); }
+  subs: [],
+  get(id) { const g = id.split('_')[0]; return wczytajGrupe(g).docs[id] || {}; },
+  watchDoc(id, cb) { const s = { id, cb }; this.subs.push(s); setTimeout(() => cb(structuredClone(this.get(id))), 0); return () => { this.subs = this.subs.filter(x => x !== s); }; },
+  save(id, patch) {
+    const g = id.split('_')[0], G0 = wczytajGrupe(g);
+    G0.docs[id] = merge(structuredClone(G0.docs[id] || {}), patch);
+    G0.zmieniono = Date.now();
+    zapiszGrupe(g);
+    const d = G0.docs[id];
+    setTimeout(() => this.subs.forEach(s => { if (s.id === id) s.cb(structuredClone(d)); }), 0);
+  }
 };
 
-// ---------- Stan i zapisy ----------
-const ST = { nick: '', grupa: '', tab: 'nazwy', unsub: [] };
+// ---------- Stan ----------
+const TAB_KEYS = ['start', 'nazwy', 'ekasp', 'wzor', 'zadania', 'opis', 'zestawienia'];
+const ST = { grupa: '', tab: TAB_KEYS.includes(URLP.get('zadanie')) ? URLP.get('zadanie') : 'start', unsub: [] };
+try { const g = localStorage.getItem(KL + 'wybrana'); if (GRUPY.includes(g)) ST.grupa = g; } catch (e) {}
+if (GRUPY.includes(URLP.get('grupa'))) ST.grupa = URLP.get('grupa');
 const G = () => ST.grupa;
 let statusTimer;
-function status(kind, err) {
-  const el = $('#status');
-  if (!el) return;
-  if (kind === 'saving') { el.textContent = 'Zapisywanie…'; el.className = 'status'; }
-  else if (kind === 'ok') { el.textContent = 'Zapisano'; el.className = 'status ok'; clearTimeout(statusTimer); statusTimer = setTimeout(() => { el.textContent = ''; }, 2500); }
-  else { el.textContent = 'Brak zapisu: sesja jest zamknięta albo nie ma połączenia z bazą'; el.className = 'status err'; if (err) console.error(err); }
+function status(kind, txt) {
+  const el = $('#status'); if (!el) return;
+  if (kind === 'ok') { el.textContent = PAMIEC_OK ? 'Zapisano w przeglądarce' : 'Przeglądarka nie zapisuje danych — zapiszcie plik grupy'; el.className = 'status ' + (PAMIEC_OK ? 'ok' : 'err'); clearTimeout(statusTimer); if (PAMIEC_OK) statusTimer = setTimeout(() => { el.textContent = ''; }, 2500); }
+  else { el.textContent = txt || ''; el.className = 'status ' + (kind === 'err' ? 'err' : 'ok'); clearTimeout(statusTimer); statusTimer = setTimeout(() => { el.textContent = ''; }, 5000); }
 }
-async function save(docId, typ, path, value, extra = {}) {
-  status('saving');
-  try { await DB.save(docId, { typ, grupa: G(), ts: Date.now(), ...extra, ...nest(path, value) }); status('ok'); }
-  catch (e) { status('err', e); }
+function save(docId, typ, path, value, extra = {}) {
+  DB.save(docId, { typ, grupa: G(), ts: Date.now(), ...extra, ...nest(path, value) });
+  status('ok');
 }
 const timers = {};
-function saveLater(key, fn) { clearTimeout(timers[key]); timers[key] = setTimeout(fn, 600); }
+function saveLater(key, fn) { clearTimeout(timers[key]); timers[key] = setTimeout(fn, 400); }
+
+// ---------- Plik grupy ----------
+function stempel() { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes()); }
+function pobierzPlik() {
+  const g = G(), dane = { format: 'zml-analiza-pracy-grupa', wersja: 1, grupa: g, zapisano: new Date().toISOString(), docs: wczytajGrupe(g).docs };
+  const blob = new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'MERITO_2026_Analiza pracy_' + g + '_' + stempel() + '.json' });
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  status('info', 'Plik grupy ' + g + ' zapisany w Pobranych. Wrzućcie go na czat grupy w Teams.');
+}
+function czytajPlik(file) {
+  return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (d.format !== 'zml-analiza-pracy-grupa' || !GRUPY.includes(d.grupa) || !d.docs) throw new Error('format'); ok(d); } catch (e) { bad(e); } }; r.onerror = bad; r.readAsText(file); });
+}
+function wczytajPlik() {
+  const inp = h('input', { type: 'file', accept: '.json,application/json' });
+  inp.addEventListener('change', async () => {
+    const f = inp.files[0]; if (!f) return;
+    try {
+      const d = await czytajPlik(f);
+      mem[d.grupa] = { docs: d.docs, zmieniono: Date.now() }; zapiszGrupe(d.grupa);
+      ST.grupa = d.grupa; try { localStorage.setItem(KL + 'wybrana', d.grupa); } catch (e) {}
+      render(); status('info', 'Wczytano plik grupy ' + d.grupa + ' (zapisany ' + new Date(d.zapisano).toLocaleString('pl-PL') + ').');
+    } catch (e) { status('err', 'To nie jest plik grupy z tych zajęć.'); }
+  });
+  inp.click();
+}
+function przypomnienie() {
+  return h('div', { class: 'card przyp' }, h('b', {}, 'Na koniec ćwiczenia'),
+    h('p', { class: 'desc' }, 'Zapiszcie plik grupy i wrzućcie go na czat grupy w Teams. Jeśli zmienia się osoba, która wpisuje, nowa osoba wczytuje ten plik i pracuje dalej od tego samego miejsca.'),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: pobierzPlik }, 'Zapisz plik grupy')));
+}
 
 // Pola powiązane z dokumentem: data-p = ścieżka w dokumencie
 function bindText(el, docId, typ, path, extra) {
@@ -500,13 +524,6 @@ function stanowiskoInfo(nr) {
   return h('div', { class: 'stan' }, h('div', { class: 'stan-nr' }, k[0]), h('div', {}, h('div', { class: 'stan-n' }, k[1]),
     h('div', { class: 'muted' }, k[2] + ' · wzór ' + WZOR_TYPU[k[2]] + ' · ' + k[5] + ' · ' + k[4] + (k[4] === 1 ? ' osoba' : ' os.'))));
 }
-function grupaBar() {
-  if (!PROW) return null;
-  const box = h('div', { class: 'seg' }, GRUPY.map(g => h('button', { class: 'chip', type: 'button', 'aria-pressed': g === G(),
-    onclick: () => { ST.grupa = g; render(); } }, g)));
-  return h('div', { class: 'prowbar' }, h('span', { class: 'lbl' }, 'Podgląd grupy'), box);
-}
-
 // ---------- ZAKŁADKA: NAZWY ----------
 function tabNazwy(main) {
   const id = G() + '_nazwy', typ = 'nazwy';
@@ -529,7 +546,7 @@ function tabNazwy(main) {
       h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Nazwa docelowa'), name), h('label', {}, h('span', {}, 'Typ'), ty)),
       key));
   });
-  main.append(list);
+  main.append(list, przypomnienie());
   let data = {};
   const paintKey = () => keyEls.forEach(([el, r, i]) => {
     el.hidden = !showKey; if (!showKey) return;
@@ -546,54 +563,55 @@ function tabNazwy(main) {
 }
 
 // ---------- ZAKŁADKA: EKASP ----------
-function ekaspWyniki(docs) {
-  const me = docs.find(d => d.uid === DB.uid);
+const OSOBY = ['o0', 'o1', 'o2', 'o3', 'o4'];
+const ROLE_SME = ['Pracownik A', 'Pracownik B', 'Przełożony', 'HR', 'BHP'];
+const pl = x => String(x).replace('.', ',');
+function ekaspWyniki(d) {
   return EKASP.map((_, i) => {
-    const r1 = docs.map(d => getP(d, ['r1', String(i)])).filter(v => typeof v === 'number');
-    const r2 = docs.map(d => getP(d, ['r2', String(i)])).filter(v => typeof v === 'number');
-    const range = r1.length ? Math.max(...r1) - Math.min(...r1) : null;
+    const r1 = OSOBY.map(o => getP(d, ['r1', String(i), o])).map(Number).filter(v => v >= 1);
+    const r2 = OSOBY.map(o => getP(d, ['r2', String(i), o])).map(Number).filter(v => v >= 1);
+    const range = r1.length >= 2 ? Math.max(...r1) - Math.min(...r1) : null;
     const zgoda = range !== null && range <= 2;
     const src = zgoda ? r1 : r2;
-    const final = src.length ? Math.round(src.reduce((a, b) => a + b, 0) / src.length * 10) / 10 : null;
-    return { r1, r2, range, zgoda, final, mine1: me ? getP(me, ['r1', String(i)]) : undefined };
+    const final = range !== null && src.length ? Math.round(src.reduce((a, b) => a + b, 0) / src.length * 10) / 10 : null;
+    return { r1, r2, range, zgoda, final };
   });
 }
+function ocena(id, typ, path) {
+  return bindSelect(h('select', { class: 'sel-ocena' }, h('option', { value: '' }, '–'), [1, 2, 3, 4, 5, 6, 7].map(n => h('option', { value: n }, String(n)))), id, typ, path);
+}
 function tabEkasp(main) {
-  const id = G() + '_ekasp_' + DB.uid, typ = 'ekasp', extra = { uid: DB.uid, nick: ST.nick };
+  const id = G() + '_ekasp', typ = 'ekasp';
   main.append(intro(
-    'Oceniacie pozycje EKASP dla stanowiska przydzielonego Waszej grupie, na skali wagi od 1 (nieistotna) do 7 (kluczowa). Każdy najpierw ocenia sam, bez wglądu w oceny innych; oceny pozostałych osób zobaczycie dopiero po wystawieniu wszystkich swoich ocen.',
-    'Gdy oceny różnią się najwyżej o 2 punkty, wynikiem jest średnia. Gdy różnica wynosi 3 punkty lub więcej, osoby ze skrajnymi ocenami uzasadniają je, a potem wszyscy oceniają tę pozycję ponownie. Pozycje z wynikiem 5 lub wyższym trafiają do opisu stanowiska.'),
+    'Osoby w rolach SME oceniają każdą pozycję na skali wagi od 1 (nieistotna) do 7 (kluczowa). Każda osoba najpierw zapisuje swoją ocenę na kartce albo w czacie, a dopiero potem wszyscy podają oceny jednocześnie. Protokolant wpisuje je do tabeli.',
+    'Gdy oceny różnią się najwyżej o 2 punkty, wynikiem jest średnia. Gdy różnica wynosi 3 punkty lub więcej, osoby ze skrajnymi ocenami uzasadniają je, a potem wszyscy oceniają tę pozycję ponownie w rundzie 2. Pozycje z wynikiem 5 lub wyższym trafiają do opisu stanowiska.'),
     stanowiskoInfo(STANOWISKO_GRUPY[G()]));
-  const own = h('div', { class: 'list' });
-  if (!PROW) {
-    EKASP.forEach((e, i) => own.append(card(h('div', { class: 'row-h' }, tag(e[0]), h('b', {}, (i + 1) + '. ' + e[1])), scale(id, typ, ['r1', String(i)], extra))));
-    main.append(h('h2', {}, 'Runda 1 — Twoje oceny'), own);
-  }
-  const grp = h('div', { class: 'list' });
-  main.append(h('h2', {}, 'Wyniki grupy ' + G()), grp);
-  let ownData = {};
-  if (!PROW) ST.unsub.push(DB.watchDoc(id, d => { ownData = d; applyDoc(own, d); }));
-  ST.unsub.push(DB.watchTyp(typ, all => {
-    const docs = all.filter(d => d.grupa === G());
-    const me = docs.find(d => d.uid === DB.uid);
-    const done1 = PROW || (me && EKASP.every((_, i) => typeof getP(me, ['r1', String(i)]) === 'number'));
-    const W = ekaspWyniki(docs);
-    grp.replaceChildren(h('p', { class: 'muted' }, 'Oceny wystawiły osoby: ' + (docs.map(d => d.nick || 'bez imienia').join(', ') || 'jeszcze nikt') + '.'));
-    if (!done1) { grp.append(card(h('p', {}, 'Wyniki grupy zobaczysz po wystawieniu wszystkich swoich ocen w rundzie 1.'))); return; }
-    EKASP.forEach((e, i) => {
-      const w = W[i];
-      const st = w.range === null ? h('span', { class: 'muted' }, 'brak ocen')
-        : w.zgoda ? h('span', { class: 'ok' }, 'Zgoda (różnica ' + w.range + '): średnia ' + w.final)
-        : h('span', { class: 'no' }, 'Rozbieżność (różnica ' + w.range + '): uzasadnienie skrajnych ocen i runda 2' + (w.final !== null ? ' — średnia rundy 2: ' + w.final : ''));
-      const c = card(h('div', { class: 'row-h' }, h('b', {}, (i + 1) + '. ' + e[1])),
-        h('div', { class: 'vals' }, 'Runda 1: ', w.r1.length ? w.r1.join(' · ') : '—', w.r2.length ? '   Runda 2: ' + w.r2.join(' · ') : ''),
-        st, w.final !== null && w.final >= 5 ? tag('trafia do opisu', 'gold') : null);
-      if (!w.zgoda && w.range !== null && !PROW) {
-        const sc = scale(id, typ, ['r2', String(i)], extra);
-        applyDoc(h('div', {}, sc), ownData);
-        c.append(h('div', { class: 'r2' }, h('span', { class: 'lbl' }, 'Twoja ocena w rundzie 2'), sc));
-      }
-      grp.append(c);
+  const osoby = h('div', { class: 'card' }, h('b', {}, 'Kto ocenia'), h('p', { class: 'muted' }, 'Wpiszcie role osób, które oceniają (można zmienić podpowiedzi).'),
+    h('div', { class: 'osoby' }, OSOBY.map((o, k) => h('label', {}, h('span', {}, 'Osoba ' + (k + 1)), bindText(h('input', { type: 'text', placeholder: ROLE_SME[k] }), id, typ, ['osoby', o])))));
+  const list = h('div', { class: 'list' });
+  main.append(osoby, list);
+  const rows = EKASP.map((e, i) => {
+    const r1 = h('div', { class: 'oceny' }, OSOBY.map(o => h('label', { class: 'oc' }, h('span', { class: 'oc-l', 'data-o': o }), ocena(id, typ, ['r1', String(i), o]))));
+    const r2 = h('div', { class: 'oceny' }, OSOBY.map(o => h('label', { class: 'oc' }, h('span', { class: 'oc-l', 'data-o': o }), ocena(id, typ, ['r2', String(i), o]))));
+    const r2box = h('div', { class: 'r2', hidden: true }, h('span', { class: 'lbl' }, 'Runda 2 — oceny po uzasadnieniu skrajnych ocen'), r2);
+    const st = h('div', {});
+    const c = card(h('div', { class: 'row-h' }, tag(e[0]), h('b', {}, (i + 1) + '. ' + e[1])), h('span', { class: 'lbl' }, 'Runda 1'), r1, st, r2box);
+    list.append(c);
+    return { st, r2box };
+  });
+  main.append(przypomnienie());
+  ST.unsub.push(DB.watchDoc(id, d => {
+    applyDoc(main, d);
+    main.querySelectorAll('.oc-l').forEach(el => { const k = OSOBY.indexOf(el.dataset.o); el.textContent = (getP(d, ['osoby', el.dataset.o]) || '').trim() || ROLE_SME[k]; });
+    const W = ekaspWyniki(d);
+    W.forEach((w, i) => {
+      const { st, r2box } = rows[i];
+      r2box.hidden = !(w.range !== null && !w.zgoda);
+      st.replaceChildren(w.range === null ? h('span', { class: 'muted' }, 'Wpiszcie oceny co najmniej dwóch osób.')
+        : w.zgoda ? h('span', { class: 'ok' }, 'Zgoda (różnica ' + w.range + '): średnia ' + pl(w.final))
+        : w.r2.length >= 2 ? h('span', { class: 'ok' }, 'Rozbieżność w rundzie 1 (różnica ' + w.range + '); po rundzie 2 średnia ' + pl(w.final))
+        : h('span', { class: 'no' }, 'Rozbieżność (różnica ' + w.range + '): osoby ze skrajnymi ocenami uzasadniają je, potem runda 2'),
+        w.final !== null && w.final >= 5 ? tag('trafia do opisu', 'gold') : '');
     });
   }));
 }
@@ -601,35 +619,30 @@ function tabEkasp(main) {
 // ---------- ZAKŁADKA: WZÓR I WŁAŚCICIELE ----------
 function tabWzor(main) {
   const id = G() + '_wzor', typ = 'wzor';
-  const mods = MODULY_GRUPY[G()];
   let showKey = false, data = {};
   main.append(intro(
-    'Wasza grupa opracowuje moduły wzoru: ' + mods.map(m => m + ' — ' + MODULY[m]).join(', ') + '. Dla każdego pola wskażcie, kto je wypełnia, jak często się zmienia i w jaki sposób się je wypełnia.',
-    'Pole może mieć więcej niż jednego właściciela. Typ zmienności: stałe zmieniają się tylko przy reorganizacji, okresowe przy rocznym przeglądzie, zdarzeniowe przy zmianie przepisu, systemu lub wyposażenia, a wzorcowe wpisuje się raz we wzorze dla wszystkich opisów danego typu.'));
+    'Dla każdego pola wzoru wskażcie, kto je wypełnia w organizacji. Pole może mieć więcej niż jednego właściciela. Typ zmienności i sposób wypełnienia są już wpisane przy każdym polu; jeśli się z nimi nie zgadzacie, zanotujcie to do omówienia.',
+    'Typ zmienności: stałe zmieniają się tylko przy reorganizacji, okresowe przy przeglądzie w cyklu przypisanym do stanowiska (6, 12 lub 24 miesiące), zdarzeniowe przy zmianie przepisu, systemu lub wyposażenia, a wzorcowe wpisuje się raz we wzorze dla wszystkich opisów danego typu.'));
   const list = h('div', { class: 'list' });
   const keyEls = [];
-  POLA.filter(p => mods.includes(p[1])).forEach(p => {
+  let mod = 0;
+  POLA.forEach(p => {
+    if (p[1] !== mod) { mod = p[1]; list.append(h('h2', {}, 'Moduł ' + mod + ' — ' + MODULY[mod])); }
     const owners = h('div', { class: 'chips' }, WLASCICIELE.map((w, k) => chip(w, id, typ, ['p', p[0], 'w', 'o' + k])));
-    const zm = bindSelect(selectEl(Object.entries(ZMIENNOSC).map(([k, v]) => k + ' — ' + v), 'zmienność…'), id, typ, ['p', p[0], 'z']);
-    const wy = bindSelect(selectEl(WYPELNIENIE, 'wypełnienie…'), id, typ, ['p', p[0], 'f']);
     const key = h('div', { class: 'key', hidden: true });
     keyEls.push([key, p]);
-    list.append(card(h('div', { class: 'row-h' }, tag('Moduł ' + p[1]), h('b', {}, p[2]), tag(p[3] === 'M' ? 'tylko wzór M' : 'wzory S i M', 'soft')),
-      h('label', {}, h('span', {}, 'Kto wypełnia'), owners),
-      h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Zmienność'), zm), h('label', {}, h('span', {}, 'Sposób wypełnienia'), wy)), key));
+    list.append(card(h('div', { class: 'row-h' }, h('b', {}, p[2]), tag(p[3] === 'M' ? 'tylko wzór M' : 'wzory S i M', 'soft'), tag('zmienność: ' + ZMIENNOSC[p[5]], 'soft'), tag('wypełnienie: ' + p[6], 'soft')),
+      h('label', {}, h('span', {}, 'Kto wypełnia'), owners), key));
   });
   const paintKey = () => keyEls.forEach(([el, p]) => {
     el.hidden = !showKey; if (!showKey) return;
     const d = getP(data, ['p', p[0]]) || {};
     const chosen = WLASCICIELE.filter((w, k) => getP(d, ['w', 'o' + k]) === true);
     const okW = chosen.length === p[4].length && p[4].every(x => chosen.includes(x));
-    const okZ = (d.z || '').startsWith(p[5] + ' '), okF = d.f === p[6];
-    const m = (ok, t) => h('span', { class: ok ? 'ok' : 'no' }, (ok ? '✓ ' : '✗ ') + t);
-    el.replaceChildren(h('div', {}, 'Struktura: ', h('b', {}, p[4].join(', ')), ' · ' + ZMIENNOSC[p[5]] + ' · ' + p[6]),
-      h('div', {}, m(okW, 'właściciel'), '  ', m(okZ, 'zmienność'), '  ', m(okF, 'wypełnienie')));
+    el.replaceChildren(h('div', {}, h('span', { class: okW ? 'ok' : 'no' }, okW ? 'Tak jak w strukturze' : 'Inaczej niż w strukturze'), ' · struktura: ', h('b', {}, p[4].join(', '))));
   });
   const btn = h('button', { class: 'btn', type: 'button', onclick: () => { showKey = !showKey; btn.textContent = showKey ? 'Ukryj porównanie' : 'Porównaj ze strukturą'; paintKey(); } }, 'Porównaj ze strukturą');
-  main.append(h('div', { class: 'actions' }, btn), list);
+  main.append(h('div', { class: 'actions' }, btn), list, przypomnienie());
   ST.unsub.push(DB.watchDoc(id, d => { data = d; applyDoc(list, d); paintKey(); }));
 }
 
@@ -642,8 +655,8 @@ const zdanie = z => [z[3], z[4], z[5], z[6]].join(' ') + '.';
 function tabZadania(main) {
   const id = G() + '_zadania', typ = 'zadania', nr = STANOWISKO_GRUPY[G()], k = klucz(nr), w = WZOR_TYPU[k[2]];
   main.append(intro(
-    'Zadania typowe są już wpisane z wzoru i są jednakowe dla wszystkich stanowisk tego typu. Waszym zadaniem jest opisanie zadań wyjątkowych, czyli tych, które odróżniają to stanowisko od innych. Każde zadanie zapisujecie jednym zdaniem w układzie DZIK.',
-    'D — działanie: konkretny czasownik czynnościowy, jedna czynność. Z — dla kogo lub z kim: konkretny odbiorca. I — instrument: narzędzie, system lub procedura. K — korzyść: rezultat, który nie powtarza działania.'),
+    'Zadania typowe są już wpisane z wzoru i są jednakowe dla wszystkich stanowisk tego typu. Waszym zadaniem jest opisanie zadań własnych stanowiska, czyli tych, które odróżniają to stanowisko od innych stanowisk tego samego typu. Każde zadanie zapisujecie jednym zdaniem w układzie DZIK.',
+    'D — działanie: konkretny czasownik czynnościowy, jedna czynność. Z — dla kogo lub z kim: konkretny odbiorca. I — instrument, technologia, procedura: narzędzie, system lub technologia albo procedura, z której korzysta osoba na stanowisku. K — korzyść: rezultat, który nie powtarza działania.'),
     stanowiskoInfo(nr));
   main.append(h('h2', {}, 'Zadania typowe z wzoru'),
     h('div', { class: 'list' }, typowe(nr).map(z => card(h('div', { class: 'row-h' }, tag(z[0]), tag(z[2], 'soft'), tag(z[7], 'soft')), h('p', { class: 'desc' }, zdanie(z))))));
@@ -651,7 +664,7 @@ function tabZadania(main) {
   const list = h('div', { class: 'list' });
   const sum = h('p', { class: 'muted' });
   const add = h('button', { class: 'btn', type: 'button', onclick: () => { const zid = 'z' + Date.now() + Math.random().toString(36).slice(2, 5); save(id, typ, ['z', zid, 't'], Date.now(), { numer: nr }); } }, 'Dodaj zadanie');
-  main.append(h('h2', {}, 'Zadania wyjątkowe'), list, sum, h('div', { class: 'actions' }, add));
+  main.append(h('h2', {}, 'Zadania własne stanowiska'), list, sum, h('div', { class: 'actions' }, add), przypomnienie());
   let ids = '';
   ST.unsub.push(DB.watchDoc(id, d => {
     const z = Object.entries(d.z || {}).filter(([, v]) => !v.del).sort((a, b) => (a[1].t || 0) - (b[1].t || 0));
@@ -666,14 +679,14 @@ function tabZadania(main) {
             h('label', {}, h('span', {}, 'Częstotliwość'), bindSelect(selectEl(L.czestotliwosc), id, typ, P('cz')))),
           h('label', {}, h('span', {}, 'D — działanie'), bindText(h('input', { type: 'text', placeholder: 'np. przezbraja sztancę przy zmianie zlecenia' }), id, typ, P('D'))),
           h('label', {}, h('span', {}, 'Z — dla kogo / z kim'), bindText(h('input', { type: 'text' }), id, typ, P('Z'))),
-          h('label', {}, h('span', {}, 'I — instrument'), bindText(h('input', { type: 'text' }), id, typ, P('I'))),
+          h('label', {}, h('span', {}, 'I — instrument, technologia, procedura'), bindText(h('input', { type: 'text' }), id, typ, P('I'))),
           h('label', {}, h('span', {}, 'K — korzyść'), bindText(h('input', { type: 'text' }), id, typ, P('K'))),
           h('div', { class: 'grid2' }, h('label', {}, h('span', {}, 'Udział czasu [%]'), bindText(h('input', { type: 'number', min: 0, max: 100, step: 5 }), id, typ, P('u'))), h('div', { class: 'actions end' }, del)));
       }));
     }
     applyDoc(list, d);
     const total = z.reduce((a, [, v]) => a + (parseFloat(v.u) || 0), 0);
-    sum.textContent = z.length ? 'Zadań wyjątkowych: ' + z.length + '; łączny udział czasu: ' + total + '%.' : 'Nie dodano jeszcze żadnego zadania wyjątkowego.';
+    sum.textContent = z.length ? 'Zadań własnych stanowiska: ' + z.length + '; łączny udział czasu: ' + total + '%.' : 'Nie dodano jeszcze żadnego zadania własnego stanowiska.';
   }));
 }
 
@@ -688,7 +701,7 @@ function wypelnienie(d, w) {
 function tabOpis(main) {
   const id = G() + '_opis', typ = 'opis', nr = STANOWISKO_GRUPY[G()], k = klucz(nr), w = WZOR_TYPU[k[2]];
   main.append(intro(
-    'Wypełniacie opis stanowiska przydzielonego Waszej grupie. Przy każdym polu widać, kto je wypełnia w organizacji i jak często się zmienia. Pola wzorcowe są wpisane z wzoru i ich nie zmieniacie; zadania wyjątkowe uzupełniacie w zakładce Zadania.',
+    'Wypełniacie opis stanowiska przydzielonego Waszej grupie. Przy każdym polu widać, kto je wypełnia w organizacji i jak często się zmienia. Pola wzorcowe są wpisane z wzoru i ich nie zmieniacie; zadania własne stanowiska uzupełniacie w zakładce Zadania.',
     'Opis dotyczy stanowiska, a nie osoby, która je zajmuje. Imiona i nazwiska wpisuje się wyłącznie w module 10, przy osobach, które opracowały i zatwierdziły opis.'),
     stanowiskoInfo(nr));
   const prog = h('p', { class: 'muted' });
@@ -720,12 +733,12 @@ function tabOpis(main) {
     });
     root.append(sec);
   }
-  main.append(root);
+  main.append(root, przypomnienie());
   let kompIds = null;
   ST.unsub.push(DB.watchDoc(id, d => {
     if (!getP(d, ['pola', 'numer']) && !d._pref) {
       d._pref = true;
-      DB.save(id, { typ, grupa: G(), numer: nr, ts: Date.now(), pola: { numer: k[0], nazwa: k[1], typ: k[2], jednostka: k[5] } }).catch(e => status('err', e));
+      DB.save(id, { typ, grupa: G(), numer: nr, ts: Date.now(), pola: { numer: k[0], nazwa: k[1], typ: k[2], jednostka: k[5] } });
     }
     const kz = Object.entries(getP(d, ['pola', 'komp']) || {}).filter(([, v]) => !v.del).sort((a, b) => (a[1].t || 0) - (b[1].t || 0));
     const nk = kz.map(e => e[0]).join();
@@ -747,12 +760,12 @@ function tabOpis(main) {
   }));
   ST.unsub.push(DB.watchDoc(G() + '_zadania', d => {
     const z = Object.values(d.z || {}).filter(v => !v.del && (v.D || '').trim()).sort((a, b) => (a.t || 0) - (b.t || 0));
-    live.wyj.replaceChildren(...(z.length ? z.map(v => h('li', {}, [v.D, v.Z, v.I, v.K].filter(Boolean).join(' ') + '.' + (v.kat ? ' (' + v.kat.toLowerCase() + (v.cz ? ', ' + v.cz : '') + ')' : ''))) : [h('li', { class: 'muted' }, 'Zadania wyjątkowe uzupełniacie w zakładce Zadania.')]));
+    live.wyj.replaceChildren(...(z.length ? z.map(v => h('li', {}, [v.D, v.Z, v.I, v.K].filter(Boolean).join(' ') + '.' + (v.kat ? ' (' + v.kat.toLowerCase() + (v.cz ? ', ' + v.cz : '') + ')' : ''))) : [h('li', { class: 'muted' }, 'Zadania własne stanowiska uzupełniacie w zakładce Zadania.')]));
   }));
-  ST.unsub.push(DB.watchTyp('ekasp', all => {
-    const W = ekaspWyniki(all.filter(d => d.grupa === G()));
+  ST.unsub.push(DB.watchDoc(G() + '_ekasp', dE => {
+    const W = ekaspWyniki(dE);
     const top = EKASP.map((e, i) => [e, W[i]]).filter(([, x]) => x.final !== null && x.final >= 5);
-    live.psych.textContent = top.length ? 'Wynik konsensusu EKASP Waszej grupy — pozycje z wagą 5 lub wyższą: ' + top.map(([e, x]) => e[1].replace(/\.$/, '') + ' (' + x.final + ')').join('; ') + '.' : 'Wyniki konsensusu EKASP Waszej grupy pojawią się tu po wystawieniu ocen w zakładce EKASP.';
+    live.psych.textContent = top.length ? 'Wynik konsensusu EKASP Waszej grupy — pozycje z wagą 5 lub wyższą: ' + top.map(([e, x]) => e[1].replace(/\.$/, '') + ' (' + pl(x.final) + ')').join('; ') + '.' : 'Wyniki konsensusu EKASP Waszej grupy pojawią się tu po wystawieniu ocen w zakładce EKASP.';
   }));
 }
 
@@ -761,17 +774,30 @@ function tbl(head, rows) {
   return h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, head.map(x => h('th', {}, x)))),
     h('tbody', {}, rows.length ? rows.map(r => h('tr', {}, r.map(c => h('td', {}, c)))) : h('tr', {}, h('td', { colspan: head.length, class: 'muted' }, 'Brak danych w opisach.')))));
 }
+const PLIKI = {};
 async function tabZestawienia(main) {
   main.append(intro(
-    'Zestawienia powstają z opisów wypełnionych przez wszystkie grupy. Pokazują, że opisy stanowisk zapisane w jednym wzorze, z wartościami wybieranymi ze słowników, działają jak baza danych: jedno zapytanie odpowiada na pytanie, które bez takiej bazy wymagałoby przeczytania wszystkich opisów.',
-    'Liczba osób pochodzi z obsady stanowisk w firmie KORVEX, dlatego zestawienia pokazują od razu skalę działań, np. ile osób trzeba przeszkolić albo ile licencji systemu potrzeba.'));
+    'Zestawienia powstają z opisów wypełnionych przez wszystkie grupy. Wczytajcie pliki grup (można zaznaczyć kilka naraz). Opisy zapisane w jednym wzorze, z wartościami wybieranymi ze słowników, działają jak baza danych: jedno zestawienie odpowiada na pytanie, które bez takiej bazy wymagałoby przeczytania wszystkich opisów.',
+    'Liczba osób pochodzi z obsady stanowisk w firmie KORVEX, dlatego zestawienia pokazują od razu skalę działań, np. ile osób trzeba przeszkolić albo ile kont w systemie założyć.'));
+  const info = h('p', { class: 'muted' });
+  const inp = h('input', { type: 'file', accept: '.json,application/json', multiple: true, hidden: true });
+  inp.addEventListener('change', async () => {
+    let n = 0, bad = 0;
+    for (const f of inp.files) { try { const d = await czytajPlik(f); PLIKI[d.grupa] = d.docs; n++; } catch (e) { bad++; } }
+    inp.value = ''; run(); status(bad ? 'err' : 'info', 'Wczytane pliki: ' + n + (bad ? '; pominięte (zły format): ' + bad : '') + '.');
+  });
+  main.append(inp, h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => inp.click() }, 'Wczytaj pliki grup'), h('button', { class: 'btn', type: 'button', onclick: () => run() }, 'Odśwież zestawienia')), info);
   const out = h('div', {});
   const btn = h('button', { class: 'btn', type: 'button', onclick: () => run() }, 'Odśwież zestawienia');
   main.append(h('div', { class: 'actions' }, btn), out);
   async function run() {
     out.replaceChildren(h('p', { class: 'muted' }, 'Wczytywanie opisów…'));
-    let opisy, zad;
-    try { [opisy, zad] = await Promise.all([DB.listTyp('opis'), DB.listTyp('zadania')]); } catch (e) { status('err', e); return; }
+    const zrodla = {};
+    GRUPY.forEach(g => { const loc = wczytajGrupe(g).docs; if (Object.keys(loc).length) zrodla[g] = loc; });
+    Object.assign(zrodla, PLIKI);
+    info.textContent = 'Dane grup: ' + (Object.keys(zrodla).sort().join(', ') || 'brak') + '.';
+    const docs = Object.values(zrodla).flatMap(d => Object.values(d));
+    let opisy = docs.filter(d => d.typ === 'opis'), zad = docs.filter(d => d.typ === 'zadania');
     opisy = opisy.filter(o => o.pola && o.pola.numer).sort((a, b) => (a.grupa || '').localeCompare(b.grupa || ''));
     const S = opisy.map(o => { const k = klucz(o.pola.numer); const t = o.pola.typ || (k && k[2]); return { o, k, nr: o.pola.numer, n: o.pola.nazwa || (k && k[1]), t, w: WZOR_TYPU[t] || 'S', os: k ? k[4] : 1 }; });
     const has = (s, f, i) => getP(s.o, ['pola', f, 'o' + i]) === true;
@@ -796,51 +822,57 @@ async function tabZestawienia(main) {
         tbl(['Kompetencja', 'Stanowiska', 'Osoby'], KOMPETENCJE.map(x => { const st = S.filter(s => Object.values(getP(s.o, ['pola', 'komp']) || {}).some(v => !v.del && v.k === x[0])); return [x[0], st.map(lab).join('; ') || '—', String(st.reduce((a, s) => a + s.os, 0))]; }))),
       sec('8. Pola wzorcowe', 'Pola wzorcowe mają jednakową treść we wszystkich opisach danego wzoru. Zmiana przepisu wymaga poprawienia jednego wpisu we wzorze, a nie każdego opisu osobno.',
         tbl(['Pole', 'Wzór', 'Liczba opisów z tą samą treścią'], POLA.filter(p => p[7] === 'wzor' || p[7] === 'typowe').flatMap(p => (p[3] === 'M' ? ['M'] : ['S', 'M']).map(w => [p[2], w, String(S.filter(s => s.w === w).length)])))),
-      sec('9. Zadania typowe i wyjątkowe', 'Porównanie pokazuje, w jakiej części opis powstaje hurtowo z wzoru, a w jakiej wymaga pracy SME.',
-        tbl(['Stanowisko', 'Zadania typowe', 'Zadania wyjątkowe'], S.map(s => { const z = zad.find(d => d.grupa === s.o.grupa); const nw = z ? Object.values(z.z || {}).filter(v => !v.del && (v.D || '').trim()).length : 0;
-          return [lab(s), String(s.k ? typowe(s.nr).length : 0), String(nw)]; })))
+      sec('9. Zadania typowe i zadania własne stanowiska', 'Porównanie pokazuje, w jakiej części opis powstaje hurtowo z wzoru, a w jakiej wymaga pracy SME.',
+        tbl(['Stanowisko', 'Zadania typowe', 'Zadania własne'], S.map(s => { const z = zad.find(d => d.grupa === s.o.grupa); const nw = z ? Object.values(z.z || {}).filter(v => !v.del && (v.D || '').trim()).length : 0;
+          return [lab(s), String(s.k ? typowe(s.nr).length : 0), String(nw)]; }))),
+      sec('10. Cykl przeglądu', 'Cykl przeglądu i data następnego przeglądu pozwalają zaplanować, które opisy trzeba przejrzeć w najbliższym czasie, i przygotować pracę zespołów SME.',
+        tbl(['Stanowisko', 'Cykl przeglądu', 'Data następnego przeglądu', 'Osoby'], S.map(s => [lab(s), getP(s.o, ['pola', 'cykl']) || '—', getP(s.o, ['pola', 'nastepny']) || '—', String(s.os)])))
     );
   }
   run();
 }
 
 // ---------- Ramy aplikacji ----------
-const TABS = [['nazwy', 'Nazwy', tabNazwy], ['ekasp', 'EKASP', tabEkasp], ['wzor', 'Wzór i właściciele', tabWzor], ['zadania', 'Zadania', tabZadania], ['opis', 'Opis', tabOpis], ['zestawienia', 'Zestawienia', tabZestawienia]];
+const TABS = [['start', 'Wszystkie zadania', tabStart], ['nazwy', '1. Nazwy', tabNazwy], ['ekasp', '2. EKASP', tabEkasp], ['wzor', '3. Wzór i właściciele', tabWzor], ['zadania', '4. Zadania', tabZadania], ['opis', '5. Opis', tabOpis], ['zestawienia', 'Zestawienia', tabZestawienia]];
+const OPISY_ZAD = {
+  nazwy: 'Porządkowanie nazw stanowisk w działach Waszej grupy według reguły poziom + zakres.',
+  ekasp: 'Ocena dziesięciu pozycji EKASP dla Waszego stanowiska i procedura konsensusu.',
+  wzor: 'Właściciele wszystkich pól wzoru opisu: kto wypełnia które pole.',
+  zadania: 'Zadania własne Waszego stanowiska w układzie DZIK.',
+  opis: 'Pełny opis Waszego stanowiska, z wynikami poprzednich zadań.'
+};
+function adres(zad, g) { const u = new URL(location.href); u.search = ''; u.searchParams.set('zadanie', zad); if (g) u.searchParams.set('grupa', g); return u.toString(); }
+function tabStart(main) {
+  main.append(h('h1', {}, 'Praca w grupach — zadania'),
+    intro('Pracuje jedna osoba w grupie, protokolant, który udostępnia ekran w pokoju grupy. Wszystko, co wpisuje, zapisuje się w jego przeglądarce, a po każdym zadaniu grupa zapisuje plik grupy i wrzuca go na czat grupy w Teams.',
+      'Jeśli protokolant się zmienia, nowa osoba otwiera tę stronę, klika „Wczytaj plik grupy” i wybiera ostatni plik z czatu.'),
+    stanowiskoInfo(STANOWISKO_GRUPY[G()]));
+  const list = h('div', { class: 'tiles' });
+  ['nazwy', 'ekasp', 'wzor', 'zadania', 'opis'].forEach((k, n) => list.append(h('a', { class: 'tile', href: adres(k, G()) }, h('span', { class: 'tile-n' }, String(n + 1)), h('b', {}, TABS.find(t => t[0] === k)[1].replace(/^\d\. /, '')), h('span', {}, OPISY_ZAD[k]))));
+  main.append(list, h('h2', {}, 'Plik grupy'), h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: pobierzPlik }, 'Zapisz plik grupy'), h('button', { class: 'btn', type: 'button', onclick: wczytajPlik }, 'Wczytaj plik grupy')));
+}
+function wyborGrupy(main) {
+  main.append(h('div', { class: 'card narrow' }, h('h2', {}, 'Wybierzcie swoją grupę'),
+    h('p', { class: 'muted' }, 'Numer grupy podaje prowadzący. Wybór można zmienić w każdej chwili przyciskiem „Zmień grupę”.'),
+    h('div', { class: 'grupy' }, GRUPY.map(g => h('button', { class: 'btn', type: 'button', onclick: () => { ST.grupa = g; try { localStorage.setItem(KL + 'wybrana', g); } catch (e) {} render(); } }, 'Grupa ' + g.slice(1)))),
+    h('p', { class: 'muted' }, 'Macie już plik grupy z czatu? ', h('a', { href: '#', class: 'link', onclick: e => { e.preventDefault(); wczytajPlik(); } }, 'Wczytaj plik grupy'))));
+}
 function render() {
   ST.unsub.forEach(u => { try { u(); } catch (e) {} }); ST.unsub = [];
-  const nav = $('#tabs'); nav.replaceChildren(...TABS.map(([k, n]) => h('button', { class: 'chip', type: 'button', 'aria-pressed': ST.tab === k, onclick: () => { ST.tab = k; render(); } }, n)));
-  $('#who').textContent = PROW ? 'Prowadzący · podgląd grupy ' + G() : ST.nick + ' · grupa ' + G();
   const main = $('#main'); main.replaceChildren();
-  const gb = grupaBar(); if (gb) main.append(gb);
-  TABS.find(t => t[0] === ST.tab)[2](main);
+  const bez = !G() && ST.tab !== 'zestawienia';
+  $('#tabs').replaceChildren(...(bez ? [] : TABS.map(([k, n]) => h('button', { class: 'chip', type: 'button', 'aria-pressed': ST.tab === k, onclick: () => { ST.tab = k; try { history.replaceState(null, '', adres(k, G())); } catch (e) {} render(); } }, n))));
+  $('#who').textContent = G() ? 'Grupa ' + G().slice(1) + ' · ' + klucz(STANOWISKO_GRUPY[G()]).slice(0, 2).join(' ') : '';
+  $('#change').hidden = !G();
+  $('#plik').hidden = !G();
+  if (bez) wyborGrupy(main); else TABS.find(t => t[0] === ST.tab)[2](main);
   window.scrollTo(0, 0);
 }
-function login() {
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem('zml-ap-' + SESJA) || '{}'); } catch (e) {}
-  const nick = h('input', { type: 'text', maxlength: 24, placeholder: 'np. Anna', value: saved.nick || '' });
-  let grupa = saved.grupa || '';
-  const chips = h('div', { class: 'seg' }, GRUPY.map(g => h('button', { class: 'chip', type: 'button', 'aria-pressed': g === grupa, onclick: e => { grupa = g; chips.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === e.currentTarget)); } }, g)));
-  const err = h('p', { class: 'no' });
-  const go = h('button', { class: 'btn', type: 'button', onclick: () => {
-    if (!nick.value.trim() || !grupa) { err.textContent = 'Wpisz imię i wybierz grupę.'; return; }
-    ST.nick = nick.value.trim(); ST.grupa = grupa;
-    try { localStorage.setItem('zml-ap-' + SESJA, JSON.stringify({ nick: ST.nick, grupa })); } catch (e) {}
-    $('#app').hidden = false; $('#login').hidden = true; render();
-  } }, 'Rozpocznij');
-  $('#login').replaceChildren(h('div', { class: 'card narrow' }, h('h2', {}, 'Dołącz do pracy grupy'),
-    h('label', {}, h('span', {}, 'Imię'), nick), h('label', {}, h('span', {}, 'Grupa'), chips), err, h('div', { class: 'actions end' }, go)));
-}
-async function start() {
-  $('#login').replaceChildren(h('p', { class: 'muted' }, 'Łączenie z bazą…'));
-  try { await DB.init(); }
-  catch (e) { console.error(e); $('#login').replaceChildren(h('div', { class: 'card narrow' }, h('h2', {}, 'Brak połączenia z bazą'), h('p', {}, 'Nie udało się połączyć z bazą. Sprawdź połączenie z internetem i odśwież stronę.'))); return; }
-  if (PROW) { ST.nick = 'Prowadzący'; ST.grupa = 'G1'; $('#login').hidden = true; $('#app').hidden = false; render(); }
-  else login();
-  $('#change').addEventListener('click', () => { if (PROW) return; $('#app').hidden = true; $('#login').hidden = false; login(); });
-  if (PROW) $('#change').hidden = true;
-}
-start();
+$('#change').addEventListener('click', () => { ST.grupa = ''; try { localStorage.removeItem(KL + 'wybrana'); } catch (e) {} render(); });
+$('#plik').addEventListener('click', pobierzPlik);
+try { localStorage.setItem(KL + 'test', '1'); localStorage.removeItem(KL + 'test'); } catch (e) { PAMIEC_OK = false; }
+render();
+if (!PAMIEC_OK) status('err', 'Przeglądarka nie zapisuje danych (np. tryb prywatny) — zapisujcie plik grupy po każdym zadaniu.');
 
 </script>
 </body>
